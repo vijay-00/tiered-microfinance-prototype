@@ -114,5 +114,7 @@ export const ROUTER_FUTURE = {
 } as const;
 
 export function createAppRouter() {
-  return createBrowserRouter(routes, { future: ROUTER_FUTURE });
+  // On GitHub Pages the app lives under /<repo>/; Vite's BASE_URL carries that prefix.
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+  return createBrowserRouter(routes, { future: ROUTER_FUTURE, basename });
 }
