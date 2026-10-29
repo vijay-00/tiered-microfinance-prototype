@@ -1,0 +1,32 @@
+[
+  {
+    "id": "soc_1",
+    "federationId": "fed_1",
+    "name": "Annapoorani Credit Society",
+    "code": "ANN",
+    "district": "Madurai",
+    "registrationNo": "TN/MDU/CS/1987/0142",
+    "creditLimit": 250000000,
+    "openedOn": "1987-06-12"
+  },
+  {
+    "id": "soc_2",
+    "federationId": "fed_1",
+    "name": "Grama Valarchi Credit Society",
+    "code": "GRM",
+    "district": "Thanjavur",
+    "registrationNo": "TN/TNJ/CS/1994/0318",
+    "creditLimit": 300000000,
+    "openedOn": "1994-02-03"
+  },
+  {
+    "id": "soc_3",
+    "federationId": "fed_1",
+    "name": "Sakthi Mahalir Credit Society",
+    "code": "SHM",
+    "district": "Dindigul",
+    "registrationNo": "TN/DGL/CS/2003/0077",
+    "creditLimit": 200000000,
+    "openedOn": "2003-09-21"
+  }
+]

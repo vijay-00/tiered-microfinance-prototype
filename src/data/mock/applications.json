@@ -1,0 +1,1810 @@
+[
+  {
+    "id": "app_001",
+    "memberId": "mem_001",
+    "societyId": "soc_1",
+    "requestedAmount": 3500000,
+    "requestedTenureMonths": 12,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-03-02",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-04",
+      "monthlyIncome": 1900000,
+      "existingObligations": 200000,
+      "recommendedAmount": 3000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_002",
+    "memberId": "mem_002",
+    "societyId": "soc_1",
+    "requestedAmount": 6000000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-02",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-04",
+      "monthlyIncome": 2700000,
+      "existingObligations": 200000,
+      "recommendedAmount": 6000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_003",
+    "memberId": "mem_003",
+    "societyId": "soc_1",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-03-03",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-05",
+      "monthlyIncome": 2800000,
+      "existingObligations": 100000,
+      "recommendedAmount": 10000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_004",
+    "memberId": "mem_004",
+    "societyId": "soc_1",
+    "requestedAmount": 5500000,
+    "requestedTenureMonths": 12,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-03-03",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-06",
+      "monthlyIncome": 2500000,
+      "existingObligations": 150000,
+      "recommendedAmount": 5500000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_005",
+    "memberId": "mem_005",
+    "societyId": "soc_1",
+    "requestedAmount": 4000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-04",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-06",
+      "monthlyIncome": 3000000,
+      "existingObligations": 100000,
+      "recommendedAmount": 4000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_006",
+    "memberId": "mem_006",
+    "societyId": "soc_1",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-04",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-09",
+      "monthlyIncome": 2000000,
+      "existingObligations": 100000,
+      "recommendedAmount": 10000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_007",
+    "memberId": "mem_007",
+    "societyId": "soc_1",
+    "requestedAmount": 7500000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-09",
+      "monthlyIncome": 1500000,
+      "existingObligations": 150000,
+      "recommendedAmount": 7500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_008",
+    "memberId": "mem_008",
+    "societyId": "soc_1",
+    "requestedAmount": 3000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-10",
+      "monthlyIncome": 900000,
+      "existingObligations": 0,
+      "recommendedAmount": 3000000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_009",
+    "memberId": "mem_009",
+    "societyId": "soc_1",
+    "requestedAmount": 7000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-11",
+      "monthlyIncome": 2700000,
+      "existingObligations": 50000,
+      "recommendedAmount": 7000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_010",
+    "memberId": "mem_010",
+    "societyId": "soc_1",
+    "requestedAmount": 7500000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-03-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-09",
+      "monthlyIncome": 2700000,
+      "existingObligations": 100000,
+      "recommendedAmount": 7500000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_011",
+    "memberId": "mem_011",
+    "societyId": "soc_1",
+    "requestedAmount": 9500000,
+    "requestedTenureMonths": 12,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-03-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-11",
+      "monthlyIncome": 1100000,
+      "existingObligations": 100000,
+      "recommendedAmount": 9500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_012",
+    "memberId": "mem_012",
+    "societyId": "soc_1",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 12,
+    "purpose": "CROP",
+    "appliedOn": "2026-03-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-03-09",
+      "monthlyIncome": 2900000,
+      "existingObligations": 0,
+      "recommendedAmount": 10500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-03-20",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_01"
+  },
+  {
+    "id": "app_013",
+    "memberId": "mem_101",
+    "societyId": "soc_2",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-01-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-10",
+      "monthlyIncome": 1800000,
+      "existingObligations": 200000,
+      "recommendedAmount": 10500000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_014",
+    "memberId": "mem_102",
+    "societyId": "soc_2",
+    "requestedAmount": 8000000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-01-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-07",
+      "monthlyIncome": 1600000,
+      "existingObligations": 200000,
+      "recommendedAmount": 8000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 8000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_015",
+    "memberId": "mem_103",
+    "societyId": "soc_2",
+    "requestedAmount": 8500000,
+    "requestedTenureMonths": 18,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-01-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-09",
+      "monthlyIncome": 2900000,
+      "existingObligations": 0,
+      "recommendedAmount": 8500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 8500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_016",
+    "memberId": "mem_104",
+    "societyId": "soc_2",
+    "requestedAmount": 5500000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-01-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-11",
+      "monthlyIncome": 1900000,
+      "existingObligations": 200000,
+      "recommendedAmount": 5500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_017",
+    "memberId": "mem_105",
+    "societyId": "soc_2",
+    "requestedAmount": 8500000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-01-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-12",
+      "monthlyIncome": 1600000,
+      "existingObligations": 0,
+      "recommendedAmount": 8500000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 8500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_018",
+    "memberId": "mem_106",
+    "societyId": "soc_2",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 12,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-01-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-09",
+      "monthlyIncome": 1000000,
+      "existingObligations": 200000,
+      "recommendedAmount": 11000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_019",
+    "memberId": "mem_107",
+    "societyId": "soc_2",
+    "requestedAmount": 4000000,
+    "requestedTenureMonths": 12,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-01-08",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-11",
+      "monthlyIncome": 1500000,
+      "existingObligations": 150000,
+      "recommendedAmount": 2500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_officer_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 2500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_020",
+    "memberId": "mem_108",
+    "societyId": "soc_2",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-01-08",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-10",
+      "monthlyIncome": 2900000,
+      "existingObligations": 200000,
+      "recommendedAmount": 10000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_021",
+    "memberId": "mem_109",
+    "societyId": "soc_2",
+    "requestedAmount": 4500000,
+    "requestedTenureMonths": 18,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-01-09",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-13",
+      "monthlyIncome": 2000000,
+      "existingObligations": 50000,
+      "recommendedAmount": 4500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_officer_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_022",
+    "memberId": "mem_110",
+    "societyId": "soc_2",
+    "requestedAmount": 5500000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-01-09",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-13",
+      "monthlyIncome": 2000000,
+      "existingObligations": 0,
+      "recommendedAmount": 5500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_023",
+    "memberId": "mem_111",
+    "societyId": "soc_2",
+    "requestedAmount": 9000000,
+    "requestedTenureMonths": 24,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-01-10",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-14",
+      "monthlyIncome": 1000000,
+      "existingObligations": 200000,
+      "recommendedAmount": 9000000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_024",
+    "memberId": "mem_112",
+    "societyId": "soc_2",
+    "requestedAmount": 9000000,
+    "requestedTenureMonths": 24,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-01-10",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-15",
+      "monthlyIncome": 900000,
+      "existingObligations": 100000,
+      "recommendedAmount": 9000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_025",
+    "memberId": "mem_113",
+    "societyId": "soc_2",
+    "requestedAmount": 11500000,
+    "requestedTenureMonths": 18,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-01-11",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-15",
+      "monthlyIncome": 2300000,
+      "existingObligations": 150000,
+      "recommendedAmount": 11500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_026",
+    "memberId": "mem_114",
+    "societyId": "soc_2",
+    "requestedAmount": 6000000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-01-11",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-01-13",
+      "monthlyIncome": 3000000,
+      "existingObligations": 100000,
+      "recommendedAmount": 6000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-01-14",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_02"
+  },
+  {
+    "id": "app_027",
+    "memberId": "mem_201",
+    "societyId": "soc_3",
+    "requestedAmount": 3500000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-01",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-04",
+      "monthlyIncome": 900000,
+      "existingObligations": 0,
+      "recommendedAmount": 3500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_028",
+    "memberId": "mem_202",
+    "societyId": "soc_3",
+    "requestedAmount": 6000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-01",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-06",
+      "monthlyIncome": 2000000,
+      "existingObligations": 200000,
+      "recommendedAmount": 6000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_029",
+    "memberId": "mem_203",
+    "societyId": "soc_3",
+    "requestedAmount": 6000000,
+    "requestedTenureMonths": 12,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-06-02",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-07",
+      "monthlyIncome": 1400000,
+      "existingObligations": 100000,
+      "recommendedAmount": 6000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_030",
+    "memberId": "mem_204",
+    "societyId": "soc_3",
+    "requestedAmount": 8500000,
+    "requestedTenureMonths": 12,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-06-02",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-04",
+      "monthlyIncome": 1700000,
+      "existingObligations": 100000,
+      "recommendedAmount": 7500000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_031",
+    "memberId": "mem_205",
+    "societyId": "soc_3",
+    "requestedAmount": 9000000,
+    "requestedTenureMonths": 24,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-06-03",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-05",
+      "monthlyIncome": 1100000,
+      "existingObligations": 150000,
+      "recommendedAmount": 9000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_032",
+    "memberId": "mem_206",
+    "societyId": "soc_3",
+    "requestedAmount": 11500000,
+    "requestedTenureMonths": 12,
+    "purpose": "CROP",
+    "appliedOn": "2026-06-03",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-06",
+      "monthlyIncome": 2400000,
+      "existingObligations": 100000,
+      "recommendedAmount": 11500000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_033",
+    "memberId": "mem_207",
+    "societyId": "soc_3",
+    "requestedAmount": 12000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-04",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-08",
+      "monthlyIncome": 1000000,
+      "existingObligations": 0,
+      "recommendedAmount": 12000000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 12000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_034",
+    "memberId": "mem_208",
+    "societyId": "soc_3",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 18,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-06-04",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-07",
+      "monthlyIncome": 2700000,
+      "existingObligations": 150000,
+      "recommendedAmount": 11000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_035",
+    "memberId": "mem_209",
+    "societyId": "soc_3",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-09",
+      "monthlyIncome": 2500000,
+      "existingObligations": 50000,
+      "recommendedAmount": 10000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_036",
+    "memberId": "mem_210",
+    "societyId": "soc_3",
+    "requestedAmount": 3500000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-05",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-10",
+      "monthlyIncome": 1500000,
+      "existingObligations": 0,
+      "recommendedAmount": 3500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_037",
+    "memberId": "mem_211",
+    "societyId": "soc_3",
+    "requestedAmount": 9000000,
+    "requestedTenureMonths": 12,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-06-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-08",
+      "monthlyIncome": 2000000,
+      "existingObligations": 100000,
+      "recommendedAmount": 9000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_038",
+    "memberId": "mem_212",
+    "societyId": "soc_3",
+    "requestedAmount": 7500000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-06",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-09",
+      "monthlyIncome": 1700000,
+      "existingObligations": 150000,
+      "recommendedAmount": 7500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_039",
+    "memberId": "mem_213",
+    "societyId": "soc_3",
+    "requestedAmount": 12000000,
+    "requestedTenureMonths": 12,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-06-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-12",
+      "monthlyIncome": 1800000,
+      "existingObligations": 100000,
+      "recommendedAmount": 12000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 12000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_040",
+    "memberId": "mem_214",
+    "societyId": "soc_3",
+    "requestedAmount": 6000000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-07",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-11",
+      "monthlyIncome": 1100000,
+      "existingObligations": 150000,
+      "recommendedAmount": 6000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_041",
+    "memberId": "mem_215",
+    "societyId": "soc_3",
+    "requestedAmount": 4500000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-08",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-12",
+      "monthlyIncome": 1500000,
+      "existingObligations": 50000,
+      "recommendedAmount": 4500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_042",
+    "memberId": "mem_216",
+    "societyId": "soc_3",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-06-08",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-11",
+      "monthlyIncome": 2800000,
+      "existingObligations": 150000,
+      "recommendedAmount": 10000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_03"
+  },
+  {
+    "id": "app_043",
+    "memberId": "mem_013",
+    "societyId": "soc_1",
+    "requestedAmount": 3000000,
+    "requestedTenureMonths": 12,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-09-14",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-17",
+      "monthlyIncome": 2900000,
+      "existingObligations": 0,
+      "recommendedAmount": 3000000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_044",
+    "memberId": "mem_014",
+    "societyId": "soc_1",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-09-14",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-18",
+      "monthlyIncome": 2400000,
+      "existingObligations": 150000,
+      "recommendedAmount": 10000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_045",
+    "memberId": "mem_015",
+    "societyId": "soc_1",
+    "requestedAmount": 4500000,
+    "requestedTenureMonths": 12,
+    "purpose": "CROP",
+    "appliedOn": "2026-09-15",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-20",
+      "monthlyIncome": 2300000,
+      "existingObligations": 0,
+      "recommendedAmount": 4500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4500000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_046",
+    "memberId": "mem_016",
+    "societyId": "soc_1",
+    "requestedAmount": 2000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-15",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-20",
+      "monthlyIncome": 1300000,
+      "existingObligations": 50000,
+      "recommendedAmount": 2000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 2000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_047",
+    "memberId": "mem_017",
+    "societyId": "soc_1",
+    "requestedAmount": 5000000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-16",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-19",
+      "monthlyIncome": 1800000,
+      "existingObligations": 100000,
+      "recommendedAmount": 5000000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_048",
+    "memberId": "mem_018",
+    "societyId": "soc_1",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-09-16",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-19",
+      "monthlyIncome": 2900000,
+      "existingObligations": 100000,
+      "recommendedAmount": 11000000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_049",
+    "memberId": "mem_019",
+    "societyId": "soc_1",
+    "requestedAmount": 4000000,
+    "requestedTenureMonths": 24,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-09-17",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-21",
+      "monthlyIncome": 2600000,
+      "existingObligations": 150000,
+      "recommendedAmount": 4000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_050",
+    "memberId": "mem_020",
+    "societyId": "soc_1",
+    "requestedAmount": 4000000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-17",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-19",
+      "monthlyIncome": 1100000,
+      "existingObligations": 200000,
+      "recommendedAmount": 4000000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_officer",
+      "on": "2026-10-09",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 4000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_04"
+  },
+  {
+    "id": "app_051",
+    "memberId": "mem_115",
+    "societyId": "soc_2",
+    "requestedAmount": 10500000,
+    "requestedTenureMonths": 12,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-09-21",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-24",
+      "monthlyIncome": 1700000,
+      "existingObligations": 50000,
+      "recommendedAmount": 10000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_052",
+    "memberId": "mem_116",
+    "societyId": "soc_2",
+    "requestedAmount": 5500000,
+    "requestedTenureMonths": 24,
+    "purpose": "CROP",
+    "appliedOn": "2026-09-21",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-24",
+      "monthlyIncome": 3000000,
+      "existingObligations": 100000,
+      "recommendedAmount": 5500000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_053",
+    "memberId": "mem_117",
+    "societyId": "soc_2",
+    "requestedAmount": 11000000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-22",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-25",
+      "monthlyIncome": 1000000,
+      "existingObligations": 150000,
+      "recommendedAmount": 11000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_054",
+    "memberId": "mem_118",
+    "societyId": "soc_2",
+    "requestedAmount": 7000000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-22",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-24",
+      "monthlyIncome": 1800000,
+      "existingObligations": 150000,
+      "recommendedAmount": 7000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 7000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_055",
+    "memberId": "mem_119",
+    "societyId": "soc_2",
+    "requestedAmount": 5000000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-23",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-27",
+      "monthlyIncome": 2300000,
+      "existingObligations": 0,
+      "recommendedAmount": 5000000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_officer_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 5000000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_056",
+    "memberId": "mem_120",
+    "societyId": "soc_2",
+    "requestedAmount": 6500000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-09-23",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-25",
+      "monthlyIncome": 2500000,
+      "existingObligations": 0,
+      "recommendedAmount": 6500000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_057",
+    "memberId": "mem_121",
+    "societyId": "soc_2",
+    "requestedAmount": 10500000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-24",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-26",
+      "monthlyIncome": 1900000,
+      "existingObligations": 50000,
+      "recommendedAmount": 10500000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_058",
+    "memberId": "mem_122",
+    "societyId": "soc_2",
+    "requestedAmount": 10000000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-24",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-26",
+      "monthlyIncome": 1300000,
+      "existingObligations": 100000,
+      "recommendedAmount": 10000000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 10000000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_059",
+    "memberId": "mem_123",
+    "societyId": "soc_2",
+    "requestedAmount": 3000000,
+    "requestedTenureMonths": 12,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-25",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-28",
+      "monthlyIncome": 1800000,
+      "existingObligations": 50000,
+      "recommendedAmount": 3000000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_officer_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 3000000,
+      "tenureMonths": 12,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_060",
+    "memberId": "mem_124",
+    "societyId": "soc_2",
+    "requestedAmount": 6500000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-25",
+    "status": "POOLED",
+    "appraisal": {
+      "officerId": "usr_officer_2",
+      "on": "2026-09-28",
+      "monthlyIncome": 1300000,
+      "existingObligations": 0,
+      "recommendedAmount": 6500000,
+      "notes": "Two milch animals already owned; adding a third."
+    },
+    "decision": {
+      "by": "usr_secretary_2",
+      "on": "2026-10-08",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    },
+    "poolId": "pool_05"
+  },
+  {
+    "id": "app_061",
+    "memberId": "mem_021",
+    "societyId": "soc_1",
+    "requestedAmount": 9500000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-10-01",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-10-03",
+      "monthlyIncome": 1900000,
+      "existingObligations": 200000,
+      "recommendedAmount": 9500000,
+      "notes": "Household of five; spouse also earns."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-10-13",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 9500000,
+      "tenureMonths": 18,
+      "rateBps": 1150
+    }
+  },
+  {
+    "id": "app_062",
+    "memberId": "mem_022",
+    "societyId": "soc_1",
+    "requestedAmount": 11500000,
+    "requestedTenureMonths": 24,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-10-03",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-10-07",
+      "monthlyIncome": 2400000,
+      "existingObligations": 150000,
+      "recommendedAmount": 11500000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-10-15",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 11500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    }
+  },
+  {
+    "id": "app_063",
+    "memberId": "mem_023",
+    "societyId": "soc_1",
+    "requestedAmount": 6500000,
+    "requestedTenureMonths": 24,
+    "purpose": "CROP",
+    "appliedOn": "2026-10-06",
+    "status": "APPROVED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-10-10",
+      "monthlyIncome": 1500000,
+      "existingObligations": 150000,
+      "recommendedAmount": 6500000,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-10-18",
+      "outcome": "APPROVED",
+      "sanctionedAmount": 6500000,
+      "tenureMonths": 24,
+      "rateBps": 1150
+    }
+  },
+  {
+    "id": "app_064",
+    "memberId": "mem_024",
+    "societyId": "soc_1",
+    "requestedAmount": 5500000,
+    "requestedTenureMonths": 18,
+    "purpose": "HOUSING",
+    "appliedOn": "2026-10-19",
+    "status": "UNDER_APPRAISAL",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-10-23",
+      "monthlyIncome": 2200000,
+      "existingObligations": 200000,
+      "recommendedAmount": 5500000,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    }
+  },
+  {
+    "id": "app_065",
+    "memberId": "mem_025",
+    "societyId": "soc_1",
+    "requestedAmount": 7500000,
+    "requestedTenureMonths": 18,
+    "purpose": "TRADE",
+    "appliedOn": "2026-10-21",
+    "status": "UNDER_APPRAISAL",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-10-23",
+      "monthlyIncome": 1200000,
+      "existingObligations": 150000,
+      "recommendedAmount": 7000000,
+      "notes": "Steady seasonal income; repaid an earlier society loan on time."
+    }
+  },
+  {
+    "id": "app_066",
+    "memberId": "mem_026",
+    "societyId": "soc_1",
+    "requestedAmount": 7500000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-10-26",
+    "status": "SUBMITTED"
+  },
+  {
+    "id": "app_067",
+    "memberId": "mem_027",
+    "societyId": "soc_1",
+    "requestedAmount": 11500000,
+    "requestedTenureMonths": 18,
+    "purpose": "DAIRY",
+    "appliedOn": "2026-10-28",
+    "status": "SUBMITTED"
+  },
+  {
+    "id": "app_068",
+    "memberId": "mem_028",
+    "societyId": "soc_1",
+    "requestedAmount": 3500000,
+    "requestedTenureMonths": 24,
+    "purpose": "TRADE",
+    "appliedOn": "2026-09-02",
+    "status": "REJECTED",
+    "appraisal": {
+      "officerId": "usr_officer",
+      "on": "2026-09-04",
+      "monthlyIncome": 1500000,
+      "existingObligations": 50000,
+      "recommendedAmount": 0,
+      "notes": "Repayment capacity adequate at the recommended amount."
+    },
+    "decision": {
+      "by": "usr_secretary",
+      "on": "2026-09-14",
+      "outcome": "REJECTED",
+      "sanctionedAmount": 0,
+      "tenureMonths": 24,
+      "rateBps": 1150,
+      "reason": "Existing obligations leave too little repayment capacity."
+    }
+  },
+  {
+    "id": "app_069",
+    "memberId": "mem_217",
+    "societyId": "soc_3",
+    "requestedAmount": 8500000,
+    "requestedTenureMonths": 24,
+    "purpose": "EDUCATION",
+    "appliedOn": "2026-06-03",
+    "status": "REJECTED",
+    "appraisal": {
+      "officerId": "usr_secretary_3",
+      "on": "2026-06-06",
+      "monthlyIncome": 1700000,
+      "existingObligations": 50000,
+      "recommendedAmount": 0,
+      "notes": "Business turnover verified from sales book."
+    },
+    "decision": {
+      "by": "usr_secretary_3",
+      "on": "2026-06-15",
+      "outcome": "REJECTED",
+      "sanctionedAmount": 0,
+      "tenureMonths": 24,
+      "rateBps": 1150,
+      "reason": "Existing obligations leave too little repayment capacity."
+    }
+  }
+]

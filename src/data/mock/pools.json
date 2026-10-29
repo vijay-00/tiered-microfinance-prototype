@@ -1,0 +1,121 @@
+[
+  {
+    "id": "pool_01",
+    "societyId": "soc_1",
+    "reference": "ANN/POOL/2026-27/01",
+    "createdOn": "2026-03-21",
+    "submittedOn": "2026-03-25",
+    "status": "UNDER_APEX_REVIEW",
+    "applicationIds": [
+      "app_001",
+      "app_002",
+      "app_003",
+      "app_004",
+      "app_005",
+      "app_006",
+      "app_007",
+      "app_008",
+      "app_009",
+      "app_010",
+      "app_011",
+      "app_012"
+    ],
+    "requestedAmount": 83500000,
+    "requestedTenureMonths": 24
+  },
+  {
+    "id": "pool_02",
+    "societyId": "soc_2",
+    "reference": "GRM/POOL/2025-26/04",
+    "createdOn": "2026-01-15",
+    "submittedOn": "2026-01-18",
+    "status": "UNDER_APEX_REVIEW",
+    "applicationIds": [
+      "app_013",
+      "app_014",
+      "app_015",
+      "app_016",
+      "app_017",
+      "app_018",
+      "app_019",
+      "app_020",
+      "app_021",
+      "app_022",
+      "app_023",
+      "app_024",
+      "app_025",
+      "app_026"
+    ],
+    "requestedAmount": 110000000,
+    "requestedTenureMonths": 24
+  },
+  {
+    "id": "pool_03",
+    "societyId": "soc_3",
+    "reference": "SHM/POOL/2026-27/01",
+    "createdOn": "2026-06-16",
+    "submittedOn": "2026-06-20",
+    "status": "UNDER_APEX_REVIEW",
+    "applicationIds": [
+      "app_027",
+      "app_028",
+      "app_029",
+      "app_030",
+      "app_031",
+      "app_032",
+      "app_033",
+      "app_034",
+      "app_035",
+      "app_036",
+      "app_037",
+      "app_038",
+      "app_039",
+      "app_040",
+      "app_041",
+      "app_042"
+    ],
+    "requestedAmount": 129000000,
+    "requestedTenureMonths": 24
+  },
+  {
+    "id": "pool_04",
+    "societyId": "soc_1",
+    "reference": "ANN/POOL/2026-27/02",
+    "createdOn": "2026-10-12",
+    "status": "OPEN",
+    "applicationIds": [
+      "app_043",
+      "app_044",
+      "app_045",
+      "app_046",
+      "app_047",
+      "app_048",
+      "app_049",
+      "app_050"
+    ],
+    "requestedAmount": 43500000,
+    "requestedTenureMonths": 24
+  },
+  {
+    "id": "pool_05",
+    "societyId": "soc_2",
+    "reference": "GRM/POOL/2026-27/02",
+    "createdOn": "2026-10-14",
+    "submittedOn": "2026-10-20",
+    "status": "UNDER_APEX_REVIEW",
+    "applicationIds": [
+      "app_051",
+      "app_052",
+      "app_053",
+      "app_054",
+      "app_055",
+      "app_056",
+      "app_057",
+      "app_058",
+      "app_059",
+      "app_060"
+    ],
+    "requestedAmount": 75000000,
+    "requestedTenureMonths": 24
+  }
+]

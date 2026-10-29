@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tiered Microfinance — whole-app design brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm 15mm 16mm; }
+  :root {
+    --ink: #1c2233; --soft: #5b6478; --faint: #8a93a6; --line: #e3e6ef;
+    --brand: #4338ca; --brand-soft: #eef0ff; --brand-ink: #312e81;
+    --good: #15803d; --good-soft: #e8f6ec; --warn: #b45309; --warn-soft: #fdf3e2;
+    --bad: #be123c; --bad-soft: #fde9ee; --info: #1d4ed8; --info-soft: #e8efff;
+    --violet: #6d28d9; --violet-soft: #f1eafe;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: var(--ink); font-size: 9.6pt; line-height: 1.5; }
+  .page { break-before: page; }
+  .eyebrow { font-size: 7.4pt; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  h1 { font-size: 24pt; line-height: 1.15; margin: 4pt 0 8pt; color: var(--brand); letter-spacing: -.01em; }
+  h2 { font-size: 15pt; margin: 0 0 6pt; color: var(--brand); letter-spacing: -.005em; }
+  h3 { font-size: 11pt; margin: 14pt 0 4pt; }
+  h4 { font-size: 7.6pt; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); margin: 12pt 0 4pt; }
+  p { margin: 0 0 6pt; }
+  ul { margin: 0 0 6pt; padding-left: 14pt; }
+  li { margin: 0 0 2.5pt; }
+  li > ul { margin-top: 2pt; }
+  .lead { font-size: 11.2pt; line-height: 1.45; }
+  .note { color: var(--soft); font-size: 8.6pt; }
+  code, .addr { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 8pt; color: var(--brand-ink); background: var(--brand-soft); padding: 0 3pt; border-radius: 3pt; white-space: nowrap; }
+  .callout { background: #f7f7fd; border: 1px solid #e6e5f7; border-radius: 9pt; padding: 9pt 12pt 6pt; margin: 9pt 0; break-inside: avoid; }
+  .callout > b:first-child, .callout .title { display: block; color: var(--brand); font-weight: 600; margin-bottom: 4pt; }
+  .tag { display: inline-block; font-size: 6.8pt; font-weight: 600; padding: 1pt 6pt; border-radius: 99pt; white-space: nowrap; vertical-align: 1pt; }
+  .t-redesign { background: var(--info-soft); color: var(--info); }
+  .t-new { background: var(--violet-soft); color: var(--violet); }
+  .t-question { background: var(--warn-soft); color: var(--warn); }
+  .t-keep { background: var(--good-soft); color: var(--good); }
+  table { border-collapse: collapse; width: 100%; font-size: 8.4pt; margin: 4pt 0 8pt; }
+  th { text-align: left; font-weight: 600; color: var(--brand); font-size: 7.6pt; border-bottom: 1.5px solid var(--line); padding: 4pt 5pt; }
+  td { border-bottom: 1px solid var(--line); padding: 4pt 5pt; vertical-align: top; }
+  tr { break-inside: avoid; }
+  .glance td:first-child { font-weight: 600; color: var(--brand); width: 22pt; }
+  .group td { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; font-size: 7.6pt; letter-spacing: .06em; text-transform: uppercase; }
+  .item-head { display: flex; align-items: center; gap: 8pt; border: 1px solid #e6e5f7; background: #f7f7fd; border-radius: 9pt; padding: 7pt 10pt; margin-bottom: 6pt; }
+  .item-head .code { font-weight: 700; color: #fff; background: var(--brand); border-radius: 5pt; padding: 1pt 6pt; font-size: 9pt; }
+  .item-head .name { font-weight: 600; font-size: 11.5pt; flex: 1; }
+  .where { font-size: 8.2pt; color: var(--soft); margin: 0 0 8pt; }
+  .where b { color: var(--ink); font-weight: 600; }
+  .flow { font-size: 8.6pt; background: #fafafa; border: 1px dashed #d9dcea; border-radius: 7pt; padding: 5pt 9pt; margin: 4pt 0 8pt; }
+  .flow b { color: var(--brand); font-size: 7.4pt; letter-spacing: .08em; margin-right: 6pt; }
+  figure { margin: 8pt 0 10pt; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; max-height: 222mm; margin: 0 auto; border: 1px solid var(--line); border-radius: 7pt; box-shadow: 0 2pt 8pt rgba(30, 34, 60, .08); }
+  figure.half img { max-height: 112mm; }
+  figure.tablet img { max-height: 150mm; }
+  .pair { display: flex; gap: 8pt; align-items: flex-start; break-inside: avoid; }
+  .pair figure { flex: 1; margin-top: 4pt; }
+  figcaption { font-size: 7.6pt; color: var(--soft); text-align: center; margin-top: 4pt; line-height: 1.4; }
+  .design { border-left: 3px solid var(--brand); padding: 2pt 0 2pt 10pt; margin: 8pt 0; break-inside: avoid; }
+  .design > .title { font-size: 7.6pt; font-weight: 700; letter-spacing: .08em; color: var(--brand); margin-bottom: 3pt; }
+  .design.q { border-color: var(--warn); }
+  .design.q > .title { color: var(--warn); }
+  .sw { display: inline-block; width: 8pt; height: 8pt; border-radius: 2pt; vertical-align: -1pt; margin-right: 3pt; }
+  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .muted { color: var(--faint); }
+  .two { columns: 2; column-gap: 14pt; }
+  .two li { break-inside: avoid; }
+  .footer { font-size: 7.6pt; color: var(--faint); border-top: 1px solid var(--line); padding-top: 6pt; margin-top: 14pt; }
+</style>
+</head>
+<body>
+
+<!-- ===================================================== COVER -->
+<div class="eyebrow">Tiered Microfinance Prototype · Design brief · Whole app · v1</div>
+<h1>Every screen, ready for a modern design</h1>
+<p class="lead">The prototype works end to end. A member applies; the society pools ten to twenty approved loans; the federation sanctions a wholesale tranche; members repay every month; and every payment is split between the federation and the society, in double-entry books. Every screen was built for correctness, not for looks. This brief walks through the whole app so it can be given one modern, coherent design. For each screen it covers where it is, who uses it, what it is for, the flow, what is on it today and what we need designed. We will rebuild each screen to your design. No behaviour, figure or rule changes.</p>
+<p class="note">Prepared 29/10/2026. Screenshots come from the local build at 1440px (desktop) and 768px (tablet), on the demo date, Thursday 29 October 2026. All data is mock and every name is fictional. Unless a caption says otherwise, the view is the secretary of Annapurna Credit Society in scenario A, the clean run. Scenarios B (delinquency) and C (prepayment and recovery) appear where they show a state that A cannot.</p>
+
+<div class="callout">
+  <b>The product in one paragraph</b>
+  Pragati Apex Credit Federation (PACF) lends wholesale to its member credit societies at <b>9.5%</b> a year. A society, such as Annapurna, Gramodaya or Sahakar Mitra in Karnataka, takes applications from its members and pools ten to twenty approved loans into one funding request. Once the federation sanctions it, the society draws the tranche and lends to each member at <b>11.5%</b>. Members repay a fixed monthly instalment (EMI). Each payment is split: wholesale interest and all the principal go on to the federation at the next monthly remittance, and the <b>2.0%</b> spread stays with the society as its margin. Late members cost the society cash, not margin. Principal held back from the federation costs margin for good.
+</div>
+
+<div class="callout">
+  <b>Who sees what</b>
+  <ul>
+    <li><b>Society Secretary:</b> everything in their society. Decides loans above ₹50,000, builds and submits pools, draws down, disburses and remits.</li>
+    <li><b>Loan Officer:</b> takes and appraises applications, decides loans up to ₹50,000, and records payments.</li>
+    <li><b>Auditor:</b> every society screen, read only.</li>
+    <li><b>Apex Officer</b> (the federation): exposure across societies, funding requests, review and sanction, and society records.</li>
+    <li><b>Member:</b> their own loans, schedule and payments, at the retail rate only. Nothing about wholesale pricing or margin reaches them.</li>
+  </ul>
+</div>
+
+<div class="callout">
+  <b>Keep, whatever the look</b>
+  <ul>
+    <li>Money in rupees with Indian grouping and two decimals (<span class="num">₹5,35,169.01</span>), tabular figures, right-aligned in tables. Negative amounts look negative. Rates read “11.5% a year”; dates “29 Oct 2026”.</li>
+    <li>Every amount that is a link stays a link. Any dashboard figure opens the journal lines behind it in at most two clicks.</li>
+    <li>Words that explain numbers are content, not decoration: the margin explanation, the payment split preview, and the refusal messages the engine returns.</li>
+    <li>The demo bar must never look like part of the product. Today it is an amber strip.</li>
+    <li>Colour never carries meaning alone: every state also has a word or an icon.</li>
+    <li>Desktop first, working down to tablet width (768px). Keyboard and screen reader use: dialogs trap and return focus, a skip link leads to the page, and focus moves to each new page.</li>
+    <li>Light and dark. Both token sets exist today, and dark follows the system setting.</li>
+  </ul>
+</div>
+
+<div class="callout">
+  <b>Built with</b>
+  React and Tailwind 4, with colour tokens in oklch; Radix for dialogs, menus and tabs; lucide icons; the system font. You are free to propose a typeface, an icon set, a palette, radii and elevation. We will express them as tokens, so every screen picks them up at once.
+</div>
+
+<div class="callout">
+  <b>How to read the tags</b>
+  <span class="tag t-redesign">Redesign</span> works today; give it the modern look and keep its content. &nbsp;
+  <span class="tag t-new">New pattern</span> missing, or solved differently on several screens; design it once and we will reuse it. &nbsp;
+  <span class="tag t-question">Question</span> we need a rule or a yes / no, not a full design.
+</div>
+
+<!-- ===================================================== AT A GLANCE -->
+<div class="page">
+<h2>At a glance — 36 items</h2>
+<table class="glance">
+  <tr><th>#</th><th>Screen or part</th><th>Address</th><th>What needs designing</th><th>Tag</th></tr>
+  <tr class="group"><td colspan="5">Foundations</td></tr>
+  <tr><td>F1</td><td>Visual language</td><td>—</td><td>Type scale, palette, spacing, radii, elevation, icons; light and dark</td><td><span class="tag t-new">New pattern</span></td></tr>
+  <tr><td>F2</td><td>Colour meanings</td><td>every screen</td><td>One meaning per colour: on time, due, late, at risk; federation and society; demo</td><td><span class="tag t-question">Question</span></td></tr>
+  <tr><td>F3</td><td>Money and numbers</td><td>every screen</td><td>Amounts, rates, differences, negatives, headline figures</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>F4</td><td>Small charts</td><td>dashboards, reports, dialogs</td><td>Split bar, ageing bar, pool band, limit bar, repaid bar</td><td><span class="tag t-new">New pattern</span></td></tr>
+  <tr><td>F5</td><td>Status pills</td><td>every list</td><td>Nine families of statuses, each with a word</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr class="group"><td colspan="5">Shell and demo controls</td></tr>
+  <tr><td>S1</td><td>App shell</td><td>every page</td><td>Sidebar, page header, breadcrumb, tablet menu</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>S2</td><td>Demo bar and invariants</td><td>every page</td><td>Role, society, clock, scenario, walkthrough, invariants panel</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>S3</td><td>Walkthrough panel</td><td>every page</td><td>The guided-tour card</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>S4</td><td>Loading, empty, refused, not found</td><td>every page</td><td>One set of states for the whole app</td><td><span class="tag t-new">New pattern</span></td></tr>
+  <tr class="group"><td colspan="5">Society — Secretary, Loan Officer, Auditor</td></tr>
+  <tr><td>D1</td><td>Dashboard</td><td><span class="addr">/dashboard</span></td><td>Position, earnings, what is due, ageing; every figure a link</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>M1</td><td>Member register</td><td><span class="addr">/members</span></td><td>Search, totals, status pills per member</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>M2</td><td>Member profile</td><td><span class="addr">/members/:id</span></td><td>Facts, loans, applications, “new application”</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>A1</td><td>Application queue</td><td><span class="addr">/applications</span></td><td>Six stage tabs, who-decides pill</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>A2</td><td>New application</td><td><span class="addr">/applications/new</span></td><td>Form with a live EMI quote</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>A3</td><td>Appraisal and decision</td><td><span class="addr">/applications/:id</span></td><td>Appraisal form, repayment burden, approve / reject, officer limit</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>P1</td><td>Pools</td><td><span class="addr">/pools</span></td><td>List with federation outcome</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>P2</td><td>Pool builder</td><td><span class="addr">/pools/new</span></td><td>Pick members, live economics, member band</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>P3</td><td>Pool detail and re-scope</td><td><span class="addr">/pools/:id</span></td><td>Decision card, history, re-scope dialog</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>T1</td><td>Funding</td><td><span class="addr">/tranches</span></td><td>Tranches with next remittance</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>T2</td><td>Tranche detail</td><td><span class="addr">/tranches/:id</span></td><td>Next remittance, history, remit and disburse dialogs</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>K1</td><td>Collections desk</td><td><span class="addr">/collections</span></td><td>Due and overdue lists, payment drawer with split preview</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>L1</td><td>Loan detail</td><td><span class="addr">/loans/:id</span></td><td>Schedule, receipts with their split and journal entry</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>G1</td><td>General ledger</td><td><span class="addr">/ledger</span></td><td>Journal and trace, T-accounts, trial balance</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>G2</td><td>Statements</td><td><span class="addr">/ledger/statements</span></td><td>Income statement and balance sheet by period</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>R1</td><td>Reports</td><td><span class="addr">/reports</span></td><td>Margin, ageing, collection efficiency, pool performance</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>X1</td><td>Settings</td><td><span class="addr">/settings</span></td><td>Policy, reconciliation, scenarios, walkthroughs</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr class="group"><td colspan="5">Federation — Apex Officer</td></tr>
+  <tr><td>E1</td><td>Exposure</td><td><span class="addr">/apex</span></td><td>Totals, limit used per society, members late</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>E2</td><td>Funding requests</td><td><span class="addr">/apex/requests</span></td><td>Queue of submitted pools, oldest first</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>E3</td><td>Review and sanction</td><td><span class="addr">/apex/requests/:id</span></td><td>Terms editor, track record, composition, decline</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>E4</td><td>Societies</td><td><span class="addr">/apex/societies</span></td><td>Limits, headroom, punctuality, members late</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>E5</td><td>Society detail</td><td><span class="addr">/apex/societies/:id</span></td><td>Tranches, remittance punctuality, pools</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr class="group"><td colspan="5">Member</td></tr>
+  <tr><td>U1</td><td>My loans</td><td><span class="addr">/me</span></td><td>What I owe, next instalment</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr><td>U2</td><td>My loan</td><td><span class="addr">/me/loans/:id</span></td><td>Schedule and payments, member’s words</td><td><span class="tag t-redesign">Redesign</span></td></tr>
+  <tr class="group"><td colspan="5">Questions for the whole app</td></tr>
+  <tr><td>Q1</td><td>Table density</td><td>every table</td><td>Compact or comfortable; up to 10 columns</td><td><span class="tag t-question">Question</span></td></tr>
+  <tr><td>Q2</td><td>Phone</td><td>member screens</td><td>Should members get a phone layout?</td><td><span class="tag t-question">Question</span></td></tr>
+  <tr><td>Q3</td><td>Languages</td><td>every screen</td><td>Room for Kannada labels, 30–50% longer</td><td><span class="tag t-question">Question</span></td></tr>
+</table>
+<p class="note">Redesign: 29. New pattern: 3 (F1, F4, S4). Question: 4 (F2, Q1–Q3). The next page shows how the screens connect, from application to remittance.</p>
+</div>
+
+<!-- ===================================================== THE FLOW -->
+<div class="page">
+<h2>How the screens connect</h2>
+<div class="flow"><b>ORIGINATION</b> Apply (A2) → Appraise (A3) → Decide (A3, officer up to ₹50,000) → Pool (P2) → Submit to the federation → Begin review (E3) → Sanction or decline (E3) → Re-scope if sanctioned short (P3) → Draw down and disburse (T2)</div>
+<div class="flow"><b>SERVICING</b> Instalments fall due (clock) → Record payments (K1) → Each payment split between federation and society (K1, L1) → Remit to the federation on the date (T2) → Margin kept (T2, R1)</div>
+<div class="flow"><b>BOOKS</b> Every money movement posts a balanced journal entry → Dashboard figures (D1) open their journal lines (G1) → Statements (G2) and reports (R1) are folded from the same journal</div>
+<p>Three ideas recur on almost every screen and should look the same everywhere:</p>
+<ul>
+  <li><b>The split.</b> Any amount members pay divides into “to the federation” and “kept by the society”. It shows as a two-colour bar in the payment drawer (K1), the pool builder (P2), the pool economics (P3, E3) and the tranche margin (T2).</li>
+  <li><b>Theoretical against realised.</b> What the schedules promised against what the books show, with the difference explained in words (D1, R1).</li>
+  <li><b>Traceable figures.</b> A figure that is a link opens the journal lines that add up to it. Today this is a plain underline on hover. It needs a consistent, quiet affordance (F3).</li>
+</ul>
+<h4>The demo, in brief</h4>
+<p>An amber demo bar sits above every page (S2). It switches role and society, moves a simulated clock (+1 day, +1 month, next due date), loads one of three prepared scenarios, starts a guided walkthrough, and shows a green dot while all 36 accounting checks pass. Advancing the clock never posts anything; only people record payments and remittances.</p>
+<figure><img src="screens/shell-dashboard.jpg" alt=""><figcaption>The app today: demo bar, sidebar, page header and the society dashboard. Scenario A, 29 Oct 2026.</figcaption></figure>
+</div>
+
+<!-- ===================================================== F1 -->
+<div class="page">
+<div class="item-head"><span class="code">F1</span><span class="name">Visual language</span><span class="tag t-new">New pattern</span></div>
+<p class="where"><b>Every screen</b> · today’s tokens live in <code>src/index.css</code></p>
+<p>Today the app is neutral and dense, for screens that are mostly numbers: cool greys, one blue accent (<span class="sw" style="background:#2f5aa8"></span>primary), three status colours (<span class="sw" style="background:#16a34a"></span>good, <span class="sw" style="background:#c2861a"></span>warn, <span class="sw" style="background:#d1342f"></span>bad), soft tints of each, and an amber strip (<span class="sw" style="background:#f7e7b4"></span>demo) reserved for the demo bar. The system font throughout, lucide line icons, 8px radii, 1px borders, almost no shadow. White cards on a very light grey page.</p>
+<table>
+  <tr><th>Part</th><th>Today</th></tr>
+  <tr><td>Type</td><td>System UI font; page title 20px semibold; card titles 14px semibold; body 14px; labels 12px; tile figures 20px semibold, tabular</td></tr>
+  <tr><td>Surfaces</td><td>Page background off-white; cards white with a 1px border; muted grey for table heads and inputs</td></tr>
+  <tr><td>Components</td><td>Button (primary, outline, ghost, subtle; md, sm, icon); badge (neutral, info, good, warn, bad); card; tabs; dialog (440–720px); right-hand sheet (512px); native selects and inputs; table; stat tile with a coloured left edge</td></tr>
+  <tr><td>Icons</td><td>lucide, 16px, in the sidebar, buttons and the demo bar</td></tr>
+  <tr><td>Dark</td><td>Every token has a dark value; the app follows the system setting</td></tr>
+</table>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A modern visual language for a finance tool used all day by society staff: typeface (with good tabular figures and a ₹ glyph), type scale, palette, spacing, radii, elevation and an icon set.</li>
+  <li>Light and dark versions of every token.</li>
+  <li>How cards, tiles and tables sit on the page: flat with borders, soft shadows, or layered surfaces?</li>
+  <li>Native selects are used in forms and filters today. Should they become custom selects, or stay native for speed and accessibility?</li>
+</ul></div>
+</div>
+
+<!-- ===================================================== F2 -->
+<div class="page">
+<div class="item-head"><span class="code">F2</span><span class="name">One meaning per colour</span><span class="tag t-question">Question</span></div>
+<p class="where"><b>Every screen</b></p>
+<p>The same few colours carry different ideas in different places. Green means both “on time” and “money the society keeps”. Amber means “due today”, “in grace”, “re-scope needed” and “awaiting decision”. Blue is the brand, “informational” pills, and the federation’s share in every split bar.</p>
+<table>
+  <tr><th>Idea</th><th>Where</th><th>Colour today</th></tr>
+  <tr><td>Paid, on time, balanced, ties to the books</td><td>Schedules, remittances, trial balance, ageing</td><td>green</td></tr>
+  <tr><td>Kept by the society (margin, spread)</td><td>Split bars, margin figures, dashboard tiles</td><td>green</td></tr>
+  <tr><td>To the federation (wholesale share)</td><td>Split bars, pool economics</td><td>blue (brand)</td></tr>
+  <tr><td>Due today, in grace, needs appraisal, awaiting decision</td><td>Collections, applications</td><td>amber</td></tr>
+  <tr><td>Re-scope needed, sanctioned short, rounding gap</td><td>Pool detail, tranche, margin</td><td>amber / grey</td></tr>
+  <tr><td>Late, overdue, past grace, at risk, declined, rejected</td><td>Collections, ageing, apex</td><td>red</td></tr>
+  <tr><td>Ageing buckets: current → over 90 days</td><td>Dashboard, reports</td><td>green → amber → light red → red</td></tr>
+  <tr><td>Officer can decide / Secretary decides</td><td>Applications</td><td>grey / blue</td></tr>
+  <tr><td>Demo controls</td><td>Demo bar, scenario menu</td><td>amber strip</td></tr>
+</table>
+<div class="design q"><div class="title">QUESTION</div><ul>
+  <li>A short colour rule every screen follows, with an icon or word for each state so colour alone never carries meaning.</li>
+  <li>Should “to the federation” and “kept by the society” have their own two colours, apart from the status colours? They appear together on at least six screens.</li>
+  <li>The ageing scale (current, in grace, 8–30, 31–60, 61–90, over 90 days): a sequential palette that still reads in greyscale and for colour-blind users.</li>
+</ul></div>
+</div>
+
+<!-- ===================================================== F3 -->
+<div class="page">
+<div class="item-head"><span class="code">F3</span><span class="name">Money and numbers</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Every screen</b> · one component, MoneyText, renders every amount</p>
+<table>
+  <tr><th>Kind</th><th>Example today</th><th>Rule</th></tr>
+  <tr><td>Amount</td><td class="num">₹5,35,169.01</td><td>Indian grouping (lakhs, crores), two decimals, tabular</td></tr>
+  <tr><td>Negative</td><td class="num" style="color:#be123c">-₹596.81</td><td>Minus sign and the “bad” colour</td></tr>
+  <tr><td>Headline figure</td><td class="num"><b style="font-size:13pt">₹3,199.53</b></td><td>Stat tiles: 20px semibold</td></tr>
+  <tr><td>Rate</td><td>11.5% a year · 2% spread</td><td>Trailing zeros dropped</td></tr>
+  <tr><td>Share</td><td>78.8% · 31.9%</td><td>One decimal for efficiency and at-risk shares</td></tr>
+  <tr><td>Difference</td><td class="num">-₹3,915.14 apart</td><td>Muted when within ₹1 (rounding), coloured otherwise</td></tr>
+  <tr><td>Traced figure</td><td><u>₹977.25</u></td><td>A link to its journal lines; underline on hover only</td></tr>
+  <tr><td>Reference</td><td><code>PACF/SAN/2026-27/014</code> · <code>loan_001</code></td><td>Sanction, pool, receipt and loan references appear as plain text</td></tr>
+</table>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Figures in tables, tiles and running text: weight, size steps and the ₹ sign’s treatment. Should paise be visually quieter than rupees in headline figures?</li>
+  <li>A visible but quiet sign that a figure opens its journal lines: an icon on hover, a dotted underline, or a tile footer such as “View lines →”?</li>
+  <li>References and internal ids (<code>loan_001</code>, <code>app_070</code>, <code>ANN/R/00073</code>): show them, style them as quiet codes, or hide internal ids from staff?</li>
+</ul></div>
+</div>
+
+<!-- ===================================================== F4 -->
+<div class="page">
+<div class="item-head"><span class="code">F4</span><span class="name">Small charts</span><span class="tag t-new">New pattern</span></div>
+<p class="where"><b>Dashboards, reports and dialogs</b> · five small bars, each built separately today</p>
+<table>
+  <tr><th>Chart</th><th>Shows</th><th>Where</th></tr>
+  <tr><td>Split bar</td><td>To the federation against kept by the society (and held as advance)</td><td>Payment drawer (K1), pool economics (P2, P3, E3), loan receipts (L1)</td></tr>
+  <tr><td>Ageing bar</td><td>Principal outstanding by days past due, six buckets, stacked</td><td>Dashboard (D1), ageing report (R1)</td></tr>
+  <tr><td>Member band</td><td>Members in the pool against the 10–20 band</td><td>Pool builder (P2)</td></tr>
+  <tr><td>Limit bar</td><td>Drawn, sanctioned-not-drawn and headroom against a credit limit</td><td>Federation exposure (E1)</td></tr>
+  <tr><td>Repaid bar and purpose bars</td><td>Share of principal repaid; amount by loan purpose</td><td>Pool performance (R1), review (E3)</td></tr>
+</table>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>One family of small charts with shared spacing, labels, legends and empty states. A legend inline, under the bar, or on hover?</li>
+  <li>Month-by-month trends (margin, collection efficiency) are tables today. Is a sparkline or small bar chart wanted on the dashboard and in reports?</li>
+  <li>Every chart needs a text equivalent for screen readers; today each bar has an aria label listing its parts.</li>
+</ul></div>
+<div class="pair">
+  <figure><img src="screens/collections-drawer.jpg" alt=""><figcaption>Split bar in the payment drawer (K1).</figcaption></figure>
+  <figure><img src="screens/apex-exposure.jpg" alt=""><figcaption>Limit bars on the federation’s exposure (E1), scenario B.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== F5 -->
+<div class="page">
+<div class="item-head"><span class="code">F5</span><span class="name">Status pills</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Every list</b> · one Badge component in five tones</p>
+<table>
+  <tr><th>Family</th><th>Words today</th></tr>
+  <tr><td>Loan</td><td>Active · Repaid · Foreclosed · Written off</td></tr>
+  <tr><td>Instalment</td><td>Paid · Upcoming · Due today · Part paid · N days late</td></tr>
+  <tr><td>Collection</td><td>Due today · N days late, in grace · N days late · Upcoming</td></tr>
+  <tr><td>Application stage</td><td>Needs appraisal · Awaiting decision · Ready to pool · In a pool · Disbursed · Rejected</td></tr>
+  <tr><td>Who decides</td><td>Officer can decide · Secretary decides</td></tr>
+  <tr><td>Pool</td><td>Being built · Ready to submit · Submitted · Under review · Sanctioned · Declined · Disbursed · Servicing · Closed</td></tr>
+  <tr><td>Tranche</td><td>Sanctioned · Part drawn · Drawn · Servicing · Closed · Defaulted</td></tr>
+  <tr><td>Remittance</td><td>On the day · N days late · Short · Overdue · Due today · Not due yet</td></tr>
+  <tr><td>Books</td><td>Balanced · Balances · Ties to the books · Out of balance · Does not tie to the books</td></tr>
+</table>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A pill system with an icon per state family, following F2. Do lifecycle statuses (pool, tranche, application) get a stepper or progress look anywhere, or stay as pills?</li>
+  <li>Pills that are links today (an applicant’s open application on the member register, “1 pool awaiting review”): how a clickable pill differs from a plain one.</li>
+</ul></div>
+</div>
+
+<!-- ===================================================== S1 -->
+<div class="page">
+<div class="item-head"><span class="code">S1</span><span class="name">App shell: sidebar, page header, tablet menu</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Every page</b> · society, federation and member tiers each have their own sidebar</p>
+<p>The sidebar shows the organisation at the top (“Credit society · Annapurna Credit Society · Dharwad district”, or the federation), grouped navigation (Origination, Servicing, Books, Admin for a society; Lending for the federation), and the signed-in person with a role pill at the bottom; the auditor also gets “Read only”. Below 1024px the sidebar folds into a <b>Menu</b> button that slides it in from the left. Every page has a header: title, a one-line description, actions on the right, and on detail pages a breadcrumb above.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The sidebar for each tier: how the organisation, the groups and the person sit; collapsed (icon-only) on smaller laptops?</li>
+  <li>The page header pattern: title, description, breadcrumb, primary and secondary actions, and the status pill on detail pages (pool, tranche, application).</li>
+  <li>Tablet: the Menu button sits at the top of the page content today. Should there be a proper top bar?</li>
+</ul></div>
+<div class="pair">
+  <figure class="tablet"><img src="screens/tablet-dashboard.jpg" alt=""><figcaption>Tablet, 768px: the Menu button and two-column tiles. Scenario B.</figcaption></figure>
+  <figure class="tablet"><img src="screens/tablet-menu.jpg" alt=""><figcaption>Tablet menu open.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== S2 -->
+<div class="page">
+<div class="item-head"><span class="code">S2</span><span class="name">Demo bar and invariants panel</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Every page</b> · demo only; must never look like the product</p>
+<ul>
+  <li><b>Viewing as</b>: the five roles. <b>Society</b> menu: whose books, for society roles.</li>
+  <li><b>Today</b>: the simulated date, +1 day, +1 month, Next due date.</li>
+  <li><b>Scenario</b> menu: A Clean run, B Delinquency, C Prepayment and recovery, and Reset demo data.</li>
+  <li><b>Walkthrough</b> menu: three guided tours (S3).</li>
+  <li><b>Invariants</b>: a green dot and “36/36”. It opens a side panel listing the twelve accounting checks for each society, each passing or failing with detail.</li>
+</ul>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The bar now wraps to two rows even at 1440px. A compact single row, a collapsible drawer, or a floating pill that opens a demo panel?</li>
+  <li>How it stays clearly “demo” in light and dark while looking as finished as the rest.</li>
+  <li>The invariants panel: a list of twelve checks per society. A summary first, details on demand?</li>
+</ul></div>
+<div class="pair">
+  <figure><img src="screens/demo-scenario-menu.jpg" alt=""><figcaption>Scenario menu open.</figcaption></figure>
+  <figure><img src="screens/demo-invariants.jpg" alt=""><figcaption>Invariants panel: twelve checks per society.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== S3 -->
+<div class="page">
+<div class="item-head"><span class="code">S3</span><span class="name">Walkthrough panel</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Every page</b> · started from the demo bar or Settings</p>
+<p>Three scripted tours: “When members fall behind” (8 steps, scenario B), “Prepayment and recovery” (4 steps, scenario C) and “A month in the life of a pool” (5 steps, scenario A). Each step loads its scenario, person and screen, then says what to look at; nothing is clicked for the user. The card floats bottom right with Back, Next and Finish, and “step N of M”.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The tour card: size, position, and whether it points at the part of the screen it describes (a highlight or spotlight).</li>
+  <li>The card covers the bottom-right of the page today, over the ageing card. Dock it, or let it be dragged or minimised?</li>
+</ul></div>
+<figure><img src="screens/demo-walkthrough.jpg" alt=""><figcaption>Step 1 of the delinquency tour over the scenario B dashboard.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== S4 -->
+<div class="page">
+<div class="item-head"><span class="code">S4</span><span class="name">Loading, empty, refused and not-found states</span><span class="tag t-new">New pattern</span></div>
+<p class="where"><b>Every page</b> · every read waits 150–400ms, like a real backend</p>
+<ul>
+  <li><b>Loading:</b> grey pulsing tiles of the right count and shape.</li>
+  <li><b>Empty:</b> a sentence in the card (“Nothing remitted yet.”, “No loan is in this bucket.”, “Every member is up to date.”).</li>
+  <li><b>Refused:</b> the engine refuses anything a rule forbids and says why, in words; the dialog or form shows it in red above its buttons. A failure the screen does not handle shows as a red strip under the demo bar.</li>
+  <li><b>Not found:</b> a header and a link back.</li>
+  <li><b>Not allowed:</b> actions a role cannot take are hidden or replaced with a sentence (the auditor sees the desk, but “not record payments in this role”).</li>
+</ul>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>One family of states for the whole app: skeletons, empty (with or without an illustration), inline errors, page-level errors, and the “you can see but not do” message.</li>
+  <li>Success after an action: today the drawer turns into a receipt, dialogs simply close and the page refreshes. Is a toast wanted?</li>
+</ul></div>
+<div class="pair">
+  <figure><img src="screens/not-found.jpg" alt=""><figcaption>Not found.</figcaption></figure>
+  <figure><img src="screens/collections-auditor.jpg" alt=""><figcaption>The auditor on the collections desk: read only.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== D1 -->
+<div class="page">
+<div class="item-head"><span class="code">D1</span><span class="name">Society dashboard</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Dashboard</b> · <code>/dashboard</code> · Secretary, Loan Officer, Auditor · the home page for society roles</p>
+<p>The society’s position at a glance, in four groups. <b>Position</b>: loans outstanding, owed to the federation, cash and bank, advances held. <b>Earnings</b>: net interest income this month and this financial year (April to March), realised against theoretical margin, penal interest and fees. <b>What is due</b>: due today, overdue, collection efficiency for the month, the next remittance. <b>Loans by days past due</b>: a six-bucket ageing bar that ties to the books.</p>
+<p>Every money tile is a link. Balances and earnings open the journal lines that add up to them (G1); ageing buckets, collection efficiency and margin open the report (R1), from which the lines are one more click.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Twelve tiles and a chart. Which deserve to lead? A hero figure (realised margin, or cash) with the rest smaller?</li>
+  <li>Realised against theoretical margin is the heart of the product story. How to show the two side by side, with the gap and a one-line reason, right on the dashboard.</li>
+  <li>The tone edge on each tile (green, amber, red, grey) carries meaning today. Keep it, or move the meaning into an icon and word (F2)?</li>
+  <li>The “traceable figure” affordance on tiles (F3).</li>
+</ul></div>
+<figure><img src="screens/dashboard-delinquency.jpg" alt=""><figcaption>Scenario B: three loans overdue; net interest income negative this month, because the society paid the federation in full while members fell behind; realised margin ₹3,915 below theory; 31.9% of the portfolio past grace.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== M1 -->
+<div class="page">
+<div class="item-head"><span class="code">M1</span><span class="name">Member register</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Origination › Members</b> · <code>/members</code> · Secretary, Loan Officer, Auditor</p>
+<p>Everyone who holds shares in the society: three totals (active members, borrowing now, outstanding), a search over name, village, membership number and occupation, and a table with village, occupation, active loans, outstanding and a status cell. The status cell can show Dormant or Exited, “N days late” or “In grace”, and a link pill to an application in progress. <b>New application</b> sits top right.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A list of 30 here, but societies run to hundreds. Is a filter (borrowing, late, dormant) wanted beside search?</li>
+  <li>The status cell, which can hold up to three pills.</li>
+</ul></div>
+<figure><img src="screens/members.jpg" alt=""><figcaption>Annapurna’s thirty members: one dormant, and many with an application on its way, each a link.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== M2 -->
+<div class="page">
+<div class="item-head"><span class="code">M2</span><span class="name">Member profile</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Members › a member</b> · <code>/members/:id</code> · Secretary, Loan Officer, Auditor</p>
+<p>A strip of facts (occupation, phone, share capital, internal score, borrowing now, can still borrow up to the ₹5,00,000 limit per member), the member’s loans with status and days late, and their applications with stage. <b>New application</b> opens the form with the member chosen; when they cannot apply, the reason replaces the button (“Application app_064 is already in progress.”).</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A member header (name, membership number, village, since) that reads as a person, not a record. Should it carry a repayment track record (“6 of 6 on time”)? That would be new.</li>
+  <li>The facts strip of six figures.</li>
+</ul></div>
+<figure><img src="screens/member-profile.jpg" alt=""><figcaption>Fakirappa Pujar: one active loan, one disbursed application.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== A1 -->
+<div class="page">
+<div class="item-head"><span class="code">A1</span><span class="name">Application queue</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Origination › Applications</b> · <code>/applications</code> · Secretary, Loan Officer, Auditor</p>
+<div class="flow"><b>FLOW</b> Needs appraisal → Awaiting decision → Ready to pool → In a pool → Disbursed (or Rejected)</div>
+<p>Six tabs, one per stage, each with its count. The table shows applicant (name, id, village), applied, purpose, amount, tenure and EMI. The last column changes by tab: who decides (Officer can decide up to ₹50,000, Secretary decides above it), the pool, the loan, or the rejection reason. Pending work sorts oldest first; finished work newest first.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Six stage tabs: tabs, a segmented control, or a small pipeline with counts that doubles as the filter?</li>
+  <li>The “who decides” pill: how prominent should the officer limit be on each row?</li>
+</ul></div>
+<figure><img src="screens/applications-queue.jpg" alt=""><figcaption>Needs appraisal: two applications above the officer limit.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== A2 -->
+<div class="page">
+<div class="item-head"><span class="code">A2</span><span class="name">New application</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Applications › New</b> · <code>/applications/new</code> · Secretary, Loan Officer</p>
+<p>The member (only active members without an application in progress), amount in rupees, tenure (6–60 months) and purpose. On the right, <b>What the member would pay</b> updates as the amount is typed: monthly instalment, interest over the tenure, repaid in all, and who will decide. If the member’s total borrowing would pass ₹5,00,000 it says so, in red. Submitting opens the application (A3).</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The live quote is the emotional centre of the form. Should the EMI dominate, with the rest secondary?</li>
+  <li>A member picker for hundreds of members: search with avatar initials rather than a native select?</li>
+  <li>Tenure as a select, chips (6, 12, 18, 24…) or a slider?</li>
+</ul></div>
+<figure><img src="screens/application-new.jpg" alt=""><figcaption>₹45,000 over 12 months: ₹3,988 a month, ₹2,851.90 in interest, within the officer’s limit.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== A3 -->
+<div class="page">
+<div class="item-head"><span class="code">A3</span><span class="name">Appraisal and decision</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Applications › an application</b> · <code>/applications/:id</code> · appraise and decide: Secretary, Loan Officer; read: Auditor</p>
+<div class="flow"><b>FLOW</b> Needs appraisal: record the appraisal → Awaiting decision: approve (amount, tenure) or reject (reason) → Decided: summary, pool, loan</div>
+<p><b>Appraisal</b>: monthly income, existing repayments and a recommended amount (0 recommends rejection), with notes. As the figures are typed, a line shows repayments on all loans as a share of monthly income against the 50% cap for microfinance loans, green within it and red above it. It informs; it does not block.</p>
+<p><b>Decision</b>: Approve or Reject; the amount (up to what was asked) and tenure, with the new EMI; or a reason. Above ₹50,000 only the secretary may decide. An officer sees why, and the button stays disabled.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The page as a timeline of steps (applied, appraised, decided, pooled, disbursed), with the current step’s form open?</li>
+  <li>The repayment-burden line as a small gauge against the 50% cap?</li>
+  <li>The approve / reject choice is a two-button segmented control today.</li>
+</ul></div>
+<div class="pair">
+  <figure><img src="screens/application-appraise.jpg" alt=""><figcaption>Appraisal with a live repayment burden.</figcaption></figure>
+  <figure><img src="screens/application-approved.jpg" alt=""><figcaption>Decided: approved, waiting to be pooled.</figcaption></figure>
+</div>
+<figure><img src="screens/application-decide-officer.jpg" alt=""><figcaption>A loan officer on a ₹70,000 recommendation: the secretary decides.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== P1 -->
+<div class="page">
+<div class="item-head"><span class="code">P1</span><span class="name">Pools</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Origination › Pools</b> · <code>/pools</code> · build and submit: Secretary; read: Loan Officer, Auditor</p>
+<p>Approved applications go to the federation 10 to 20 at a time, as one request for a wholesale tranche. A banner counts approved applications waiting to be pooled, with <b>Add to</b> the open pool (or Start a pool). The table: reference and opening date, status, members, requested, longest loan, and the federation outcome (sanction reference and amount, decline remarks, or “submitted on”). Open pools have <b>Continue</b>.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Pools as cards (with the member band and economics in miniature) or a table?</li>
+</ul></div>
+<figure><img src="screens/pools-list.jpg" alt=""><figcaption>One pool being built, one servicing.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== P2 -->
+<div class="page">
+<div class="item-head"><span class="code">P2</span><span class="name">Pool builder</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Pools › New / Continue</b> · <code>/pools/new?pool=:id</code> · Secretary</p>
+<div class="flow"><b>FLOW</b> Tick approved applications → watch the economics → Save draft or Submit to the federation (confirm) → pool detail</div>
+<p>On the left, approved applications with checkboxes (member, purpose, amount, tenure, EMI) and Select all. On the right, sticky: the member band (10–20), requested amount, longest loan, average tenure by amount, and over the life of the loans what members pay in interest at 11.5%, what is owed to the federation at 9.5%, and what the society keeps (the 2% spread), with a split bar. Below 10 members it says how many more; Submit stays disabled.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Two panes on desktop, stacked on tablet. The economics panel is the persuasive part: how to make the society’s margin read at a glance.</li>
+  <li>The member band, with the 10–20 range and the count.</li>
+  <li>Selecting rows: the whole row is clickable today, as well as the checkbox.</li>
+</ul></div>
+<figure><img src="screens/pool-builder.jpg" alt=""><figcaption>Eleven selected: ₹7,10,000 requested, the spread shown over the life of the loans.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== P3 -->
+<div class="page">
+<div class="item-head"><span class="code">P3</span><span class="name">Pool detail and re-scope</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Pools › a pool</b> · <code>/pools/:id</code> · re-scope: Secretary; read: Loan Officer, Auditor</p>
+<p>The federation’s decision card (waiting, under review, declined with remarks, or sanctioned with reference, amount, rate and tenure), the members with their stage or loan, the economics, and a history timeline (opened, submitted, sanctioned by whom, re-scoped, drawn down, loans paid out).</p>
+<p><b>Re-scope.</b> When the federation sanctions less than the members ask for, nothing can be drawn until the secretary re-scopes the pool: either cut every loan by the same proportion (each rounded down to the rupee, never below the ₹5,000 minimum), or remove members until the rest fit (those removed can join another pool). The secretary must confirm the members agreed.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The re-scope dialog’s two methods, the before and after amounts, and the confirmation that gates it.</li>
+  <li>The history timeline, used here and on the federation’s review.</li>
+</ul></div>
+<figure><img src="screens/pool-detail.jpg" alt=""><figcaption>A servicing pool: decision, members, economics and history.</figcaption></figure>
+<div class="pair">
+  <figure><img src="screens/pool-rescope-needed.jpg" alt=""><figcaption>Sanctioned ₹6,00,000 against ₹7,50,000: re-scope needed.</figcaption></figure>
+  <figure><img src="screens/pool-rescope-dialog.jpg" alt=""><figcaption>The re-scope dialog, pro rata: each member at 80%, new EMIs.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== T1 -->
+<div class="page">
+<div class="item-head"><span class="code">T1</span><span class="name">Funding</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Servicing › Funding</b> · <code>/tranches</code> · Secretary, Loan Officer, Auditor</p>
+<p>Each tranche the federation has sanctioned to the society: sanction reference and pool, sanctioned, drawn, outstanding, loans funded and active, status, and the next remittance (date and amount, overdue in red).</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A tranche as a card with a drawn / outstanding meter and the next remittance as its call to action?</li>
+</ul></div>
+<figure><img src="screens/tranches.jpg" alt=""><figcaption>One tranche, servicing; next remittance 15 Nov.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== T2 -->
+<div class="page">
+<div class="item-head"><span class="code">T2</span><span class="name">Tranche detail, remittance and disbursement</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Funding › a tranche</b> · <code>/tranches/:id</code> · remit, draw and disburse: Secretary; read: Loan Officer, Auditor</p>
+<div class="flow"><b>FLOW</b> Sanctioned → (re-scope if short) → Draw down and disburse (choose members, first due date) → each month: Record remittance on the date → Closed</div>
+<p>Facts (sanctioned, drawn, undrawn, outstanding, rate, tenure); the <b>Next remittance</b> card (interest on the tranche balance, principal members were due to repay, prepayments and arrears, the total owed, how much members have paid in towards it, and cash before and after); totals to date, including the margin kept; the remittance history with the margin each month earned; the remittances still to come; and the loans funded.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The Next remittance card holds a small calculation (interest + principal + arrears = owed) beside a narrative. How to make the sum legible.</li>
+  <li>The remittance dialog’s “short payment” path and its consequences (carried forward, cash below zero).</li>
+  <li>The disbursement dialog’s list, date and summary (to lend, drawn now, left undrawn).</li>
+</ul></div>
+<figure><img src="screens/tranche-detail.jpg" alt=""><figcaption>Tranche PACF/SAN/2026-27/014: six remittances on the day, the margin each month kept.</figcaption></figure>
+<div class="pair">
+  <figure><img src="screens/tranche-remit-dialog.jpg" alt=""><figcaption>Record remittance, 15 Nov: pay in full or short; what carries forward.</figcaption></figure>
+  <figure><img src="screens/tranche-disburse-dialog.jpg" alt=""><figcaption>Draw down and disburse: members, first due date, what is drawn now.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== K1 -->
+<div class="page">
+<div class="item-head"><span class="code">K1</span><span class="name">Collections desk and payment drawer</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Servicing › Collections</b> · <code>/collections</code> · record: Loan Officer, Secretary; read: Auditor</p>
+<div class="flow"><b>FLOW</b> Due today / overdue list → Record payment (drawer: amount, mode, apply extra to principal) → live preview of the split → Record → receipt with its journal entry</div>
+<p>Totals for the day (collected, owed on to the federation, kept by the society), then <b>Due today</b>, <b>Overdue</b> (days late, in grace or past it, penal accruing) and <b>Coming up in the next 7 days</b>, each row with member, pool, due since, amount and Record payment. <b>Record all due today</b> records a full cash receipt for each instalment due, after one confirmation.</p>
+<p>The drawer shows what is due and outstanding, the amount (Amount due, Pay off the loan), how it is received, “apply anything extra to principal”, and a live preview: how the payment is applied (penal, overdue interest, principal…) and where it goes (to the federation, kept by the society), with words.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The desk is the most-used screen. A faster rhythm: inline “record due amount” on each row, with the drawer for anything else?</li>
+  <li>The drawer’s live split preview (the split bar, F4) and the receipt it turns into.</li>
+  <li>How lateness reads: in grace against past grace, and penal interest accruing.</li>
+</ul></div>
+<figure><img src="screens/collections-due.jpg" alt=""><figcaption>15 Nov 2026: twelve instalments due today.</figcaption></figure>
+<figure><img src="screens/collections-overdue.jpg" alt=""><figcaption>Scenario B: three members overdue, two past 44 days and one past 106.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== L1 -->
+<div class="page">
+<div class="item-head"><span class="code">L1</span><span class="name">Loan detail</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>A loan</b> (from collections, members, ledger) · <code>/loans/:id</code> · record: Loan Officer, Secretary; read: Auditor</p>
+<p>Facts (principal, rate, EMI, tenure, disbursed, pool and tranche), the position today (outstanding, due now, days past due, penal), totals (interest paid, wholesale share, margin retained), the amortisation schedule with a status per instalment, and every payment, newest first, each opening to its split and its journal entry. After a prepayment the loan is re-amortised at the same EMI over a shorter tenure, and the original schedule can be shown beside it.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The schedule table (up to 60 rows): progress through it, the current row, and paid rows.</li>
+  <li>A receipt opened: allocation, split and journal entry in a compact, readable block.</li>
+  <li>Original against rescheduled: side by side, or overlaid?</li>
+</ul></div>
+<figure><img src="screens/loan-detail.jpg" alt=""><figcaption>loan_001: six of twelve instalments paid.</figcaption></figure>
+<figure><img src="screens/loan-rescheduled.jpg" alt=""><figcaption>Scenario C: Renuka Angadi’s ₹25,000 prepayment; the same EMI, a shorter schedule, the original alongside.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== G1 -->
+<div class="page">
+<div class="item-head"><span class="code">G1</span><span class="name">General ledger: journal, T-accounts, trial balance</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Books › Ledger</b> · <code>/ledger</code>, <code>?view=accounts</code>, <code>?view=trial</code> · Secretary, Loan Officer, Auditor</p>
+<p><b>Journal</b>: every entry, newest first, filtered by account, dates, source and search. When reached from a figure, it becomes a <b>trace</b>: a card naming the accounts and dates, their debits, credits and balances, and the total that equals the figure, with only the lines behind it below. Each entry expands to its debit and credit lines. <b>T-accounts</b>: one account as a classic T, balance brought down and carried down. <b>Trial balance</b>: each account in its debit or credit column at any date, with a Balanced pill. CSV on every view.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The trace card is how every dashboard figure is explained. It should feel like an answer, not a filter.</li>
+  <li>Filters (account, dates, source, search) in one bar; a date-range control.</li>
+  <li>The T-account in a modern idiom that accountants still recognise.</li>
+</ul></div>
+<figure><img src="screens/ledger-trace.jpg" alt=""><figcaption>The trace behind October’s net interest income: ₹5,619.11 less ₹4,641.86 = ₹977.25.</figcaption></figure>
+<div class="pair">
+  <figure><img src="screens/ledger-taccount.jpg" alt=""><figcaption>T-account: Member Loans Receivable from 1 Oct.</figcaption></figure>
+  <figure><img src="screens/ledger-trial.jpg" alt=""><figcaption>Trial balance at 29 Oct: balanced.</figcaption></figure>
+</div>
+
+</div>
+
+<!-- ===================================================== G2 -->
+<div class="page">
+<div class="item-head"><span class="code">G2</span><span class="name">Statements</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Books › Statements</b> · <code>/ledger/statements</code> · Secretary, Loan Officer, Auditor</p>
+<p>A period (this month, last month, this quarter, this financial year, last financial year, since inception, or chosen dates). The <b>income statement</b> for the period (interest from members, interest to the federation, net interest income, penal interest and fees, provisions, surplus) and the <b>balance sheet</b> at its end (assets, liabilities, reserves and surplus not yet closed), with a Balances pill. Every line opens its journal lines or T-account. CSV.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Statements that look like statements: indentation, subtotals, rules, and a print-friendly version.</li>
+  <li>A comparison column (previous period) is not built yet. Should the design leave room for it?</li>
+</ul></div>
+<figure><img src="screens/statements.jpg" alt=""><figcaption>This financial year, 1 Apr to 29 Oct 2026.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== R1 -->
+<div class="page">
+<div class="item-head"><span class="code">R1</span><span class="name">Reports: margin, ageing, collection efficiency, pool performance</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Books › Reports</b> · <code>/reports</code> with four tabs · Secretary, Loan Officer, Auditor</p>
+<ul>
+  <li><b>Margin</b>: theoretical against realised for the financial year and since inception, the difference, and why, in words. The reasons: members behind, members catching up, prepayment timing, wholesale interest above schedule (lost for good), a remittance outstanding, and rounding. Then month by month.</li>
+  <li><b>Ageing</b>: the six buckets as tiles that filter the loan list; the total ties to the books.</li>
+  <li><b>Collection efficiency</b>: each month’s instalments against what was paid by the month’s end; choose a month to see each instalment.</li>
+  <li><b>Pool performance</b>: per funded pool, loans, disbursed, outstanding, repaid, at risk, interest, wholesale, margin, remittances on time.</li>
+</ul>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The margin story is the gate the prototype was built for. The explanation is a bulleted list today; should it become a small waterfall chart (theoretical → each reason → realised)?</li>
+  <li>The month-by-month table has nine columns: a chart above it?</li>
+  <li>Four reports as tabs, or a report landing page with cards?</li>
+</ul></div>
+<figure><img src="screens/reports-margin.jpg" alt=""><figcaption>Scenario B, Annapurna: members ₹3,915.10 behind on interest; the gap builds from July.</figcaption></figure>
+<figure><img src="screens/reports-margin-gramodaya.jpg" alt=""><figcaption>Scenario B, Gramodaya: August’s principal held back; September shows extra wholesale interest, lost for good.</figcaption></figure>
+<div class="pair">
+  <figure><img src="screens/reports-ageing.jpg" alt=""><figcaption>Ageing, scenario B: one loan over 90 days, two at 31–60.</figcaption></figure>
+  <figure><img src="screens/reports-collections.jpg" alt=""><figcaption>Collection efficiency, scenario B: 78.8% in October.</figcaption></figure>
+</div>
+<figure><img src="screens/reports-pools.jpg" alt=""><figcaption>Pool performance, scenario A.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== X1 -->
+<div class="page">
+<div class="item-head"><span class="code">X1</span><span class="name">Settings</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Admin › Settings</b> · <code>/settings</code> · Secretary, Loan Officer, Auditor</p>
+<p>The lending policy, shown and not edited (rates, spread, penal interest, loan size and limit per member, tenure, officer limit, pool size, the 50% repayment burden, prepayment without a fee); the reconciliation policy in force (pass-through) and the alternative; the scenarios with Load and Reset demo data (each confirmed); and the guided walkthroughs.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>Policy reads as a reference card. Mark it clearly as fixed for the demo.</li>
+</ul></div>
+<figure><img src="screens/settings.jpg" alt=""><figcaption>Settings in scenario A.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== E1 -->
+<div class="page">
+<div class="item-head"><span class="code">E1</span><span class="name">Federation exposure</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Exposure</b> · <code>/apex</code> · Apex Officer · the federation’s home page</p>
+<p>Four totals (owed to the federation, undrawn commitments, wholesale interest received this year, member loans over 7 days late), a link to pools awaiting a decision, and a row per society: limit used (drawn, sanctioned not drawn, headroom), outstanding, headroom, members late, interest this year, and status pills (remittances current or overdue, pools awaiting review). CSV.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The federation’s risk view: limit used against members late against punctuality, per society, readable at a glance.</li>
+</ul></div>
+<figure><img src="screens/apex-exposure.jpg" alt=""><figcaption>Scenario B: Annapurna’s members are late, but its remittances are current; one pool awaits review.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== E2 -->
+<div class="page">
+<div class="item-head"><span class="code">E2</span><span class="name">Funding requests</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Lending › Funding requests</b> · <code>/apex/requests</code> · Apex Officer</p>
+<p>Pools submitted by societies, oldest first: reference, society, members, requested, longest loan, submitted (with days waiting, red after 14) and status (Submitted, Under review).</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A queue that shows age and urgency.</li>
+</ul></div>
+<figure><img src="screens/apex-requests.jpg" alt=""><figcaption>One request under review, waiting 9 days.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== E3 -->
+<div class="page">
+<div class="item-head"><span class="code">E3</span><span class="name">Review and sanction</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Funding requests › a pool</b> · <code>/apex/requests/:id</code> · Apex Officer</p>
+<div class="flow"><b>FLOW</b> Submitted → Begin review → Terms: sanction (amount up to the request and the credit limit, wholesale rate, tenure at least the longest loan, remarks) or Decline (remarks) → the society re-scopes if short</div>
+<p>Request facts (requested, members, longest loan, average tenure, smallest and largest loan), the terms editor, what the money is for (by purpose), the members, the society’s track record (credit limit, sanctioned, outstanding, headroom now and if sanctioned in full, remittances on the day, overdue, arrears, members late) and the pool’s economics.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>A decision page: the terms and the evidence side by side. What must the officer see before sanctioning?</li>
+  <li>Sanctioning short is common. Make the consequence (“the society will re-scope”) visible in the terms editor.</li>
+</ul></div>
+<figure><img src="screens/apex-review.jpg" alt=""><figcaption>GRM/POOL/2026-27/02 under review: up to ₹7,50,000 within the credit limit.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== E4 + E5 -->
+<div class="page">
+<div class="item-head"><span class="code">E4</span><span class="name">Societies</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Lending › Societies</b> · <code>/apex/societies</code> · Apex Officer</p>
+<p>Each society: credit limit, sanctioned, headroom, outstanding, remittances paid on time, members late, and pills for remittances overdue and pools to review.</p>
+<figure><img src="screens/apex-societies.jpg" alt=""><figcaption>Three societies, scenario A.</figcaption></figure>
+</div>
+<div class="page">
+<div class="item-head"><span class="code">E5</span><span class="name">Society detail</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>Societies › a society</b> · <code>/apex/societies/:id</code> · Apex Officer</p>
+<p>Facts, the society’s tranches with next remittance, every remittance with its punctuality (on the day, days late, short), and its pools.</p>
+<figure><img src="screens/apex-society.jpg" alt=""><figcaption>Annapurna: six remittances, all on the day.</figcaption></figure>
+</div>
+
+<!-- ===================================================== U1 + U2 -->
+<div class="page">
+<div class="item-head"><span class="code">U1</span><span class="name">My loans (member)</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>My loans</b> · <code>/me</code> · Member</p>
+<p>What the member owes, what they have paid, and their next instalment, per loan, at the retail rate only. Nothing about the federation, wholesale pricing or margin.</p>
+<figure><img src="screens/member-home.jpg" alt=""><figcaption>Fakirappa Pujar’s loan: 6 of 12 instalments paid.</figcaption></figure>
+</div>
+<div class="page">
+<div class="item-head"><span class="code">U2</span><span class="name">My loan (member)</span><span class="tag t-redesign">Redesign</span></div>
+<p class="where"><b>My loans › a loan</b> · <code>/me/loans/:id</code> · Member</p>
+<p>The schedule and every payment with how it was applied, in plain words for a member.</p>
+<div class="design"><div class="title">DESIGN</div><ul>
+  <li>The member view is for borrowers, many on phones and some new to digital money. Warmer, simpler, larger, with the next instalment first (see Q2).</li>
+</ul></div>
+<figure><img src="screens/member-loan.jpg" alt=""><figcaption>Your schedule and your payments.</figcaption></figure>
+
+</div>
+
+<!-- ===================================================== QUESTIONS -->
+<div class="page">
+<h2>Questions for the whole app</h2>
+<div class="item-head"><span class="code">Q1</span><span class="name">Table density</span><span class="tag t-question">Question</span></div>
+<p>Most screens are tables of 5 to 10 columns, with two lines in the first cell (name and an id or place). Staff read them all day. Compact rows (as now, about 40px) or comfortable (52px)? A density switch? Sticky headers for long tables (schedules, journal)?</p>
+<div class="item-head"><span class="code">Q2</span><span class="name">Phone</span><span class="tag t-question">Question</span></div>
+<p>Society and federation screens are designed for desktop and must work at tablet width. The member screens (U1, U2) will mostly be seen on phones once a member portal exists, an open question in the technical design. Should they get a phone layout now?</p>
+<div class="item-head"><span class="code">Q3</span><span class="name">Languages</span><span class="tag t-question">Question</span></div>
+<p>Every label is English today. The societies are in Karnataka, so Kannada will follow, and Kannada labels run 30–50% longer. Should buttons, tabs and tile labels be designed with that room now?</p>
+
+<div class="callout" style="margin-top:14pt">
+  <b>Not a design question: noticed while preparing this brief</b>
+  <ul>
+    <li>Internal ids (<code>loan_001</code>, <code>app_070</code>) appear to staff beside names. See F3 for whether to keep them.</li>
+    <li>The demo bar wraps to two rows at 1440px since the society switcher and walkthrough menu were added (S2).</li>
+    <li>Forms use native selects for member, tenure, purpose, mode and filters (F1).</li>
+    <li>CSV downloads are built but not styled beyond an outline button.</li>
+  </ul>
+</div>
+
+<div class="footer">Source: tiered-microfinance-prototype, local build after Phase 6, 29/10/2026; 338 tests passing. Technical design document: https://claude.ai/artifact/Bhzryr1KS5wbjx8ZCn7E4B. Screenshots: <code>docs/design-brief/screens/</code>, 47 images at 1440 × 900 (desktop) and 768 × 1024 (tablet), device scale 1.25.</div>
+</div>
+
+</body>
+</html>

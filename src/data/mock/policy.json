@@ -1,0 +1,22 @@
+{
+  "retailRateBps": 1150,
+  "wholesaleRateBps": 950,
+  "penalRateBps": 200,
+  "poolMinMembers": 10,
+  "poolMaxMembers": 20,
+  "minTicket": 500000,
+  "maxTicket": 50000000,
+  "officerApprovalLimit": 5000000,
+  "graceDays": 7,
+  "reconciliationPolicy": "PASS_THROUGH",
+  "accrualEnabled": false,
+  "allocationOrder": [
+    "PENAL_INTEREST",
+    "FEES",
+    "OVERDUE_INTEREST",
+    "OVERDUE_PRINCIPAL",
+    "CURRENT_INTEREST",
+    "CURRENT_PRINCIPAL",
+    "ADVANCE"
+  ]
+}

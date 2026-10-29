@@ -1,0 +1,58 @@
+[
+  {
+    "id": "usr_member",
+    "name": "Veerappan Pandian",
+    "role": "MEMBER",
+    "title": "Member",
+    "societyId": "soc_1",
+    "memberId": "mem_001"
+  },
+  {
+    "id": "usr_officer",
+    "name": "Karthik Rajan",
+    "role": "LOAN_OFFICER",
+    "title": "Field Officer",
+    "societyId": "soc_1"
+  },
+  {
+    "id": "usr_secretary",
+    "name": "Meenakshi Sundaram",
+    "role": "SECRETARY",
+    "title": "Secretary",
+    "societyId": "soc_1"
+  },
+  {
+    "id": "usr_officer_2",
+    "name": "Senthil Kumar",
+    "role": "LOAN_OFFICER",
+    "title": "Field Officer",
+    "societyId": "soc_2"
+  },
+  {
+    "id": "usr_secretary_2",
+    "name": "Anitha Ramesh",
+    "role": "SECRETARY",
+    "title": "Secretary",
+    "societyId": "soc_2"
+  },
+  {
+    "id": "usr_secretary_3",
+    "name": "Velmurugan Pandian",
+    "role": "SECRETARY",
+    "title": "Secretary",
+    "societyId": "soc_3"
+  },
+  {
+    "id": "usr_apex",
+    "name": "Dr. Sudha Ramanathan",
+    "role": "APEX_OFFICER",
+    "title": "Credit Manager"
+  },
+  {
+    "id": "usr_auditor",
+    "name": "R. N. Subramanian",
+    "role": "AUDITOR",
+    "title": "Statutory Auditor",
+    "societyId": "soc_1"
+  }
+]

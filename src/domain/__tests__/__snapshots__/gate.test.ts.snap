@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`determinism > matches the committed trial balance snapshot 1`] = `
+{
+  "outstanding": [
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+    "CLOSED",
+  ],
+  "tb": [
+    {
+      "code": 1000,
+      "cr": 182222870,
+      "dr": 203532938,
+    },
+    {
+      "code": 1100,
+      "cr": 88000000,
+      "dr": 88000000,
+    },
+    {
+      "code": 1150,
+      "cr": 0,
+      "dr": 0,
+    },
+    {
+      "code": 2000,
+      "cr": 88000000,
+      "dr": 88000000,
+    },
+    {
+      "code": 2050,
+      "cr": 0,
+      "dr": 0,
+    },
+    {
+      "code": 2100,
+      "cr": 0,
+      "dr": 0,
+    },
+    {
+      "code": 3000,
+      "cr": 20000000,
+      "dr": 0,
+    },
+    {
+      "code": 4000,
+      "cr": 7532938,
+      "dr": 0,
+    },
+    {
+      "code": 4100,
+      "cr": 0,
+      "dr": 0,
+    },
+    {
+      "code": 5000,
+      "cr": 0,
+      "dr": 6222870,
+    },
+    {
+      "code": 5200,
+      "cr": 0,
+      "dr": 0,
+    },
+  ],
+}
+`;

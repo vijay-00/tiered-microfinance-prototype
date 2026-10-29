@@ -1,0 +1,100 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Neutral and dense, for screens that are mostly numbers: cool
+ * greys, one blue accent, three status colours, and an amber strip reserved for
+ * the demo toolbar so nobody mistakes it for the product.
+ */
+:root {
+  --background: oklch(0.982 0.003 255);
+  --foreground: oklch(0.22 0.02 260);
+  --card: oklch(1 0 0);
+  --muted: oklch(0.962 0.005 255);
+  --muted-foreground: oklch(0.52 0.02 260);
+  --border: oklch(0.91 0.006 255);
+  --ring: oklch(0.55 0.15 255);
+  --primary: oklch(0.47 0.14 258);
+  --primary-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.95 0.025 258);
+  --accent-foreground: oklch(0.36 0.12 258);
+  --good: oklch(0.56 0.13 155);
+  --good-soft: oklch(0.95 0.04 155);
+  --warn: oklch(0.6 0.13 70);
+  --warn-soft: oklch(0.96 0.05 85);
+  --bad: oklch(0.56 0.19 27);
+  --bad-soft: oklch(0.95 0.03 27);
+  --demo: oklch(0.96 0.045 90);
+  --demo-border: oklch(0.83 0.1 85);
+  --demo-foreground: oklch(0.38 0.07 70);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.17 0.01 260);
+    --foreground: oklch(0.93 0.008 255);
+    --card: oklch(0.21 0.012 260);
+    --muted: oklch(0.25 0.012 260);
+    --muted-foreground: oklch(0.7 0.015 255);
+    --border: oklch(0.3 0.012 260);
+    --ring: oklch(0.65 0.14 255);
+    --primary: oklch(0.66 0.14 255);
+    --primary-foreground: oklch(0.16 0.02 260);
+    --accent: oklch(0.28 0.04 258);
+    --accent-foreground: oklch(0.85 0.08 255);
+    --good: oklch(0.72 0.14 155);
+    --good-soft: oklch(0.28 0.05 155);
+    --warn: oklch(0.8 0.13 80);
+    --warn-soft: oklch(0.3 0.05 80);
+    --bad: oklch(0.7 0.17 27);
+    --bad-soft: oklch(0.3 0.06 27);
+    --demo: oklch(0.29 0.05 85);
+    --demo-border: oklch(0.5 0.09 85);
+    --demo-foreground: oklch(0.88 0.08 90);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-demo: var(--demo);
+  --color-demo-border: var(--demo-border);
+  --color-demo-foreground: var(--demo-foreground);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}

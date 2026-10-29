@@ -1,0 +1,33 @@
+{
+  "description": "The TDD's reference fixture. One member loan of Rs 1,00,000 at 11.5% p.a. over 12 months, on-lent from a tranche at 9.5% p.a. under the pass-through policy with every instalment paid on time. All amounts in paise. If the engine produces anything else, the engine is wrong.",
+  "input": {
+    "loanId": "loan_ref",
+    "principal": 10000000,
+    "annualBps": 1150,
+    "tenureMonths": 12,
+    "firstDueOn": "2026-05-15"
+  },
+  "wholesaleBps": 950,
+  "emi": 886200,
+  "rows": [
+    { "period": 1,  "dueOn": "2026-05-15", "opening": 10000000, "instalment": 886200, "interest": 95833, "principal": 790367, "closing": 9209633, "wholesaleInterest": 79167, "margin": 16666 },
+    { "period": 2,  "dueOn": "2026-06-15", "opening": 9209633,  "instalment": 886200, "interest": 88259, "principal": 797941, "closing": 8411692, "wholesaleInterest": 72910, "margin": 15349 },
+    { "period": 3,  "dueOn": "2026-07-15", "opening": 8411692,  "instalment": 886200, "interest": 80612, "principal": 805588, "closing": 7606104, "wholesaleInterest": 66593, "margin": 14019 },
+    { "period": 4,  "dueOn": "2026-08-15", "opening": 7606104,  "instalment": 886200, "interest": 72892, "principal": 813308, "closing": 6792796, "wholesaleInterest": 60215, "margin": 12677 },
+    { "period": 5,  "dueOn": "2026-09-15", "opening": 6792796,  "instalment": 886200, "interest": 65098, "principal": 821102, "closing": 5971694, "wholesaleInterest": 53776, "margin": 11322 },
+    { "period": 6,  "dueOn": "2026-10-15", "opening": 5971694,  "instalment": 886200, "interest": 57229, "principal": 828971, "closing": 5142723, "wholesaleInterest": 47276, "margin": 9953 },
+    { "period": 7,  "dueOn": "2026-11-15", "opening": 5142723,  "instalment": 886200, "interest": 49284, "principal": 836916, "closing": 4305807, "wholesaleInterest": 40713, "margin": 8571 },
+    { "period": 8,  "dueOn": "2026-12-15", "opening": 4305807,  "instalment": 886200, "interest": 41264, "principal": 844936, "closing": 3460871, "wholesaleInterest": 34088, "margin": 7176 },
+    { "period": 9,  "dueOn": "2027-01-15", "opening": 3460871,  "instalment": 886200, "interest": 33167, "principal": 853033, "closing": 2607838, "wholesaleInterest": 27399, "margin": 5768 },
+    { "period": 10, "dueOn": "2027-02-15", "opening": 2607838,  "instalment": 886200, "interest": 24992, "principal": 861208, "closing": 1746630, "wholesaleInterest": 20645, "margin": 4347 },
+    { "period": 11, "dueOn": "2027-03-15", "opening": 1746630,  "instalment": 886200, "interest": 16739, "principal": 869461, "closing": 877169,  "wholesaleInterest": 13827, "margin": 2912 },
+    { "period": 12, "dueOn": "2027-04-15", "opening": 877169,   "instalment": 885575, "interest": 8406,  "principal": 877169, "closing": 0,       "wholesaleInterest": 6944,  "margin": 1462 }
+  ],
+  "totals": {
+    "collected": 10633775,
+    "interest": 633775,
+    "principal": 10000000,
+    "wholesaleInterest": 523553,
+    "margin": 110222
+  }
+}
