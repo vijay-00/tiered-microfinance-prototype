@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { Breadcrumb } from '@/components/Breadcrumb';
 import { Facts } from '@/components/Facts';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
@@ -47,11 +47,7 @@ export function TrancheDetailPage() {
   const { tranche, totals } = data;
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
-        <Link to="/tranches" className="hover:underline">Funding</Link>
-        <ChevronRight className="size-3" aria-hidden />
-        <span>{tranche.sanctionRef}</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Funding', to: '/tranches' }, { label: tranche.sanctionRef }]} />
       <PageHeader
         title={tranche.sanctionRef}
         description={`${data.pool.reference} · ${data.societyName} · sanctioned ${formatDate(tranche.sanctionedOn)}`}

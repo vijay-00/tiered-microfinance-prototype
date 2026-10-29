@@ -2,6 +2,7 @@ import {
   BookOpen,
   Building2,
   FileBarChart,
+  FilePlus2,
   FileText,
   HandCoins,
   Inbox,
@@ -67,5 +68,12 @@ export const NAV: Record<Tier, NavGroup[]> = {
       ],
     },
   ],
-  member: [{ items: [{ to: '/me', label: 'My loans', icon: Wallet }] }],
+  member: [
+    {
+      items: [
+        { to: '/me', label: 'My loans', icon: Wallet, end: true },
+        { to: '/me/apply', label: 'Apply for a loan', icon: FilePlus2 },
+      ],
+    },
+  ],
 };

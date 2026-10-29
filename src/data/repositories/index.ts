@@ -80,9 +80,11 @@ import {
 import type { ID, ISODate, Paise } from '@/domain/types';
 import {
   apexExposure,
+  memberApplications,
   memberLoans,
   societySummary,
   type ExposureRow,
+  type MemberApplicationView,
   type MemberLoanView,
   type SocietySummary,
 } from '@/domain/views';
@@ -198,6 +200,7 @@ export interface Repositories {
   };
   member: {
     getLoans(memberId: ID): Promise<MemberLoanView[]>;
+    getApplications(memberId: ID): Promise<MemberApplicationView[]>;
     getLoan(loanId: ID, memberId: ID): Promise<MemberLoanDetail>;
   };
   collections: {
@@ -324,6 +327,7 @@ export function createRepositories(store: AppStore, latency: Latency = DEFAULT_L
     },
     member: {
       getLoans: (memberId) => respond(() => memberLoans(world(), memberId)),
+      getApplications: (memberId) => respond(() => memberApplications(world(), memberId)),
       getLoan: (loanId, memberId) => respond(() => memberLoanDetail(world(), loanId, memberId)),
     },
     collections: {

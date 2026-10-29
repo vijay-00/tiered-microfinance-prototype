@@ -22,14 +22,14 @@ describe('the delinquency scenario, through the screens', () => {
 
     // The dashboard puts the two margins side by side.
     const tile = await screen.findByRole('link', { name: /^Realised against theoretical margin/ });
-    expect(tile).toHaveTextContent('₹3,199.53');
-    expect(tile).toHaveTextContent('Theoretical ₹7,114.67');
+    expect(tile).toHaveTextContent('₹3,200');
+    expect(tile).toHaveTextContent('Theoretical ₹7,115');
 
     // One click explains the difference in words.
     await user.click(tile);
     const year = await screen.findByRole('region', { name: 'Margin: This financial year' });
     expect(year).toHaveTextContent(
-      'Members paid ₹3,915.10 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
+      'Members paid ₹3,915 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
     );
 
     // Who is behind.
@@ -91,7 +91,7 @@ describe('demo controls', () => {
     const { user } = renderApp('/dashboard');
     await user.click(within(demoBar()).getByRole('button', { name: 'Society: Annapoorani Credit Society' }));
     await user.click(await screen.findByRole('menuitem', { name: /^Grama Valarchi Credit Society/ }));
-    expect(await within(sidebar().parentElement!).findByText('Grama Valarchi Credit Society')).toBeInTheDocument();
+    expect(await within(sidebar().parentElement!).findByText('Grama Valarchi')).toBeInTheDocument();
     expect(within(demoBar()).getByRole('button', { name: 'Society: Grama Valarchi Credit Society' })).toBeInTheDocument();
   });
 

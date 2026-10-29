@@ -1,14 +1,10 @@
-import { Menu, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DemoToolbar } from '@/features/demo/DemoToolbar';
-import { ApexShell } from '@/features/apex/ApexShell';
+import { GlassShell } from './GlassShell';
 import { WalkthroughProvider } from '@/features/demo/Walkthrough';
-import { selectRoleInfo } from '@/store/selectors';
 import { useAppStore } from '@/store/context';
-import { Sidebar } from './Sidebar';
 
 function Notice() {
   const notice = useAppStore((s) => s.notice);
@@ -24,29 +20,10 @@ function Notice() {
   );
 }
 
-/** Below the large breakpoint the sidebar folds into a menu that slides in from the left. */
-function MobileNav() {
-  const [open, setOpen] = useState(false);
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="mb-4 lg:hidden">
-          <Menu aria-hidden /> Menu
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="max-w-72" aria-describedby={undefined}>
-        <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <Sidebar className="w-full flex-1 border-r-0" onNavigate={() => setOpen(false)} />
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 export function AppShell() {
   const main = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
   const first = useRef(true);
-  const tier = useAppStore(selectRoleInfo).tier;
 
   // Moving to another screen moves focus to it, so keyboard and screen reader
   // users start at the new page rather than back in the sidebar.
@@ -70,19 +47,7 @@ export function AppShell() {
         </a>
         <DemoToolbar />
         <Notice />
-        {tier === 'apex' ? (
-          <ApexShell ref={main} />
-        ) : (
-          <div className="flex flex-1">
-            <Sidebar className="hidden lg:flex" />
-            <main id="main" ref={main} tabIndex={-1} className="min-w-0 flex-1 px-4 py-5 outline-none sm:px-6 lg:px-8 lg:py-6">
-              <MobileNav />
-              <div className="mx-auto max-w-6xl">
-                <Outlet />
-              </div>
-            </main>
-          </div>
-        )}
+        <GlassShell ref={main} />
       </div>
     </WalkthroughProvider>
   );

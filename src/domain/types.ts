@@ -402,6 +402,8 @@ export const loanApplicationSchema = z.object({
     })
     .optional(),
   poolId: idSchema.optional(),
+  /** Made by the member themselves, rather than taken by the officer or the secretary. */
+  selfApplied: z.boolean().optional(),
 });
 export type LoanApplication = z.infer<typeof loanApplicationSchema>;
 

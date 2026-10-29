@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Breadcrumb } from '@/components/Breadcrumb';
 import { Facts } from '@/components/Facts';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
@@ -55,11 +56,7 @@ export function LoanDetailPage() {
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
-        <Link to="/collections" className="hover:underline">Collections</Link>
-        <ChevronRight className="size-3" aria-hidden />
-        <span>{loanId}</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Collections', to: '/collections' }, { label: loanId }]} />
       <PageHeader
         title={member.name}
         description={

@@ -210,7 +210,7 @@ describe('applications', () => {
     const world = seedWorld();
     expectError(() => applyEvent(world, submit({ memberId: 'mem_024' })), /already has application app_064 in progress/);
     expectError(() => applyEvent(world, submit({ memberId: 'mem_029' })), /dormant and cannot apply/);
-    expectError(() => applyEvent(world, submit({ requestedAmount: 100_000 })), /between ₹5,000.00 and ₹5,00,000.00/);
+    expectError(() => applyEvent(world, submit({ requestedAmount: 100_000 })), /between ₹5,000 and ₹5,00,000/);
     expectError(() => applyEvent(world, submit({ requestedTenureMonths: 2 })), /between 3 and 60 whole months/);
     expectError(() => applyEvent(world, submit({ recordedBy: 'usr_officer_2' })), /for another society/);
     expectError(() => applyEvent(world, submit({ recordedBy: 'usr_auditor' })), /cannot submit an application/);
@@ -227,7 +227,7 @@ describe('applications', () => {
     const world = seedWorld();
     expectError(
       () => applyEvent(world, decide('app_065', 'usr_officer', 7_000_000, 18)),
-      /cannot decide ₹70,000.00: above the ₹50,000.00 officer limit, the secretary decides/,
+      /cannot decide ₹70,000: above the ₹50,000 officer limit, the secretary decides/,
     );
     // Cut to the limit, it is the officer's to approve.
     expect(applicationOf(applyEvent(world, decide('app_065', 'usr_officer', 5_000_000, 18)), 'app_065').status).toBe('APPROVED');
@@ -249,7 +249,7 @@ describe('applications', () => {
     expect(positionOf(world, 'loan_001').principalOutstanding).toBeGreaterThan(0);
     world = applyEvent(world, submit({ applicationId: 'app_901', memberId: 'mem_001', requestedAmount: 50_000_000, recordedBy: 'usr_secretary' }));
     world = applyEvent(world, appraise('app_901', 50_000_000, 'usr_secretary'));
-    expectError(() => applyEvent(world, decide('app_901', 'usr_secretary', 50_000_000, 12)), /above the ₹5,00,000.00 limit per member/);
+    expectError(() => applyEvent(world, decide('app_901', 'usr_secretary', 50_000_000, 12)), /above the ₹5,00,000 limit per member/);
     expect(() => applyEvent(world, decide('app_901', 'usr_secretary', 40_000_000, 12))).not.toThrow();
   });
 });
@@ -339,7 +339,7 @@ describe('sanction and disbursement', () => {
         s.id === 'soc_2' ? { ...s, creditLimit: s.creditLimit - societyTrackRecord(world, 'soc_2').headroom + 100_000 } : s,
       ),
     }));
-    expectError(() => applyEvent(tight, sanction(75_000_000)), /above its ₹\d[\d,]*\.\d\d credit limit/);
+    expectError(() => applyEvent(tight, sanction(75_000_000)), /above its ₹\d[\d,]* credit limit/);
     expect(() => applyEvent(tight, sanction(100_000))).not.toThrow();
   });
 
@@ -352,7 +352,7 @@ describe('sanction and disbursement', () => {
   it('lends only what has been drawn', () => {
     let world = applyEvent(seedWorld(), sanction(75_000_000));
     const first = poolOf(world, 'pool_05').applicationIds[0]!;
-    expectError(() => applyEvent(world, disburse(first)), /draw down first: ₹0.00 of the tranche is drawn and not yet lent/);
+    expectError(() => applyEvent(world, disburse(first)), /draw down first: ₹0 of the tranche is drawn and not yet lent/);
     world = applyEvent(world, draw(applicationOf(world, first).decision!.sanctionedAmount));
     expect(() => applyEvent(world, disburse(first))).not.toThrow();
     expectError(() => applyEvent(world, disburse(first, 'usr_officer_2')), /cannot draw down or disburse as a Field Officer/);
@@ -368,7 +368,7 @@ describe('sanction and disbursement', () => {
     const world = applyEvent(seedWorld(), sanction(60_000_000));
     expectError(
       () => applyEvent(world, draw(100_000)),
-      /re-scope GRM\/POOL\/2026-27\/02 first: its members ask for ₹7,50,000.00 against a ₹6,00,000.00 sanction/,
+      /re-scope GRM\/POOL\/2026-27\/02 first: its members ask for ₹7,50,000 against a ₹6,00,000 sanction/,
     );
     expect(disbursementPlan(world, 'trn_90').rescope).toMatchObject({ asked: 75_000_000, sanctioned: 60_000_000 });
     expect(poolDetail(world, 'pool_05').shortfall).toBe(15_000_000);
@@ -411,7 +411,7 @@ describe('sanction and disbursement', () => {
     const lines = keep.map((id) => ({ applicationId: id, amount: amount(id) }));
     expectError(
       () => applyEvent(world, rescope('REMOVE', ids.map((id) => ({ applicationId: id, amount: amount(id) })))),
-      /would still ask for ₹7,50,000.00 against a ₹6,00,000.00 sanction/,
+      /would still ask for ₹7,50,000 against a ₹6,00,000 sanction/,
     );
     expectError(
       () => applyEvent(world, rescope('REMOVE', [{ ...lines[0]!, amount: lines[0]!.amount - 100 }, ...lines.slice(1)])),
@@ -438,7 +438,7 @@ describe('sanction and disbursement', () => {
       ids.map((id) => ({ applicationId: id, amount: applicationOf(world, id).decision!.sanctionedAmount })),
       5_000_000,
     );
-    expectError(() => applyEvent(world, rescope('PRO_RATA', cut)), /below the ₹5,000.00 minimum: remove members instead/);
+    expectError(() => applyEvent(world, rescope('PRO_RATA', cut)), /below the ₹5,000 minimum: remove members instead/);
 
     world = applyEvent(seedWorld(), sanction(75_000_000));
     expectError(

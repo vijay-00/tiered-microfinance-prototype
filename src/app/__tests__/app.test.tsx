@@ -17,7 +17,7 @@ describe('the app shell', () => {
   it('opens scenario A on the secretary’s dashboard, with figures from the seed', async () => {
     const { router } = renderApp('/');
     await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard'));
-    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: /^Good (morning|afternoon|evening), Meenakshi$/ })).toBeInTheDocument();
     expect(await screen.findByText('Loans outstanding')).toBeInTheDocument();
     expect(screen.getByText('12 active loans, 0 closed')).toBeInTheDocument();
     expect(screen.getByText('Every member is up to date')).toBeInTheDocument();

@@ -49,5 +49,6 @@ export const SCREENS: readonly Screen[] = [
   { path: '/apex/societies/:societyId', tier: 'apex', phase: 4, title: 'Society detail', summary: 'Tranche history, remittance punctuality and current exposure.' },
   // Member
   { path: '/me', tier: 'member', phase: 2, title: 'My loans', summary: 'What you owe, what you have paid, and your next instalment.' },
+  { path: '/me/apply', tier: 'member', phase: 6, title: 'Apply for a loan', summary: 'The member applies for themselves and sees the instalment as they type; the application joins the society queue.' },
   { path: '/me/loans/:loanId', tier: 'member', phase: 3, title: 'Loan detail', summary: 'Your schedule, what has been paid and what is due.' },
 ];

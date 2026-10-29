@@ -15,6 +15,7 @@ import { GeneralLedgerPage } from '@/features/ledger/GeneralLedgerPage';
 import { StatementsPage } from '@/features/ledger/StatementsPage';
 import { LoanDetailPage } from '@/features/loans/LoanDetailPage';
 import { MemberHomePage } from '@/features/member/MemberHomePage';
+import { MemberApplyPage } from '@/features/member/MemberApplyPage';
 import { MemberLoanPage } from '@/features/member/MemberLoanPage';
 import { MemberProfilePage } from '@/features/members/MemberProfilePage';
 import { MembersPage } from '@/features/members/MembersPage';
@@ -54,6 +55,7 @@ const BUILT: Record<string, () => ReactElement> = {
   '/apex/societies': () => <SocietiesPage />,
   '/apex/societies/:societyId': () => <SocietyDetailPage />,
   '/me': () => <MemberHomePage />,
+  '/me/apply': () => <MemberApplyPage />,
   '/me/loans/:loanId': () => <MemberLoanPage />,
 };
 

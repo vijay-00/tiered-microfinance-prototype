@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { addMonthsISO, daysBetween, isValidISODate } from '../dates';
-import { formatBps, formatPaise, parseRupees, roundHalfUp, rupees } from '../money';
+import { formatBps, formatPaise, formatPaisePlain, parseRupees, roundHalfUp, rupees } from '../money';
 
 /**
  * The two rules the TDD marks as not open for change, enforced mechanically
@@ -105,9 +105,20 @@ describe('money', () => {
   });
 
   it('formats with Indian digit grouping', () => {
-    expect(formatPaise(10_633_775)).toBe('₹1,06,337.75');
+    expect(formatPaise(10_633_775)).toBe('₹1,06,338');
     expect(formatBps(950)).toBe('9.5%');
     expect(formatBps(1150)).toBe('11.5%');
     expect(formatBps(200)).toBe('2%');
+  });
+
+  it('shows whole rupees: 50 paise and above round up, below round down', () => {
+    expect(formatPaise(4_863_022)).toBe('₹48,630');
+    expect(formatPaise(4_863_049)).toBe('₹48,630');
+    expect(formatPaise(4_863_050)).toBe('₹48,631');
+    expect(formatPaise(4_863_099)).toBe('₹48,631');
+    expect(formatPaise(-59_681)).toBe('-₹597');
+    expect(formatPaise(-40)).toBe('₹0');
+    // Display only: the exact amount survives for an input to edit.
+    expect(formatPaisePlain(4_863_022)).toBe('48,630.22');
   });
 });

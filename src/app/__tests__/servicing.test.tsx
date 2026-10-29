@@ -55,7 +55,7 @@ describe('the monthly cycle, through the screens', () => {
     const cells = within(november).getAllByRole('cell');
     expect(cells[0]).toHaveTextContent('15 Nov 2026');
     expect(cells[6]).toHaveTextContent(/^₹\d/);
-    expect(cells[4]).toHaveTextContent('₹0.00');
+    expect(cells[4]).toHaveTextContent('₹0');
   });
 });
 

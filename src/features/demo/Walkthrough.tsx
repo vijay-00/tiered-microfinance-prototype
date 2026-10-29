@@ -27,6 +27,63 @@ export interface Walkthrough {
 
 export const WALKTHROUGHS: readonly Walkthrough[] = [
   {
+    id: 'journey',
+    title: 'A member’s loan, start to finish',
+    summary: 'Scenario A: a member applies, the society appraises, pools and submits, the federation sanctions, the society pays out, the member repays and the society remits.',
+    steps: [
+      {
+        title: 'The member applies',
+        body: 'Veerappan Pandian, a member, applies directly. Type an amount, say 40000, and the monthly instalment appears as you type, in whole rupees. Choose Send application.',
+        go: { scenario: 'A', userId: 'usr_member', path: '/me/apply' },
+      },
+      {
+        title: 'The member can follow it',
+        body: 'The member’s home screen now tracks the application, step by step, from applying to being paid out. It shows the retail rate and nothing of the federation’s pricing.',
+        go: { userId: 'usr_member', path: '/me' },
+      },
+      {
+        title: 'The field officer appraises and approves',
+        body: 'Open Veerappan Pandian’s application in the queue. Enter the monthly income, 40000, to see the repayment burden against the 50% cap, and Record appraisal. Within the officer’s limit, Approve it.',
+        go: { userId: 'usr_officer', path: '/applications' },
+      },
+      {
+        title: 'The secretary pools and submits',
+        body: 'Approved applications go to the federation 10 to 20 at a time. Choose Add to ANN/POOL/2026-27/02, Select all, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as it fills.',
+        go: { userId: 'usr_secretary', path: '/pools' },
+      },
+      {
+        title: 'The federation sanctions',
+        body: 'The apex officer opens ANN/POOL/2026-27/02, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
+        go: { userId: 'usr_apex', path: '/apex/requests' },
+      },
+      {
+        title: 'The society draws down and pays out',
+        body: 'Open the new sanction, PACF/SAN/2026-27/022, and choose Draw down and disburse. One drawdown and twelve disbursements post to the ledger, and each loan gets its schedule.',
+        go: { userId: 'usr_secretary', path: '/tranches' },
+      },
+      {
+        title: 'The loan is paid out',
+        body: 'The application has become a loan: what is still to repay, the instalment and the date of the first one.',
+        go: { userId: 'usr_member', path: '/me' },
+      },
+      {
+        title: 'A month on, members repay',
+        body: 'Use Next due date in the demo bar until twelve instalments are due today, then Record all due today. Each payment is split into what goes on to the federation and what the society keeps.',
+        go: { userId: 'usr_officer', path: '/collections' },
+      },
+      {
+        title: 'The society remits',
+        body: 'Open PACF/SAN/2026-27/022 and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
+        go: { userId: 'usr_secretary', path: '/tranches' },
+      },
+      {
+        title: 'The federation sees it land',
+        body: 'Annapoorani’s remittance appears in its record, on the day and in full, and its outstanding comes down.',
+        go: { userId: 'usr_apex', path: '/apex/societies/soc_1' },
+      },
+    ],
+  },
+  {
     id: 'delinquency',
     title: 'When members fall behind',
     summary: 'Scenario B: late members cost the society cash, not margin; holding principal back from the federation costs margin for good.',

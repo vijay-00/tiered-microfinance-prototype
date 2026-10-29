@@ -53,6 +53,8 @@ export interface AppActions {
   /** Discards everything done in the app and reloads the current scenario. */
   reset(): void;
   dismissNotice(): void;
+  /** Remembers pop-ups as seen, so they are not shown again. */
+  markSeen(keys: readonly string[]): void;
 }
 
 export type AppStoreState = AppState & AppActions;
@@ -80,8 +82,8 @@ export function userForRole(world: WorldState, role: Role): User | undefined {
   );
 }
 
-function defaultSession(world: WorldState): Session {
-  const user = userForRole(world, 'SECRETARY') ?? world.users[0];
+function defaultSession(world: WorldState, role: Role): Session {
+  const user = userForRole(world, role) ?? world.users[0];
   if (!user) throw new Error('the seed has no users');
   return { userId: user.id };
 }
@@ -90,8 +92,13 @@ function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export function createAppStore(options: { storage?: StorageLike } = {}): AppStore {
-  const { storage } = options;
+/**
+ * `startAs` is the role a first visit opens as, and the fallback when a
+ * scenario lacks the current user. The demo opens as the apex officer
+ * (main.tsx); tests start as the secretary, where their scripts begin.
+ */
+export function createAppStore(options: { storage?: StorageLike; startAs?: Role } = {}): AppStore {
+  const { storage, startAs = 'SECRETARY' } = options;
   const saved = loadPersisted(storage);
 
   let scenarioId: ScenarioId = DEFAULT_SCENARIO;
@@ -114,7 +121,7 @@ export function createAppStore(options: { storage?: StorageLike } = {}): AppStor
     }
   }
   const savedUser = saved && world.users.some((u) => u.id === saved.session.userId);
-  const session = savedUser ? saved.session : defaultSession(world);
+  const session = savedUser ? saved.session : defaultSession(world, startAs);
 
   const store = createStore<AppStoreState>()((set, get) => ({
     scenarioId,
@@ -147,12 +154,12 @@ export function createAppStore(options: { storage?: StorageLike } = {}): AppStor
 
     switchUser(userId) {
       if (!get().world.users.some((u) => u.id === userId)) return;
-      set({ session: { userId } });
+      set({ session: { ...get().session, userId } });
     },
 
     switchRole(role) {
       const user = userForRole(get().world, role);
-      if (user) set({ session: { userId: user.id } });
+      if (user) set({ session: { ...get().session, userId: user.id } });
       else set({ notice: `No ${roleInfo(role).label} in this scenario.` });
     },
 
@@ -166,7 +173,7 @@ export function createAppStore(options: { storage?: StorageLike } = {}): AppStor
           seedWorld: next.world,
           world: next.world,
           userEvents: [],
-          session: next.world.users.some((u) => u.id === current) ? get().session : defaultSession(next.world),
+          session: next.world.users.some((u) => u.id === current) ? { userId: current } : defaultSession(next.world, startAs),
           notice: undefined,
         });
         return { ok: true };
@@ -180,11 +187,17 @@ export function createAppStore(options: { storage?: StorageLike } = {}): AppStor
     reset() {
       clearPersisted(storage);
       const current = seedWorldFor(get().scenarioId);
-      set({ world: current.world, seedWorld: current.world, userEvents: [], notice: undefined });
+      set({ world: current.world, seedWorld: current.world, userEvents: [], session: { userId: get().session.userId }, notice: undefined });
     },
 
     dismissNotice() {
       set({ notice: undefined });
+    },
+
+    markSeen(keys) {
+      const seen = new Set(get().session.seen ?? []);
+      keys.forEach((k) => seen.add(k));
+      set({ session: { ...get().session, seen: [...seen] } });
     },
   }));
 

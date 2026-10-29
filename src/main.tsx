@@ -8,7 +8,8 @@ import { createAppStore } from './store/appStore';
 import { AppProviders } from './store/context';
 import { browserStorage } from './store/persistence';
 
-const store = createAppStore({ storage: browserStorage() });
+// The demo opens on the federation's view; the demo bar switches to any other role.
+const store = createAppStore({ storage: browserStorage(), startAs: 'APEX_OFFICER' });
 const repositories = createRepositories(store);
 const router = createAppRouter();
 

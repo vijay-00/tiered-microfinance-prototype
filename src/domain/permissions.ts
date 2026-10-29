@@ -17,7 +17,8 @@ export type Action =
   | 'RECORD_REMITTANCE';
 
 export const PERMISSIONS: Readonly<Record<Action, readonly Role[]>> = {
-  SUBMIT_APPLICATION: ['LOAN_OFFICER', 'SECRETARY'],
+  // A member may apply for themselves; the reducer refuses an application for anyone else.
+  SUBMIT_APPLICATION: ['LOAN_OFFICER', 'SECRETARY', 'MEMBER'],
   APPRAISE_APPLICATION: ['LOAN_OFFICER', 'SECRETARY'],
   // Above the officer's approval limit only the secretary may decide; see
   // approvalAuthority in machines.ts, which the reducer applies on top.

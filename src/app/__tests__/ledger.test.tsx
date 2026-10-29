@@ -27,7 +27,7 @@ describe('the dashboard, traced to the journal', () => {
       const value = valueOf(tile);
       await user.click(tile); // one
       expect(await traceTotal()).toContain(`Total${value}`);
-      if (value !== '₹0.00') {
+      if (value !== '₹0') {
         const journal = screen.getByRole('table', { name: 'Journal entries, newest first' });
         expect(within(journal).getAllByRole('row').length).toBeGreaterThan(1);
       }

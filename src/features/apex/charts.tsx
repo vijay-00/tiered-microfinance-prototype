@@ -203,7 +203,8 @@ export function RemittanceChart({ months }: { months: FederationTrends['months']
           <span key={m.month}>{monthName(m.month, 'short')}</span>
         ))}
       </div>
-      <table className="sr-only">
+      <div className="sr-only">
+        <table>
         <caption>Remittances received from societies by month this financial year</caption>
         <thead>
           <tr>
@@ -224,6 +225,7 @@ export function RemittanceChart({ months }: { months: FederationTrends['months']
           ))}
         </tbody>
       </table>
+      </div>
     </section>
   );
 }

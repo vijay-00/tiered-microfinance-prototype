@@ -1,9 +1,10 @@
 import { compareISO } from './dates';
+import { approvalAuthority } from './machines';
 import { ACCOUNTS, type AccountCode } from './ledger';
 import { sum } from './money';
 import type { RemittanceDue } from './reconciliation';
 import { accountBalances, incomeStatement } from './statements';
-import type { Bps, ID, ISODate, LoanStatus, Paise, Society } from './types';
+import type { Bps, ID, ISODate, LoanPurpose, LoanStatus, Paise, Society } from './types';
 import {
   journalOf,
   nextRemittanceDate,
@@ -201,4 +202,110 @@ export function memberLoans(state: WorldState, memberId: ID): MemberLoanView[] {
             : undefined,
       };
     });
+}
+
+/**
+ * A member's applications as a tracker: each step from applying to being paid
+ * out, with the date it happened. Like the member's loans, it names no
+ * wholesale rate and no margin.
+ */
+export type ApplicationStepKey = 'APPLIED' | 'APPRAISED' | 'DECIDED' | 'SENT' | 'FUNDED' | 'PAID_OUT';
+
+export interface MemberApplicationView {
+  readonly applicationId: ID;
+  readonly requestedAmount: Paise;
+  readonly requestedTenureMonths: number;
+  readonly purpose: LoanPurpose;
+  readonly appliedOn: ISODate;
+  readonly outcome: 'IN_PROGRESS' | 'REJECTED' | 'PAID_OUT';
+  /** The amount the society approved, once it has. */
+  readonly approvedAmount: Paise | undefined;
+  readonly reason: string | undefined;
+  readonly loanId: ID | undefined;
+  readonly steps: ReadonlyArray<{ readonly key: ApplicationStepKey; readonly on: ISODate | undefined }>;
+}
+
+export function memberApplications(state: WorldState, memberId: ID): MemberApplicationView[] {
+  return state.applications
+    .filter((a) => a.memberId === memberId)
+    .sort((a, b) => compareISO(b.appliedOn, a.appliedOn))
+    .map((application) => {
+      const pool = application.poolId ? state.pools.find((p) => p.id === application.poolId) : undefined;
+      const tranche = pool ? Object.values(state.tranches).find((t) => t.tranche.poolId === pool.id)?.tranche : undefined;
+      const loan = Object.values(state.loans).find((l) => l.loan.applicationId === application.id)?.loan;
+      const rejected = application.decision?.outcome === 'REJECTED';
+      return {
+        applicationId: application.id,
+        requestedAmount: application.requestedAmount,
+        requestedTenureMonths: application.requestedTenureMonths,
+        purpose: application.purpose,
+        appliedOn: application.appliedOn,
+        outcome: rejected ? 'REJECTED' : loan ? 'PAID_OUT' : 'IN_PROGRESS',
+        approvedAmount: application.decision?.outcome === 'APPROVED' ? application.decision.sanctionedAmount : undefined,
+        reason: rejected ? application.decision?.reason : undefined,
+        loanId: loan?.id,
+        steps: [
+          { key: 'APPLIED', on: application.appliedOn },
+          { key: 'APPRAISED', on: application.appraisal?.on },
+          { key: 'DECIDED', on: application.decision?.on },
+          { key: 'SENT', on: pool?.submittedOn },
+          { key: 'FUNDED', on: tranche?.sanctionedOn },
+          { key: 'PAID_OUT', on: loan?.disbursedOn },
+        ],
+      };
+    });
+}
+
+/**
+ * Pop-ups for the person viewing, about applications members made
+ * themselves: a new proposal for the officer, one above the officer's limit
+ * for the secretary, and the decision, then the payout, for the member.
+ * Each has a key, so once seen it is not shown again.
+ */
+export interface Notice {
+  readonly key: string;
+  readonly kind: 'PROPOSAL' | 'DECIDE' | 'APPROVED' | 'REJECTED' | 'PAID_OUT';
+  readonly applicationId: ID;
+  readonly memberName: string;
+  readonly amount: Paise;
+  readonly purpose: LoanPurpose;
+  readonly tenureMonths: number;
+  readonly reason: string | undefined;
+  readonly loanId: ID | undefined;
+}
+
+export function noticesFor(state: WorldState, userId: ID): Notice[] {
+  const user = state.users.find((u) => u.id === userId);
+  if (!user) return [];
+  const notices: Notice[] = [];
+  for (const a of state.applications) {
+    if (!a.selfApplied) continue;
+    const member = state.members.find((m) => m.id === a.memberId);
+    const base = {
+      applicationId: a.id,
+      memberName: member?.name ?? a.memberId,
+      amount: a.decision?.outcome === 'APPROVED' ? a.decision.sanctionedAmount : a.requestedAmount,
+      purpose: a.purpose,
+      tenureMonths: a.decision?.tenureMonths ?? a.requestedTenureMonths,
+      reason: a.decision?.reason,
+      loanId: undefined,
+    };
+    if (user.role === 'LOAN_OFFICER' && user.societyId === a.societyId && a.status === 'SUBMITTED') {
+      notices.push({ ...base, key: `proposal:${a.id}`, kind: 'PROPOSAL' });
+    }
+    if (
+      user.role === 'SECRETARY' &&
+      user.societyId === a.societyId &&
+      a.status === 'UNDER_APPRAISAL' &&
+      approvalAuthority(a.appraisal?.recommendedAmount || a.requestedAmount, state.policy) === 'SECRETARY'
+    ) {
+      notices.push({ ...base, key: `decide:${a.id}`, kind: 'DECIDE' });
+    }
+    if (user.role === 'MEMBER' && user.memberId === a.memberId && a.decision) {
+      notices.push({ ...base, key: `decision:${a.id}`, kind: a.decision.outcome === 'APPROVED' ? 'APPROVED' : 'REJECTED' });
+      const loan = Object.values(state.loans).find((l) => l.loan.applicationId === a.id)?.loan;
+      if (loan) notices.push({ ...base, key: `paid:${a.id}`, kind: 'PAID_OUT', amount: loan.principal, loanId: loan.id });
+    }
+  }
+  return notices;
 }

@@ -38,7 +38,7 @@ describe('origination, through the screens', () => {
 
     // And, being within the officer limit, approves it.
     const decision = await screen.findByRole('region', { name: 'Decision' });
-    await user.click(within(decision).getByRole('button', { name: /^Approve ₹40,000\.00$/ }));
+    await user.click(within(decision).getByRole('button', { name: /^Approve ₹40,000$/ }));
     expect(await screen.findByRole('heading', { name: 'Approved' })).toBeInTheDocument();
     expect(screen.getByText(/Waiting to be pooled/)).toBeInTheDocument();
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
@@ -64,7 +64,7 @@ describe('origination, through the screens', () => {
     await user.click(await screen.findByRole('link', { name: 'ANN/POOL/2026-27/02' }));
     await user.click(await screen.findByRole('button', { name: 'Begin review' }));
     const terms = await screen.findByRole('region', { name: 'Terms' });
-    await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000\.00$/ }));
+    await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000$/ }));
     expect(await screen.findByRole('heading', { name: 'Sanctioned as PACF/SAN/2026-27/022' })).toBeInTheDocument();
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
 
@@ -78,7 +78,7 @@ describe('origination, through the screens', () => {
     const disburse = await screen.findByRole('dialog', { name: 'Draw down and disburse' });
     await user.click(within(disburse).getByRole('button', { name: 'Disburse 12 loans' }));
     const done = await screen.findByRole('status');
-    expect(done).toHaveTextContent('Drew ₹7,50,000.00 and paid out 12 loans');
+    expect(done).toHaveTextContent('Drew ₹7,50,000 and paid out 12 loans');
 
     // One drawdown and twelve disbursements posted, and the books still balance.
     const posted = journalOf(store.getState().world, 'soc_1').slice(journalBefore);
@@ -98,7 +98,7 @@ describe('the officer approval limit', () => {
     const decision = await screen.findByRole('region', { name: 'Decision' });
     expect(within(decision).getByText('Secretary decides')).toBeInTheDocument();
     expect(within(decision).getByRole('alert')).toHaveTextContent(
-      '₹70,000.00 is above the ₹50,000.00 officer limit, so the secretary decides.',
+      '₹70,000 is above the ₹50,000 officer limit, so the secretary decides.',
     );
     expect(within(decision).getByRole('button', { name: /^Approve/ })).toBeDisabled();
 
@@ -157,7 +157,7 @@ describe('an under-sanctioned pool', () => {
       switchUser('usr_secretary_2');
     });
     const notice = await screen.findByRole('region', { name: 'Re-scope needed' });
-    expect(notice).toHaveTextContent('ask for ₹7,50,000.00 against the ₹6,00,000.00 the federation sanctioned');
+    expect(notice).toHaveTextContent('ask for ₹7,50,000 against the ₹6,00,000 the federation sanctioned');
     expect(screen.queryByRole('button', { name: 'Draw down and disburse' })).not.toBeInTheDocument();
 
     await user.click(within(notice).getByRole('button', { name: 'Re-scope the pool' }));

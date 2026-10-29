@@ -19,16 +19,9 @@ export function Pill({ tone, icon, children, className }: { tone: Tone; icon?: R
   );
 }
 
-/** A headline amount with the paise set smaller: ₹4,98,240.00. */
+/** A headline amount, in whole rupees like every amount on screen: ₹4,98,240. */
 export function BigMoney({ paise, className }: { paise: Paise; className?: string }) {
-  const text = formatPaise(paise);
-  const dot = text.lastIndexOf('.');
-  return (
-    <div className={cn('g-big num', paise < 0 && 'g-neg', className)}>
-      {text.slice(0, dot)}
-      <small>{text.slice(dot)}</small>
-    </div>
-  );
+  return <div className={cn('g-big num', paise < 0 && 'g-neg', className)}>{formatPaise(paise)}</div>;
 }
 
 export function Money({ paise, className }: { paise: Paise; className?: string }) {

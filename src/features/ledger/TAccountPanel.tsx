@@ -50,7 +50,7 @@ export function TAccountPanel({ societyId, filePrefix }: { societyId: ID; filePr
               <NativeSelect id={id} value={code} onChange={(e) => set({ account: e.target.value })}>
                 {CHART_OF_ACCOUNTS.map((a) => (
                   <option key={a.code} value={a.code}>
-                    {a.code} {a.name}
+                    {a.name}
                   </option>
                 ))}
               </NativeSelect>
@@ -86,7 +86,7 @@ function TAccount({ view, filePrefix }: { view: TAccountView; filePrefix: string
     <Card role="region" aria-label={`T-account ${account.code}`}>
       <CardHeader className="flex-wrap">
         <CardTitle>
-          {account.code} {account.name}
+          {account.name}
           <span className="ml-2 font-normal text-muted-foreground">{describeRange(view.range.from, view.range.to)}</span>
         </CardTitle>
         <div className="flex items-center gap-3">

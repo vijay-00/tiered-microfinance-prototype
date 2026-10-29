@@ -5,14 +5,14 @@ import { cn } from '@/lib/cn';
 
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="overflow-x-auto">
+    <div className="ui-table-wrap relative overflow-x-auto">
       <table className={cn('w-full text-sm', className)} {...props} />
     </div>
   );
 }
 
 export function THead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn('border-b bg-muted/50 text-xs text-muted-foreground', className)} {...props} />;
+  return <thead className={cn('ui-thead border-b bg-muted/50 text-xs text-muted-foreground', className)} {...props} />;
 }
 
 export function TBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {

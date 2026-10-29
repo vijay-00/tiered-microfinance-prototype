@@ -79,7 +79,7 @@ export function JournalPanel({ societyId, filePrefix }: { societyId: ID; filePre
                 {named && !single ? <option value="trace">{describeAccounts(query)}</option> : null}
                 {CHART_OF_ACCOUNTS.map((a) => (
                   <option key={a.code} value={a.code}>
-                    {a.code} {a.name}
+                    {a.name}
                   </option>
                 ))}
               </NativeSelect>
@@ -147,7 +147,7 @@ export function JournalPanel({ societyId, filePrefix }: { societyId: ID; filePre
                     <div key={a.account.code} className="flex flex-wrap justify-between gap-x-4 text-muted-foreground">
                       <dt>
                         {a.sign < 0 ? 'less ' : ''}
-                        {a.account.code} {a.account.name}
+                        {a.account.name}
                       </dt>
                       <dd className="tabular-nums">
                         Dr <MoneyText paise={a.dr} /> · Cr <MoneyText paise={a.cr} /> ·{' '}

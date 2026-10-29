@@ -52,7 +52,8 @@
 }
 
 
-.glass a { color: inherit; text-decoration: none; }
+/* In the base layer, below Tailwind utilities: a class on a link (button colours, underline) always wins. */
+@layer base { :where(.glass) a { color: inherit; text-decoration: none; } }
 .glass .num { font-variant-numeric: tabular-nums; }
 
 /* Shell ------------------------------------------------------------------ */
@@ -276,3 +277,179 @@ textarea.g-input { height: auto; min-height: 76px; padding: 10px 14px; resize: v
 .g-donut-row.on { background: var(--g-subtle); }
 .g-donut-row:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 1px; }
 .g-donut-row .g-key { margin: 0; }
+
+/* ------------------------------------------------------------------------
+ * Society screens: the shared components (Card, Button, Table, StatTile...)
+ * dressed in glass. The app theme variables are redefined inside the shell,
+ * so every bg-card, border and text-muted-foreground picks up the design.
+ * Dialogs opened from a glass screen render outside it, so they get the
+ * same palette by way of :has.
+ * --------------------------------------------------------------------- */
+.glass, body:has(.glass) [role='dialog'] {
+  --background: transparent;
+  --foreground: #0f1d24;
+  --card: rgba(255, 255, 255, 0.62);
+  --muted: rgba(15, 40, 50, 0.05);
+  --muted-foreground: #45565e;
+  --border: rgba(15, 40, 50, 0.1);
+  --ring: #0f766e;
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+  --accent: rgba(15, 118, 110, 0.12);
+  --accent-foreground: #0b5f58;
+  --good: #15803d;
+  --good-soft: rgba(21, 128, 61, 0.12);
+  --warn: #9a5b00;
+  --warn-soft: rgba(217, 119, 6, 0.14);
+  --bad: #c62828;
+  --bad-soft: rgba(198, 40, 40, 0.1);
+}
+body:has(.glass) [role='dialog']:not(.glass) { --card: #ffffff; color-scheme: light; color: #0f1d24; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; border-radius: 22px; }
+
+.glass .g-content .grid > * { min-width: 0; }
+.glass .ui-card { background: var(--g-surface); border-color: var(--g-line); border-radius: var(--g-r); box-shadow: var(--g-shadow); -webkit-backdrop-filter: blur(26px) saturate(160%); backdrop-filter: blur(26px) saturate(160%); min-width: 0; }
+.glass .ui-card-head { padding: 16px 22px; border-bottom-color: var(--border); }
+.glass .ui-card-head h2 { font-size: 15px; font-weight: 600; }
+.glass .ui-card-body { padding: 20px 22px; }
+.glass .ui-table-wrap th:first-child, .glass .ui-table-wrap td:first-child { padding-left: 22px; }
+.glass .ui-table-wrap th:last-child, .glass .ui-table-wrap td:last-child { padding-right: 22px; }
+.glass .ui-table-wrap td, .glass .ui-table-wrap th { padding-top: 11px; padding-bottom: 11px; }
+.glass .ui-thead { background: transparent; font-size: 12px; }
+.glass .ui-thead th { font-weight: 500; }
+.glass .ui-btn { border-radius: 999px; font-weight: 600; }
+.glass .ui-btn.h-9 { height: 38px; padding: 0 16px; }
+.glass .ui-btn.border { background: rgba(255, 255, 255, 0.72); border-color: var(--g-line2); }
+.glass .ui-badge { font-weight: 600; padding: 2px 9px; }
+.glass .ui-control, body:has(.glass) [role='dialog'] .ui-control { border-radius: var(--g-rs, 14px); height: 42px; background: rgba(255, 255, 255, 0.78); border-color: rgba(15, 40, 50, 0.16); }
+.glass textarea.ui-control, body:has(.glass) [role='dialog'] textarea.ui-control { height: auto; }
+.glass .ui-control:focus-visible, body:has(.glass) [role='dialog'] .ui-control:focus-visible { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12); }
+body:has(.glass) [role='dialog'] .ui-btn { border-radius: 999px; font-weight: 600; }
+.glass .ui-tabs { border-bottom-color: var(--border); }
+.glass .ui-stat { padding: 18px 22px; }
+.glass .ui-stat-tone { top: 20px; bottom: auto; height: 22px; width: 3px; border-radius: 0 3px 3px 0; }
+.glass .ui-stat-label { font-size: 13px; font-weight: 500; }
+.glass .ui-stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.025em; margin-top: 6px; }
+.glass a.ui-stat:hover { border-color: var(--g-line); box-shadow: 0 12px 36px rgba(31, 60, 80, 0.16); }
+.glass .ui-page-head { margin-bottom: 0; align-items: flex-end; }
+.glass .ui-page-head h1 { font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; }
+.glass .ui-page-head p { font-size: 14px; }
+
+/* A page breadcrumb portalled into the top bar replaces the default one. */
+.g-crumb-slot:empty { display: none; }
+.g-crumb-slot:not(:empty) + .g-crumb-default { display: none; }
+
+/* Chart tooltips and screen-reader tables take no room until they are needed. */
+.g-tip { display: none; }
+.g-slot:hover .g-tip, .g-slot:focus-visible .g-tip, .g-hrow:hover .g-tip, .g-hrow:focus-visible .g-tip { display: block; }
+
+/* Phones: one column, tighter padding. */
+@media (max-width: 640px) {
+  .g-s3, .g-s4, .g-s5, .g-s6, .g-s7, .g-s8 { grid-column: span 12; }
+  .g-app { padding: 8px; gap: 8px; }
+  .g-top { padding: 0 12px; height: 52px; }
+  .g-crumb { min-width: 0; overflow: hidden; white-space: nowrap; }
+  .g-crumb b { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .g-crumb > a, .g-crumb > span { flex: none; }
+  .g-content { padding: 16px 2px 24px; }
+  .g-card { padding: 18px; }
+  .g-card.flush { padding: 0; }
+  .g-head h1, .glass .ui-page-head h1 { font-size: 23px; }
+  .g-head .acts { margin-left: 0; }
+  .g-big:not(.sm) { font-size: 34px; }
+  .g-listhead .rt { display: none; }
+  .g-sum { gap: 16px 28px; }
+  .g-sum .g-fig { font-size: 18px; }
+  .glass .ui-card-head, .glass .ui-card-body { padding-left: 16px; padding-right: 16px; }
+  .glass .ui-table-wrap th:first-child, .glass .ui-table-wrap td:first-child { padding-left: 16px; }
+  .glass .ui-table-wrap th:last-child, .glass .ui-table-wrap td:last-child { padding-right: 16px; }
+}
+
+/* An application's steps, from applying to being paid out. */
+.g-steps { list-style: none; margin: 18px 0 4px; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.g-steps li { position: relative; display: flex; flex-direction: column; gap: 4px; padding-top: 34px; font-size: 12px; color: var(--g-muted); }
+.g-steps li::before { content: ''; position: absolute; top: 13px; left: 30px; right: -10px; height: 2px; background: var(--g-track); }
+.g-steps li:last-child::before { display: none; }
+.g-steps li.done::before { background: var(--g-accent); }
+.g-steps i { position: absolute; top: 0; left: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 12px; background: rgba(255, 255, 255, 0.8); border: 1.5px solid var(--g-line2); color: var(--g-muted); }
+.g-steps i svg { width: 14px; height: 14px; }
+.g-steps li.done i { background: var(--g-accent); border-color: var(--g-accent); color: var(--g-on-accent); }
+.g-steps li.now i { border-color: var(--g-accent); color: var(--g-accent); box-shadow: 0 0 0 4px var(--g-accent-soft); }
+.g-steps b { color: var(--g-ink); font-weight: 600; font-size: 13px; line-height: 1.3; }
+@media (max-width: 760px) {
+  .g-steps { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .g-steps li { padding: 4px 0 14px 42px; min-height: 44px; }
+  .g-steps li::before { top: 30px; bottom: -2px; left: 13px; right: auto; width: 2px; height: auto; }
+}
+
+/* Pop-ups about loan proposals and decisions. */
+[role='dialog'].g-notice { max-width: 420px; text-align: left; padding: 28px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.94); box-shadow: 0 24px 64px rgba(15, 40, 50, 0.22); }
+.g-notice h2 { font-size: 19px; font-weight: 700; letter-spacing: -0.015em; margin-top: 14px; }
+.g-notice p { font-size: 14px; line-height: 1.5; }
+.g-notice-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; }
+.g-notice-icon svg { width: 24px; height: 24px; }
+.g-notice-icon.accent { background: rgba(15, 118, 110, 0.12); color: #0f766e; }
+.g-notice-icon.good { background: rgba(21, 128, 61, 0.12); color: #15803d; }
+.g-notice-icon.bad { background: rgba(198, 40, 40, 0.1); color: #c62828; }
+.g-notice-more { margin-top: 10px; font-size: 12px !important; color: #45565e; }
+.g-notice-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+
+/*
+ * Dropdowns. The closed control is styled everywhere; where the browser
+ * supports a customizable select (Chromium's appearance: base-select), the
+ * open list is styled too, as a frosted card. Elsewhere the list stays the
+ * system one. Either way it is still a native select: keyboard, screen
+ * readers and form behaviour come for free.
+ */
+select.ui-control, select.ui-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2345565e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+}
+select.ui-select { padding-right: 28px; background-position: right 8px center; }
+
+@supports (appearance: base-select) {
+  select.ui-control, select.ui-select { appearance: base-select; background-image: none; }
+  select.ui-control { display: flex; }
+  select.ui-select { display: inline-flex; }
+  select.ui-control, select.ui-select { align-items: center; justify-content: space-between; gap: 8px; padding-right: 12px; }
+  select.ui-control::picker-icon, select.ui-select::picker-icon { content: ''; width: 14px; height: 14px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2345565e' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 14px no-repeat; transition: rotate 0.18s ease; }
+  select.ui-control:open::picker-icon, select.ui-select:open::picker-icon { rotate: 180deg; }
+  select.ui-control:open, select.ui-select:open { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12); }
+  select.ui-control::picker(select), select.ui-select::picker(select) {
+    appearance: base-select;
+    margin-block: 6px;
+    padding: 6px;
+    min-width: anchor-size(width);
+    max-height: min(340px, 60vh);
+    border: 1px solid rgba(15, 40, 50, 0.1);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 18px 48px rgba(15, 40, 50, 0.18);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    opacity: 1;
+    transition: opacity 0.14s ease, translate 0.14s ease, overlay 0.14s allow-discrete, display 0.14s allow-discrete;
+  }
+  @starting-style {
+    select.ui-control:open::picker(select), select.ui-select:open::picker(select) { opacity: 0; translate: 0 -4px; }
+  }
+  select.ui-control option, select.ui-select option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #0f1d24;
+    cursor: pointer;
+  }
+  select.ui-control option:hover, select.ui-select option:hover,
+  select.ui-control option:focus-visible, select.ui-select option:focus-visible { background: rgba(15, 118, 110, 0.08); outline: none; }
+  select.ui-control option:checked, select.ui-select option:checked { background: rgba(15, 118, 110, 0.12); color: #0b5f58; font-weight: 600; }
+  select.ui-control option::checkmark, select.ui-select option::checkmark { order: 1; margin-left: auto; color: #0f766e; }
+  select.ui-control option:disabled, select.ui-select option:disabled { color: #8a979d; cursor: default; }
+}

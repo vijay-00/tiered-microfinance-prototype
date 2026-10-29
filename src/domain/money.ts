@@ -192,8 +192,8 @@ export function allocate(amount: Paise, weights: readonly number[]): Paise[] {
 const inrFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
 });
 
 const plainFormatter = new Intl.NumberFormat('en-IN', {
@@ -201,13 +201,19 @@ const plainFormatter = new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 2,
 });
 
-/** Rs 1,00,000.00 — Indian digit grouping, with the currency symbol. */
+/**
+ * Rs 1,00,000 — Indian digit grouping, with the currency symbol, in whole
+ * rupees: 50 paise and above round up, below round down. Display only; the
+ * books keep every paisa, so a total can sit a rupee from the sum of its
+ * rounded lines.
+ */
 export function formatPaise(amount: Paise): string {
   assertPaise(amount);
-  return inrFormatter.format(amount / RUPEE);
+  // `|| 0` keeps a negative amount under 50 paise from printing as -Rs 0.
+  return inrFormatter.format(roundHalfUp(amount / RUPEE) || 0);
 }
 
-/** 1,00,000.00 — for table columns that carry the symbol in the header. */
+/** 1,00,000.00 to the paisa, for prefilling an input where the exact amount matters. */
 export function formatPaisePlain(amount: Paise): string {
   assertPaise(amount);
   return plainFormatter.format(amount / RUPEE);

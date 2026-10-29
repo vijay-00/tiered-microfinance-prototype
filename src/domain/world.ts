@@ -597,7 +597,10 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('DUPLICATE_ID', `application ${event.applicationId} already exists`);
       }
       const member = memberOf(state, event.memberId);
-      requireActor(state, event.recordedBy, 'SUBMIT_APPLICATION', member.societyId);
+      const actor = requireActor(state, event.recordedBy, 'SUBMIT_APPLICATION', member.societyId);
+      if (actor.role === 'MEMBER' && actor.memberId !== member.id) {
+        throw new WorldError('NOT_PERMITTED', `${actor.name} can apply only for themselves`);
+      }
       if (member.status !== 'ACTIVE') {
         throw new WorldError('INVALID_STATE', `${member.name} is ${member.status.toLowerCase()} and cannot apply`);
       }
@@ -620,6 +623,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
             purpose: event.purpose,
             appliedOn: event.on,
             status: 'SUBMITTED',
+            ...(actor.role === 'MEMBER' ? { selfApplied: true } : {}),
           },
         ],
       };

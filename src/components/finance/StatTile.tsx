@@ -23,13 +23,13 @@ export function StatTile(props: {
   const tone = props.tone ?? 'neutral';
   const body = (
     <>
-      <span aria-hidden className={cn('absolute inset-y-0 left-0 w-1', toneBar[tone])} />
-      <p className="text-xs font-medium text-muted-foreground">{props.label}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums">{props.value}</p>
+      <span aria-hidden className={cn('ui-stat-tone absolute inset-y-0 left-0 w-1', toneBar[tone])} />
+      <p className="ui-stat-label text-xs font-medium text-muted-foreground">{props.label}</p>
+      <p className="ui-stat-value mt-1 text-xl font-semibold tabular-nums">{props.value}</p>
       {props.detail ? <p className="mt-0.5 text-xs text-muted-foreground">{props.detail}</p> : null}
     </>
   );
-  const frame = cn('relative block overflow-hidden rounded-lg border bg-card px-4 py-3', props.className);
+  const frame = cn('ui-card ui-stat relative block overflow-hidden rounded-lg border bg-card px-4 py-3', props.className);
   return props.href ? (
     <Link to={props.href} className={cn(frame, 'transition-colors hover:border-ring')}>
       {body}

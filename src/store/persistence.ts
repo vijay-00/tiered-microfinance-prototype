@@ -23,6 +23,8 @@ export interface StorageLike {
 
 export interface Session {
   userId: string;
+  /** Pop-ups already shown and closed, by their notice key. */
+  seen?: string[];
 }
 
 export interface PersistedState {
@@ -39,7 +41,7 @@ const persistedSchema = z.object({
   seedVersion: z.string(),
   scenarioId: z.enum(['A', 'B', 'C']),
   userEvents: z.array(worldEventSchema),
-  session: z.object({ userId: idSchema }),
+  session: z.object({ userId: idSchema, seen: z.array(z.string()).optional() }),
 });
 
 export function loadPersisted(storage: StorageLike | undefined): PersistedState | undefined {

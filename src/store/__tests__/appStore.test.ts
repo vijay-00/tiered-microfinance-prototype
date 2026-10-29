@@ -152,3 +152,12 @@ describe('persistence', () => {
     expect(createAppStore({ storage }).getState().world.clock).toBe('2026-10-29');
   });
 });
+
+describe('the role a first visit opens as', () => {
+  it('opens as the apex officer when the demo asks, and as the secretary by default', () => {
+    const apex = createAppStore({ startAs: 'APEX_OFFICER' });
+    expect(apex.getState().world.users.find((u) => u.id === apex.getState().session.userId)?.role).toBe('APEX_OFFICER');
+    const plain = createAppStore();
+    expect(plain.getState().world.users.find((u) => u.id === plain.getState().session.userId)?.role).toBe('SECRETARY');
+  });
+});

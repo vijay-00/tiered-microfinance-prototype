@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { Breadcrumb } from '@/components/Breadcrumb';
 import { Facts } from '@/components/Facts';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
@@ -28,11 +28,7 @@ export function MemberLoanPage() {
   );
 
   const crumb = (
-    <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">
-      <Link to="/me" className="hover:underline">My loans</Link>
-      <ChevronRight className="size-3" aria-hidden />
-      <span>{loanId}</span>
-    </nav>
+    <Breadcrumb items={[{ label: 'My loans', to: '/me' }, { label: loanId }]} />
   );
   if (error) {
     return (
