@@ -20,13 +20,11 @@ describe('origination, through the screens', () => {
     const { user, store, router } = renderApp('/applications/new');
     const journalBefore = journalOf(store.getState().world, 'soc_1').length;
 
-    // The field officer takes the application, with the EMI shown as it is typed.
-    await viewAs(user, 'Loan Officer');
+    // The society applies for the member, with the EMI shown as it is typed.
     await user.selectOptions(await screen.findByLabelText('Member'), 'mem_030');
     await user.type(screen.getByLabelText('Amount (₹)'), '40000');
     const quote = screen.getByRole('region', { name: 'What the member would pay' });
     expect(within(quote).getByText('Monthly instalment')).toBeInTheDocument();
-    expect(within(quote).getByText('Officer can decide')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Submit application' }));
     expect(await screen.findByRole('heading', { name: 'Deepa Duraisamy' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/applications/app_070');
@@ -44,13 +42,12 @@ describe('origination, through the screens', () => {
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
 
     // The secretary adds it, and the other approved applications, to the open pool and submits it.
-    await viewAs(user, 'Society Secretary');
     await user.click(within(sidebar()).getByRole('link', { name: 'Pools' }));
     await user.click(await screen.findByRole('link', { name: 'Add to ANN/POOL/2026-27/02' }));
     const pool = await screen.findByRole('region', { name: 'The pool' });
-    expect(within(pool).getByText('8 of 10–20 members')).toBeInTheDocument();
+    expect(within(pool).getByText('8 of 1–20 members')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Select all' }));
-    expect(within(pool).getByText('12 of 10–20 members')).toBeInTheDocument();
+    expect(within(pool).getByText('12 of 1–20 members')).toBeInTheDocument();
     expect(within(pool).getByText('Kept by the society, a 2% spread')).toBeInTheDocument();
     await user.click(within(pool).getByRole('button', { name: 'Submit to the federation' }));
     const confirm = await screen.findByRole('dialog', { name: 'Submit ANN/POOL/2026-27/02?' });
@@ -65,12 +62,14 @@ describe('origination, through the screens', () => {
     await user.click(await screen.findByRole('button', { name: 'Begin review' }));
     const terms = await screen.findByRole('region', { name: 'Terms' });
     await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000$/ }));
+    await user.click(within(await screen.findByRole('dialog', { name: 'Sanction recorded' })).getByRole('button', { name: 'Close' }));
     expect(await screen.findByRole('heading', { name: 'Sanctioned as PACF/SAN/2026-27/022' })).toBeInTheDocument();
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
 
     // The secretary draws it down and pays the twelve members out.
     await viewAs(user, 'Society Secretary');
-    await user.click(within(sidebar()).getByRole('link', { name: 'Funding' }));
+    await user.click(within(await screen.findByRole('dialog', { name: 'Funding sanctioned' })).getByRole('button', { name: 'Later' }));
+    await user.click(within(sidebar()).getByRole('link', { name: /^Funding/ }));
     await user.click(await screen.findByRole('link', { name: 'PACF/SAN/2026-27/022' }));
     const waiting = await screen.findByRole('region', { name: 'Awaiting disbursement' });
     expect(within(waiting).getByText('12 members awaiting disbursement')).toBeInTheDocument();
@@ -91,33 +90,23 @@ describe('origination, through the screens', () => {
   }, 30_000);
 });
 
-describe('the officer approval limit', () => {
-  it('sends a decision above the limit to the secretary', async () => {
-    const { user } = renderApp('/applications/app_065');
-    await viewAs(user, 'Loan Officer');
+describe('the secretary decides', () => {
+  it('any amount, with no officer limit in the way', async () => {
+    renderApp('/applications/app_065');
     const decision = await screen.findByRole('region', { name: 'Decision' });
-    expect(within(decision).getByText('Secretary decides')).toBeInTheDocument();
-    expect(within(decision).getByRole('alert')).toHaveTextContent(
-      '₹70,000 is above the ₹50,000 officer limit, so the secretary decides.',
-    );
-    expect(within(decision).getByRole('button', { name: /^Approve/ })).toBeDisabled();
-
-    await viewAs(user, 'Society Secretary');
-    await waitFor(() =>
-      expect(within(screen.getByRole('region', { name: 'Decision' })).getByRole('button', { name: /^Approve/ })).toBeEnabled(),
-    );
+    expect(within(decision).queryByRole('alert')).not.toBeInTheDocument();
+    await waitFor(() => expect(within(decision).getByRole('button', { name: /^Approve/ })).toBeEnabled());
   });
 });
 
 describe('the pool builder', () => {
-  it('will not submit below ten members, and says how many more', async () => {
-    const { user } = renderApp('/pools/new?pool=pool_04');
+  it('sends a pool of a single member, and only an empty one is held back', async () => {
+    const { user } = renderApp('/pools/new');
     const pool = await screen.findByRole('region', { name: 'The pool' });
-    expect(within(pool).getByText('Add 2 more members: a pool needs at least 10.')).toBeInTheDocument();
+    expect(within(pool).getByText('Choose at least one approved application to send.')).toBeInTheDocument();
     expect(within(pool).getByRole('button', { name: 'Submit to the federation' })).toBeDisabled();
     await user.click(screen.getByRole('checkbox', { name: 'Include Gomathi Govindan' }));
-    await user.click(screen.getByRole('checkbox', { name: 'Include Thangaraj Subramani' }));
-    expect(within(pool).getByText('10 of 10–20 members')).toBeInTheDocument();
+    expect(within(pool).getByText('1 of 1–20 members')).toBeInTheDocument();
     expect(within(pool).getByRole('button', { name: 'Submit to the federation' })).toBeEnabled();
   });
 });
@@ -131,6 +120,9 @@ describe('the federation', () => {
     expect(within(dialog).getByRole('button', { name: 'Decline the pool' })).toBeDisabled();
     await user.type(within(dialog).getByLabelText('Remarks for the society'), 'Two members are already late elsewhere.');
     await user.click(within(dialog).getByRole('button', { name: 'Decline the pool' }));
+    const recorded = await screen.findByRole('dialog', { name: 'Decline recorded' });
+    expect(recorded).toHaveTextContent('Two members are already late elsewhere.');
+    await user.click(within(recorded).getByRole('button', { name: 'Close' }));
     expect(await screen.findByRole('heading', { name: 'Declined' })).toBeInTheDocument();
     const released = store.getState().world.applications.filter((a) => a.societyId === 'soc_2' && a.status === 'APPROVED');
     expect(released).toHaveLength(10);
@@ -156,6 +148,10 @@ describe('an under-sanctioned pool', () => {
       if (!result.ok) throw new Error(result.error);
       switchUser('usr_secretary_2');
     });
+    // The pop-up takes the secretary to the facility, where the re-scope comes first.
+    const popup = await screen.findByRole('dialog', { name: 'Funding sanctioned' });
+    expect(popup).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
+    await user.click(within(popup).getByRole('button', { name: 'Fit the pool to the sanction' }));
     const notice = await screen.findByRole('region', { name: 'Re-scope needed' });
     expect(notice).toHaveTextContent('ask for ₹7,50,000 against the ₹6,00,000 the federation sanctioned');
     expect(screen.queryByRole('button', { name: 'Draw down and disburse' })).not.toBeInTheDocument();
@@ -171,6 +167,12 @@ describe('an under-sanctioned pool', () => {
 
     const waiting = await screen.findByRole('region', { name: 'Awaiting disbursement' });
     expect(within(waiting).getByText('10 members awaiting disbursement')).toBeInTheDocument();
-    expect(within(waiting).getByRole('button', { name: 'Draw down and disburse' })).toBeInTheDocument();
+
+    // What is paid out adds up to the sanction exactly, to the paisa.
+    await user.click(within(waiting).getByRole('button', { name: 'Draw down and disburse' }));
+    const disburse = await screen.findByRole('dialog', { name: 'Draw down and disburse' });
+    expect(disburse).toHaveTextContent('To lend, 10 loans₹6,00,000');
+    expect(disburse).toHaveTextContent('Drawn from the federation now₹6,00,000');
+    expect(disburse).toHaveTextContent('Left undrawn₹0');
   });
 });

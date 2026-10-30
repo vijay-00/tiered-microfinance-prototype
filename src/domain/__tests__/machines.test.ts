@@ -62,18 +62,19 @@ describe('state machines', () => {
 });
 
 describe('guards', () => {
-  it('blocks a pool below ten members and says how many more are needed', () => {
-    expect(poolReadiness(9, DEFAULT_POLICY)).toEqual({
+  it('blocks an empty pool and says what to do', () => {
+    expect(poolReadiness(0, DEFAULT_POLICY)).toEqual({
       ready: false,
-      reason: 'Add 1 more member: a pool needs at least 10.',
+      reason: 'Choose at least one approved application to send.',
     });
-    expect(poolReadiness(7, DEFAULT_POLICY).reason).toBe(
+    // A higher minimum, if a federation sets one, says how many more are needed.
+    expect(poolReadiness(7, { ...DEFAULT_POLICY, poolMinMembers: 10 }).reason).toBe(
       'Add 3 more members: a pool needs at least 10.',
     );
   });
 
-  it('accepts ten to twenty members inclusive', () => {
-    expect(poolReadiness(10, DEFAULT_POLICY).ready).toBe(true);
+  it('accepts one to twenty members inclusive: a single application can go to the federation', () => {
+    expect(poolReadiness(1, DEFAULT_POLICY).ready).toBe(true);
     expect(poolReadiness(20, DEFAULT_POLICY).ready).toBe(true);
   });
 

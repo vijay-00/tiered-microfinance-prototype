@@ -9,7 +9,8 @@ import { AppProviders } from './store/context';
 import { browserStorage } from './store/persistence';
 
 // The demo opens on the federation's view; the demo bar switches to any other role.
-const store = createAppStore({ storage: browserStorage(), startAs: 'APEX_OFFICER' });
+// It shows one society, the one the demo's member belongs to.
+const store = createAppStore({ storage: browserStorage(), startAs: 'APEX_OFFICER', onlySociety: 'soc_1' });
 const repositories = createRepositories(store);
 const router = createAppRouter();
 

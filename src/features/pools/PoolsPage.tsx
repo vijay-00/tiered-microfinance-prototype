@@ -32,7 +32,7 @@ export function PoolsPage() {
     <>
       <PageHeader
         title="Pools"
-        description={`Approved applications go to the federation ${policy.poolMinMembers} to ${policy.poolMaxMembers} at a time, as one request for a wholesale tranche.`}
+        description={`Approved applications go to the federation up to ${policy.poolMaxMembers} at a time, as one request for a wholesale tranche. A single application is enough to send.`}
         actions={
           manage ? (
             <Button asChild>

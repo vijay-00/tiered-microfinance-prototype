@@ -1,10 +1,9 @@
 import { compareISO } from './dates';
-import { approvalAuthority } from './machines';
 import { ACCOUNTS, type AccountCode } from './ledger';
 import { sum } from './money';
 import type { RemittanceDue } from './reconciliation';
 import { accountBalances, incomeStatement } from './statements';
-import type { Bps, ID, ISODate, LoanPurpose, LoanStatus, Paise, Society } from './types';
+import type { Bps, ID, ISODate, LoanPurpose, LoanStatus, Paise, Society, User } from './types';
 import {
   journalOf,
   nextRemittanceDate,
@@ -257,14 +256,18 @@ export function memberApplications(state: WorldState, memberId: ID): MemberAppli
 }
 
 /**
- * Pop-ups for the person viewing, about applications members made
- * themselves: a new proposal for the officer, one above the officer's limit
- * for the secretary, and the decision, then the payout, for the member.
- * Each has a key, so once seen it is not shown again.
+ * Pop-ups for the person viewing. About applications members made
+ * themselves: a new proposal for the secretary, who appraises and decides it,
+ * and the decision, then the payout, for the member. About the federation's
+ * decision on a pool: for everyone it concerns, the society's people, the
+ * members whose loans are in it, and the apex officer who made it. Each has a
+ * key, so once seen it is not shown again.
  */
-export interface Notice {
+export type Notice = ApplicationNotice | PoolNotice;
+
+export interface ApplicationNotice {
   readonly key: string;
-  readonly kind: 'PROPOSAL' | 'DECIDE' | 'APPROVED' | 'REJECTED' | 'PAID_OUT';
+  readonly kind: 'PROPOSAL' | 'APPROVED' | 'REJECTED' | 'PAID_OUT';
   readonly applicationId: ID;
   readonly memberName: string;
   readonly amount: Paise;
@@ -274,10 +277,82 @@ export interface Notice {
   readonly loanId: ID | undefined;
 }
 
+export interface PoolNotice {
+  readonly key: string;
+  readonly kind: 'POOL_SANCTIONED' | 'POOL_DECLINED';
+  /** Whose view it is written for. */
+  readonly audience: 'SOCIETY' | 'MEMBER' | 'APEX';
+  readonly poolId: ID;
+  readonly poolReference: string;
+  readonly societyName: string;
+  readonly requested: Paise;
+  /** What the federation sanctioned; absent when it declined. */
+  readonly tranche:
+    | {
+        readonly id: ID;
+        readonly sanctionRef: string;
+        readonly sanctioned: Paise;
+        readonly rateBps: number;
+        readonly tenureMonths: number;
+      }
+    | undefined;
+  readonly remarks: string;
+  /** The viewer can look but not act, e.g. the auditor. */
+  readonly readOnly: boolean;
+}
+
+function poolNotices(state: WorldState, user: User): PoolNotice[] {
+  const notices: PoolNotice[] = [];
+  for (const pool of state.pools) {
+    const review = pool.apexReview;
+    if (!review) continue;
+    const audience: PoolNotice['audience'] | undefined =
+      user.role === 'APEX_OFFICER'
+        ? review.officerId === user.id
+          ? 'APEX'
+          : undefined
+        : user.role === 'MEMBER'
+          ? state.applications.some((a) => pool.applicationIds.includes(a.id) && a.memberId === user.memberId)
+            ? 'MEMBER'
+            : undefined
+          : user.societyId === pool.societyId
+            ? 'SOCIETY'
+            : undefined;
+    if (!audience) continue;
+    const entry = Object.values(state.tranches).find((t) => t.tranche.poolId === pool.id)?.tranche;
+    notices.push({
+      // Per person: the demo switches people in one session, and the apex
+      // officer closing theirs must not hide the society's.
+      key: `pool-${review.decision.toLowerCase()}:${pool.id}:${user.id}`,
+      kind: review.decision === 'SANCTIONED' ? 'POOL_SANCTIONED' : 'POOL_DECLINED',
+      audience,
+      poolId: pool.id,
+      poolReference: pool.reference,
+      societyName: state.societies.find((s) => s.id === pool.societyId)?.name ?? pool.societyId,
+      requested: pool.requestedAmount,
+      tranche: entry
+        ? {
+            id: entry.id,
+            sanctionRef: entry.sanctionRef,
+            sanctioned: entry.sanctionedAmount,
+            rateBps: entry.wholesaleRateBps,
+            tenureMonths: entry.tenureMonths,
+          }
+        : undefined,
+      remarks: review.remarks,
+      readOnly: user.role === 'AUDITOR',
+    });
+  }
+  return notices;
+}
+
 export function noticesFor(state: WorldState, userId: ID): Notice[] {
   const user = state.users.find((u) => u.id === userId);
   if (!user) return [];
+  // In the order things happen: proposals and decisions, then the
+  // federation's word on the pool, then the payout.
   const notices: Notice[] = [];
+  const paidOut: Notice[] = [];
   for (const a of state.applications) {
     if (!a.selfApplied) continue;
     const member = state.members.find((m) => m.id === a.memberId);
@@ -290,22 +365,14 @@ export function noticesFor(state: WorldState, userId: ID): Notice[] {
       reason: a.decision?.reason,
       loanId: undefined,
     };
-    if (user.role === 'LOAN_OFFICER' && user.societyId === a.societyId && a.status === 'SUBMITTED') {
+    if (user.role === 'SECRETARY' && user.societyId === a.societyId && a.status === 'SUBMITTED') {
       notices.push({ ...base, key: `proposal:${a.id}`, kind: 'PROPOSAL' });
-    }
-    if (
-      user.role === 'SECRETARY' &&
-      user.societyId === a.societyId &&
-      a.status === 'UNDER_APPRAISAL' &&
-      approvalAuthority(a.appraisal?.recommendedAmount || a.requestedAmount, state.policy) === 'SECRETARY'
-    ) {
-      notices.push({ ...base, key: `decide:${a.id}`, kind: 'DECIDE' });
     }
     if (user.role === 'MEMBER' && user.memberId === a.memberId && a.decision) {
       notices.push({ ...base, key: `decision:${a.id}`, kind: a.decision.outcome === 'APPROVED' ? 'APPROVED' : 'REJECTED' });
       const loan = Object.values(state.loans).find((l) => l.loan.applicationId === a.id)?.loan;
-      if (loan) notices.push({ ...base, key: `paid:${a.id}`, kind: 'PAID_OUT', amount: loan.principal, loanId: loan.id });
+      if (loan) paidOut.push({ ...base, key: `paid:${a.id}`, kind: 'PAID_OUT', amount: loan.principal, loanId: loan.id });
     }
   }
-  return notices;
+  return [...notices, ...poolNotices(state, user), ...paidOut];
 }

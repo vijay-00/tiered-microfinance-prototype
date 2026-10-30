@@ -1,17 +1,18 @@
-import { BadgeCheck, Banknote, CircleX, FileText, Scale } from 'lucide-react';
+import { BadgeCheck, Banknote, CircleX, FileText, Landmark } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { formatPaise } from '@/domain/money';
-import { noticesFor, type Notice } from '@/domain/views';
+import { formatBps, formatPaise } from '@/domain/money';
+import { noticesFor, type ApplicationNotice, type Notice, type PoolNotice } from '@/domain/views';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useAppStore } from '@/store/context';
 
 /**
- * Pop-ups about applications members made themselves: the officer hears of a
- * new proposal, the secretary of one above the officer's limit, the member of
- * the decision and the payout. One at a time; acting on it or closing it marks
- * it seen.
+ * Pop-ups about applications members made themselves: the secretary hears of a
+ * new proposal, the member of the decision and the payout. And about the
+ * federation's decision on a pool, for every role it concerns. One at a time;
+ * acting on it or closing it marks it seen. What was already so in the seed is
+ * history, not news, so it never pops up.
  */
 
 interface Copy {
@@ -24,7 +25,81 @@ interface Copy {
   tone: 'accent' | 'good' | 'bad';
 }
 
-function copyFor(n: Notice, officerLimit: number): Copy {
+function copyFor(n: Notice): Copy {
+  return 'poolId' in n ? poolCopy(n) : applicationCopy(n);
+}
+
+function poolCopy(n: PoolNotice): Copy {
+  const t = n.tranche;
+  if (n.kind === 'POOL_DECLINED' || !t) {
+    const why = n.remarks ? `: ${n.remarks}` : '.';
+    if (n.audience === 'MEMBER') {
+      return {
+        title: 'Funding for your loan was declined',
+        body: `The federation declined funding for the pool your loan was in${why} The society will tell you what happens next.`,
+        action: 'See where it stands',
+        to: '/me',
+        later: 'Close',
+        icon: CircleX,
+        tone: 'bad',
+      };
+    }
+    return {
+      title: n.audience === 'APEX' ? 'Decline recorded' : 'The federation declined a pool',
+      body:
+        n.audience === 'APEX'
+          ? `You declined ${n.societyName}’s ${n.poolReference}, asking ${formatPaise(n.requested)}${why}`
+          : `The federation declined ${n.poolReference}, which asked for ${formatPaise(n.requested)}${why}`,
+      action: n.audience === 'APEX' ? 'Back to funding requests' : 'Open the pool',
+      to: n.audience === 'APEX' ? '/apex/requests' : `/pools/${n.poolId}`,
+      later: 'Close',
+      icon: CircleX,
+      tone: 'bad',
+    };
+  }
+
+  const inFull = t.sanctioned === n.requested;
+  const share = inFull ? 'in full' : `${Math.round((t.sanctioned / n.requested) * 100)}% of the ${formatPaise(n.requested)} asked for`;
+  const terms = `${formatPaise(t.sanctioned)}, ${share}, at ${formatBps(t.rateBps)} a year for ${t.tenureMonths} months`;
+  if (n.audience === 'MEMBER') {
+    return {
+      title: 'Funding for your loan is approved',
+      body: inFull
+        ? 'The federation approved funding for the pool your loan is in. The society pays your loan out to you next.'
+        : 'The federation approved part of the funding the society asked for. The society confirms the amount it pays out to you next.',
+      action: 'See where it stands',
+      to: '/me',
+      later: 'Close',
+      icon: BadgeCheck,
+      tone: 'good',
+    };
+  }
+  if (n.audience === 'APEX') {
+    return {
+      title: 'Sanction recorded',
+      body: `You sanctioned ${n.societyName}’s ${n.poolReference}: ${terms}, as ${t.sanctionRef}. The society can now draw it down and pay out its members.`,
+      action: 'Back to funding requests',
+      to: '/apex/requests',
+      later: 'Close',
+      icon: BadgeCheck,
+      tone: 'good',
+    };
+  }
+  return {
+    title: 'Funding sanctioned',
+    body: inFull
+      ? `The federation sanctioned ${n.poolReference}: ${terms}, as ${t.sanctionRef}. Draw it down to pay out the members’ loans.`
+      : `The federation sanctioned ${n.poolReference}: ${terms}, as ${t.sanctionRef}. Fit the members’ loans to the sanction so they add up to ${formatPaise(t.sanctioned)}, then draw it down.`,
+    action: n.readOnly ? 'Open the facility' : inFull ? 'Draw down and disburse' : 'Fit the pool to the sanction',
+    // The facility page offers the re-scope first when the sanction fell short.
+    to: `/tranches/${t.id}`,
+    later: 'Later',
+    icon: Landmark,
+    tone: 'good',
+  };
+}
+
+function applicationCopy(n: ApplicationNotice): Copy {
   const loan = `${formatPaise(n.amount)} for ${PURPOSE_LABEL[n.purpose].toLowerCase()} over ${n.tenureMonths} months`;
   switch (n.kind) {
     case 'PROPOSAL':
@@ -35,16 +110,6 @@ function copyFor(n: Notice, officerLimit: number): Copy {
         to: `/applications/${n.applicationId}`,
         later: 'Later',
         icon: FileText,
-        tone: 'accent',
-      };
-    case 'DECIDE':
-      return {
-        title: 'A loan proposal needs your decision',
-        body: `${n.memberName}’s application, ${loan}, is above the officer’s ${formatPaise(officerLimit)} limit, so the decision is yours.`,
-        action: 'Open the proposal',
-        to: `/applications/${n.applicationId}`,
-        later: 'Later',
-        icon: Scale,
         tone: 'accent',
       };
     case 'APPROVED':
@@ -82,16 +147,18 @@ function copyFor(n: Notice, officerLimit: number): Copy {
 
 export function NoticePopup() {
   const world = useAppStore((s) => s.world);
+  const seedWorld = useAppStore((s) => s.seedWorld);
   const session = useAppStore((s) => s.session);
   const markSeen = useAppStore((s) => s.markSeen);
   const navigate = useNavigate();
   const pending = useMemo(() => {
     const seen = new Set(session.seen ?? []);
+    noticesFor(seedWorld, session.userId).forEach((n) => seen.add(n.key));
     return noticesFor(world, session.userId).filter((n) => !seen.has(n.key));
-  }, [world, session]);
+  }, [world, seedWorld, session]);
   const notice = pending[0];
   if (!notice) return null;
-  const copy = copyFor(notice, world.policy.officerApprovalLimit);
+  const copy = copyFor(notice);
   const Icon = copy.icon;
 
   return (

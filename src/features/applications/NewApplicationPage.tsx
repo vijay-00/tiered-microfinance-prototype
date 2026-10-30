@@ -4,11 +4,9 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
 import { MoneyText } from '@/components/finance/MoneyText';
-import { AuthorityBadge } from '@/components/finance/StatusBadges';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, Input, NativeSelect } from '@/components/ui/form';
-import { approvalAuthority } from '@/domain/machines';
 import { formatBps, formatPaise, parseRupees } from '@/domain/money';
 import { quoteLoan } from '@/domain/origination';
 import { can } from '@/domain/permissions';
@@ -22,7 +20,7 @@ import { selectCurrentUser } from '@/store/selectors';
 const TENURES = [6, 9, 12, 15, 18, 24, 30, 36, 48, 60].filter((m) => m >= MIN_TENURE_MONTHS && m <= MAX_TENURE_MONTHS);
 
 /**
- * A member applies, through the field officer or the secretary. The EMI the
+ * A member applies for themselves, or the society applies for them here. The EMI the
  * member would pay is worked out as the amount is typed, by the same schedule
  * generator that will build the real one.
  */
@@ -46,7 +44,7 @@ export function NewApplicationPage() {
   const [error, setError] = useState<string>();
 
   if (!can(user.role, 'SUBMIT_APPLICATION')) {
-    return <PageHeader title="New application" description="Only a loan officer or the secretary can take an application." />;
+    return <PageHeader title="New application" description="Only the secretary can apply for a member." />;
   }
   if (!members) return <LoadingTiles count={2} className="md:grid-cols-2" />;
 
@@ -203,12 +201,6 @@ export function NewApplicationPage() {
                     <dt className="text-muted-foreground">Repaid in all</dt>
                     <dd className="font-medium">
                       <MoneyText paise={quote.amount + quote.totalInterest} />
-                    </dd>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 pt-2">
-                    <dt className="text-muted-foreground">Decision</dt>
-                    <dd>
-                      <AuthorityBadge authority={approvalAuthority(quote.amount, policy)} />
                     </dd>
                   </div>
                 </dl>

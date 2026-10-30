@@ -1,5 +1,4 @@
 import { Badge } from '@/components/ui/badge';
-import type { ApprovalAuthority } from '@/domain/machines';
 import type { ApplicationStage } from '@/domain/origination';
 import type { CollectionStatus, ScheduleStatus } from '@/domain/servicing';
 import type { LoanStatus, PoolStatus, TrancheStatus } from '@/domain/types';
@@ -90,11 +89,7 @@ export function PoolStatusBadge({ status }: { status: PoolStatus }) {
   return <Badge tone={tone}>{label}</Badge>;
 }
 
-/** Who may decide an application of this size: the officer, or above the limit the secretary. */
-export function AuthorityBadge({ authority }: { authority: ApprovalAuthority }) {
-  return authority === 'SECRETARY' ? (
-    <Badge tone="info">Secretary decides</Badge>
-  ) : (
-    <Badge>Officer can decide</Badge>
-  );
+/** Who applied: the member for themselves, or the society on their behalf. */
+export function AppliedByBadge({ selfApplied }: { selfApplied: boolean | undefined }) {
+  return selfApplied ? <Badge tone="info">Member</Badge> : <Badge>Society</Badge>;
 }

@@ -27,7 +27,7 @@ export const SCREENS: readonly Screen[] = [
   { path: '/dashboard', tier: 'society', phase: 2, title: 'Dashboard', summary: 'Portfolio outstanding, net interest income, what is due, what is overdue, and the next remittance.' },
   { path: '/members', tier: 'society', phase: 4, title: 'Member register', summary: 'Searchable list of members with current exposure per member.' },
   { path: '/members/:memberId', tier: 'society', phase: 4, title: 'Member profile', summary: 'Loans, repayment track record, total exposure and share capital.' },
-  { path: '/applications', tier: 'society', phase: 4, title: 'Application queue', summary: 'Applications tabbed by state, with the officer approval limit visible on each row.' },
+  { path: '/applications', tier: 'society', phase: 4, title: 'Application queue', summary: 'Applications tabbed by state, appraised and decided by the secretary.' },
   { path: '/applications/new', tier: 'society', phase: 4, title: 'New application', summary: 'Member, amount, tenure and purpose, with the EMI the member would pay shown as you type.' },
   { path: '/applications/:applicationId', tier: 'society', phase: 4, title: 'Appraisal and decision', summary: 'Income and obligations, the recommended amount, and approval or rejection.' },
   { path: '/pools', tier: 'society', phase: 4, title: 'Pools', summary: 'Every pool with its status, member count, requested amount and apex decision.' },

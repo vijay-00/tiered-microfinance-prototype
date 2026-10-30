@@ -2,7 +2,7 @@
   "retailRateBps": 1150,
   "wholesaleRateBps": 950,
   "penalRateBps": 200,
-  "poolMinMembers": 10,
+  "poolMinMembers": 1,
   "poolMaxMembers": 20,
   "minTicket": 500000,
   "maxTicket": 50000000,

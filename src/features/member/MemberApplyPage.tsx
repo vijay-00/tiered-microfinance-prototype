@@ -18,7 +18,7 @@ const TENURES = [6, 9, 12, 15, 18, 24, 30, 36].filter((m) => m >= MIN_TENURE_MON
 /**
  * A member applies for themselves. The instalment is worked out as they type,
  * by the same schedule generator that will build the real loan; the
- * application then joins the society's queue for the field officer.
+ * application then joins the society's queue for the secretary.
  */
 export function MemberApplyPage() {
   const user = useAppStore(selectCurrentUser);
@@ -138,7 +138,7 @@ export function MemberApplyPage() {
                 </p>
               ) : null}
               <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--g-line2)' }}>
-                <span className="g-sub m-0">The field officer will visit to appraise it.</span>
+                <span className="g-sub m-0">The society will appraise it.</span>
                 <button type="submit" className="g-btn pri" disabled={pending}>
                   <Check aria-hidden /> {pending ? 'Sending…' : 'Send application'}
                 </button>

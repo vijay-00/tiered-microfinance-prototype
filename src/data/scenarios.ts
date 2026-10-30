@@ -20,13 +20,13 @@ export const SCENARIOS: readonly Scenario[] = [
   {
     id: 'A',
     name: 'Clean run',
-    summary: 'Three societies, every member and every remittance on time.',
+    summary: 'Every member and every remittance on time.',
     load: () => loadSeed('A'),
   },
   {
     id: 'B',
     name: 'Delinquency',
-    summary: 'Four Annapoorani members fall behind and the society remits from reserves; Grama Valarchi holds back a month of principal.',
+    summary: 'Four Annapoorani members fall behind and the society remits from reserves.',
     load: () => loadSeed('B'),
   },
   {

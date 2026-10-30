@@ -1,5 +1,5 @@
 import { CalendarDays, CheckCircle2, ChevronDown, CircleAlert, Compass, RotateCcw } from 'lucide-react';
-import { ROLES } from '@/app/roles';
+import { VISIBLE_ROLES } from '@/app/roles';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,7 +44,7 @@ function RoleSwitcher() {
         onChange={(event) => switchRole(event.target.value as Role)}
         className="ui-select h-7 rounded-md border border-demo-border bg-card px-2 text-sm text-foreground"
       >
-        {ROLES.map((r) => (
+        {VISIBLE_ROLES.map((r) => (
           <option key={r.role} value={r.role}>
             {r.label}
           </option>

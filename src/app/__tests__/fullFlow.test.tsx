@@ -33,15 +33,15 @@ describe('from a member’s application to the federation’s remittance', () =>
     await user.click(screen.getByRole('button', { name: 'Send application' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/me'));
     expect(await tracker()).toHaveTextContent('Sent to the society');
-    expect(await tracker()).toHaveTextContent('Next: the field officer visits to appraise it.');
+    expect(await tracker()).toHaveTextContent('Next: the society appraises it.');
     const application = world().applications.find((a) => a.memberId === 'mem_001' && a.status === 'SUBMITTED')!;
     expect(application.id).toBe('app_070');
     // Nothing on the member's screen speaks of wholesale pricing.
     expect(screen.getByRole('main')).not.toHaveTextContent(/9\.5%|wholesale|margin|federation/i);
 
-    // The field officer finds it in the queue, appraises it and, within the limit, approves it.
-    // A pop-up tells the field officer of the new proposal, and opens it.
-    await viewAs(user, 'Loan Officer');
+    // The secretary appraises it and approves it: there is no loan officer.
+    // A pop-up tells the secretary of the new proposal, and opens it.
+    await viewAs(user, 'Society Secretary');
     const proposal = await screen.findByRole('dialog', { name: 'New loan proposal' });
     expect(proposal).toHaveTextContent('Veerappan Pandian has applied for ₹40,000 for trade over 12 months.');
     await user.click(within(proposal).getByRole('button', { name: 'Open the proposal' }));
@@ -67,7 +67,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     await user.click(await screen.findByRole('link', { name: 'Add to ANN/POOL/2026-27/02' }));
     const pool = await screen.findByRole('region', { name: 'The pool' });
     await user.click(screen.getByRole('button', { name: 'Select all' }));
-    expect(within(pool).getByText('12 of 10–20 members')).toBeInTheDocument();
+    expect(within(pool).getByText('12 of 1–20 members')).toBeInTheDocument();
     await user.click(within(pool).getByRole('button', { name: 'Submit to the federation' }));
     const confirm = await screen.findByRole('dialog', { name: 'Submit ANN/POOL/2026-27/02?' });
     await user.click(within(confirm).getByRole('button', { name: 'Submit' }));
@@ -80,16 +80,27 @@ describe('from a member’s application to the federation’s remittance', () =>
     await user.click(await screen.findByRole('button', { name: 'Begin review' }));
     const terms = await screen.findByRole('region', { name: 'Terms' });
     await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000$/ }));
+    // A pop-up confirms the sanction to the apex officer, with the same amount.
+    const recorded = await screen.findByRole('dialog', { name: 'Sanction recorded' });
+    expect(recorded).toHaveTextContent('₹7,50,000, in full, at 9.5% a year for 24 months, as PACF/SAN/2026-27/022');
+    await user.click(within(recorded).getByRole('button', { name: 'Close' }));
     expect(await screen.findByRole('heading', { name: 'Sanctioned as PACF/SAN/2026-27/022' })).toBeInTheDocument();
 
-    // The member sees the funding approved, and waiting to be paid out.
+    // A pop-up tells the member the funding is approved; it waits to be paid out.
     await viewAs(user, 'Member');
+    const funded = await screen.findByRole('dialog', { name: 'Funding for your loan is approved' });
+    await user.click(within(funded).getByRole('button', { name: 'Close' }));
     expect(await tracker()).toHaveTextContent('Next: the money is paid out to you.');
 
-    // The secretary draws the tranche down and pays the twelve members out.
+    // A pop-up tells the secretary, with the same amount, and goes straight to the facility.
     await viewAs(user, 'Society Secretary');
-    await user.click(within(sidebar()).getByRole('link', { name: 'Funding' }));
-    await user.click(await screen.findByRole('link', { name: 'PACF/SAN/2026-27/022' }));
+    const sanctioned = await screen.findByRole('dialog', { name: 'Funding sanctioned' });
+    expect(sanctioned).toHaveTextContent('₹7,50,000, in full');
+    await user.click(within(sanctioned).getByRole('button', { name: 'Draw down and disburse' }));
+    await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/tranches\/trn_/));
+    // The sidebar marks the facility waiting to be drawn.
+    expect(within(sidebar()).getByRole('link', { name: /^Funding\s*1/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'PACF/SAN/2026-27/022' })).toBeInTheDocument();
     const waiting = await screen.findByRole('region', { name: 'Awaiting disbursement' });
     await user.click(within(waiting).getByRole('button', { name: 'Draw down and disburse' }));
     const disburse = await screen.findByRole('dialog', { name: 'Draw down and disburse' });
@@ -109,8 +120,8 @@ describe('from a member’s application to the federation’s remittance', () =>
     expect(loan.loan.emi % 100).toBe(0);
     expect(screen.queryByRole('region', { name: 'Your application' })).not.toBeInTheDocument();
 
-    // A month on, the field officer collects the first instalments.
-    await viewAs(user, 'Loan Officer');
+    // A month on, the secretary collects the first instalments.
+    await viewAs(user, 'Society Secretary');
     await user.click(within(sidebar()).getByRole('link', { name: 'Collections' }));
     for (let i = 0; i < 6 && world().clock < firstDue; i += 1) {
       await user.click(within(demoBar()).getByRole('button', { name: 'Next due date' }));
@@ -189,16 +200,55 @@ describe('pop-ups about a member’s application', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
     // Seen once is enough: switching away and back does not raise it again.
-    await viewAs(user, 'Loan Officer');
+    await viewAs(user, 'Auditor');
     await viewAs(user, 'Member');
     expect(await screen.findByRole('region', { name: 'Your application' })).toHaveTextContent('Not approved');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('raises nothing for applications taken by staff', async () => {
+  it('raises nothing for applications taken by staff, or for what the seed already decided', async () => {
     const { user } = renderApp('/dashboard');
-    await viewAs(user, 'Loan Officer');
+    await viewAs(user, 'Auditor');
+    await viewAs(user, 'Society Secretary');
     await screen.findByRole('navigation', { name: 'Main' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+});
+
+describe('the roles the demo offers', () => {
+  it('has no loan officer: a member applies for themselves, or the society applies for them', async () => {
+    renderApp('/dashboard');
+    const options = within(within(demoBar()).getByRole('combobox'))
+      .getAllByRole('option')
+      .map((o) => o.textContent);
+    expect(options).toEqual(['Society Secretary', 'Apex Officer', 'Member', 'Auditor']);
+  });
+});
+
+describe('pop-ups when the federation decides a pool', () => {
+  it('tells the society, the members in it and the apex officer, each with the same amounts', async () => {
+    const { user, store } = renderApp('/dashboard');
+    const on = store.getState().world.clock;
+    // Grama Valarchi's pool is under review; the apex officer sanctions 80% of it.
+    const pool = store.getState().world.pools.find((p) => p.reference === 'GRM/POOL/2026-27/02')!;
+    const sanctioned = Math.round(pool.requestedAmount * 0.8);
+    expect(
+      store.getState().dispatch({
+        type: 'TRANCHE_SANCTIONED', on, trancheId: 'trn_90', poolId: pool.id, sanctionRef: 'PACF/SAN/TEST/01',
+        sanctionedAmount: sanctioned, wholesaleRateBps: 950, tenureMonths: 24, remarks: '', recordedBy: 'usr_apex',
+      }),
+    ).toEqual({ ok: true });
+
+    await viewAs(user, 'Apex Officer');
+    const apex = await screen.findByRole('dialog', { name: 'Sanction recorded' });
+    expect(apex).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
+    await user.click(within(apex).getByRole('button', { name: 'Close' }));
+
+    // The society's secretary is Grama Valarchi's, not the demo's default society.
+    act(() => store.getState().switchUser('usr_secretary_2'));
+    const society = await screen.findByRole('dialog', { name: 'Funding sanctioned' });
+    expect(society).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
+    expect(society).toHaveTextContent('so they add up to ₹6,00,000');
+    expect(within(society).getByRole('button', { name: 'Fit the pool to the sanction' })).toBeInTheDocument();
   });
 });

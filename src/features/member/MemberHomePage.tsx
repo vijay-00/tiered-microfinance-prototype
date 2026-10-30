@@ -137,7 +137,7 @@ export function MemberHomePage() {
 
 const STEP_LABEL: Record<ApplicationStepKey, string> = {
   APPLIED: 'Applied',
-  APPRAISED: 'Appraised by the field officer',
+  APPRAISED: 'Appraised by the society',
   DECIDED: 'Approved by the society',
   SENT: 'Sent for funding',
   FUNDED: 'Funding approved',
@@ -146,7 +146,7 @@ const STEP_LABEL: Record<ApplicationStepKey, string> = {
 
 const NEXT_LABEL: Record<ApplicationStepKey, string> = {
   APPLIED: 'You applied',
-  APPRAISED: 'The field officer visits to appraise it',
+  APPRAISED: 'The society appraises it',
   DECIDED: 'The society decides',
   SENT: 'The society sends it, with others, for funding',
   FUNDED: 'Funding is approved',

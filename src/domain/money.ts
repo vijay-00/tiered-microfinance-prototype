@@ -201,16 +201,23 @@ const plainFormatter = new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 2,
 });
 
+const inrPaiseFormatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 /**
- * Rs 1,00,000 — Indian digit grouping, with the currency symbol, in whole
- * rupees: 50 paise and above round up, below round down. Display only; the
- * books keep every paisa, so a total can sit a rupee from the sum of its
- * rounded lines.
+ * Rs 1,00,000 — Indian digit grouping, with the currency symbol. Whole rupees
+ * print without paise; anything else prints to the paisa, Rs 1,297.83. Never
+ * rounded: the screen shows what the books hold, so a total always equals the
+ * sum of the lines shown under it.
  */
 export function formatPaise(amount: Paise): string {
   assertPaise(amount);
-  // `|| 0` keeps a negative amount under 50 paise from printing as -Rs 0.
-  return inrFormatter.format(roundHalfUp(amount / RUPEE) || 0);
+  if (amount % RUPEE === 0) return inrFormatter.format(amount / RUPEE || 0);
+  return inrPaiseFormatter.format(amount / RUPEE);
 }
 
 /** 1,00,000.00 to the paisa, for prefilling an input where the exact amount matters. */

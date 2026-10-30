@@ -136,7 +136,7 @@ export const DEFAULT_POLICY: Policy = {
   retailRateBps: 1150,
   wholesaleRateBps: 950,
   penalRateBps: 200,
-  poolMinMembers: 10,
+  poolMinMembers: 1, // one approved application is enough to go to the federation
   poolMaxMembers: 20,
   minTicket: 500_000, // Rs 5,000
   maxTicket: 50_000_000, // Rs 5,00,000

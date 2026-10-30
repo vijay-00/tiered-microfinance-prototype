@@ -2,12 +2,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
 import { MoneyText } from '@/components/finance/MoneyText';
-import { AuthorityBadge } from '@/components/finance/StatusBadges';
+import { AppliedByBadge } from '@/components/finance/StatusBadges';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatPaise } from '@/domain/money';
 import { STAGE_ORDER, type ApplicationRow, type ApplicationStage } from '@/domain/origination';
 import { can } from '@/domain/permissions';
 import { formatDate } from '@/lib/format';
@@ -22,7 +21,6 @@ const isStage = (value: string | null): value is ApplicationStage =>
 export function ApplicationsPage() {
   const user = useAppStore(selectCurrentUser);
   const version = useAppStore((s) => s.world.eventCount);
-  const limit = useAppStore((s) => s.world.policy.officerApprovalLimit);
   const repositories = useRepositories();
   const societyId = user.societyId!;
   const [params, setParams] = useSearchParams();
@@ -36,7 +34,7 @@ export function ApplicationsPage() {
     <>
       <PageHeader
         title="Applications"
-        description={`Each moves from appraisal to a decision, into a pool, and out as a loan. Up to ${formatPaise(limit)} a loan officer may decide; above that, the secretary.`}
+        description="A member applies for themselves, or the society applies for them. Each moves from appraisal to a decision by the secretary, into a pool, and out as a loan."
         actions={
           can(user.role, 'SUBMIT_APPLICATION') ? (
             <Button asChild>
@@ -86,7 +84,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
           <TH numeric>Amount</TH>
           <TH numeric>Tenure</TH>
           <TH numeric>EMI</TH>
-          <TH>{stage === 'IN_POOL' || stage === 'READY_TO_POOL' ? 'Pool' : stage === 'DISBURSED' ? 'Loan' : stage === 'REJECTED' ? 'Reason' : 'Who decides'}</TH>
+          <TH>{stage === 'IN_POOL' || stage === 'READY_TO_POOL' ? 'Pool' : stage === 'DISBURSED' ? 'Loan' : stage === 'REJECTED' ? 'Reason' : 'Applied by'}</TH>
         </tr>
       </THead>
       <TBody>
@@ -117,7 +115,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
               ) : stage === 'REJECTED' ? (
                 <span className="text-xs text-muted-foreground">{row.application.decision?.reason}</span>
               ) : (
-                <AuthorityBadge authority={row.authority} />
+                <AppliedByBadge selfApplied={row.application.selfApplied} />
               )}
             </TD>
           </tr>

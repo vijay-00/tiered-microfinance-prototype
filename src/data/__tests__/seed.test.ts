@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { invariantsBySociety, createWorld, replay } from '@/domain/world';
 import { trialBalanceOf } from '@/domain/reporting';
 import { buildScenario, buildScenarioA, SEED_TODAY } from '../../../scripts/seed/scenario-a';
-import { loadSeed, parseSeed, SeedError, loadScenarioA } from '../seed';
+import { loadSeed, parseSeed, restrictToSociety, SeedError, loadScenarioA } from '../seed';
 import federation from '../mock/federation.json';
 import policy from '../mock/policy.json';
 import societies from '../mock/societies.json';
@@ -30,6 +30,32 @@ describe.each(['B', 'C'] as const)('scenario %s', (id) => {
       expect(results.filter((r) => !r.ok).map((r) => `${r.id} ${r.detail}`), societyId).toEqual([]);
       expect(trialBalanceOf(world, societyId).balanced, societyId).toBe(true);
     }
+  });
+});
+
+describe.each(['A', 'B', 'C'] as const)('scenario %s cut down to the member’s society', (id) => {
+  const full = replay(createWorld(loadSeed(id).base), loadSeed(id).events);
+  const seed = restrictToSociety(loadSeed(id), 'soc_1');
+  const world = replay(createWorld(seed.base), seed.events);
+
+  it('holds Annapoorani and the federation, and nothing of the others', () => {
+    expect(world.societies.map((s) => s.id)).toEqual(['soc_1']);
+    expect(world.users.every((u) => u.societyId === 'soc_1' || u.role === 'APEX_OFFICER')).toBe(true);
+    expect(world.users.some((u) => u.role === 'MEMBER')).toBe(true);
+    expect(world.pools.every((p) => p.societyId === 'soc_1')).toBe(true);
+    expect(Object.values(world.tranches).every((t) => t.tranche.societyId === 'soc_1')).toBe(true);
+  });
+
+  it('leaves Annapoorani’s books exactly as they were, with every invariant green', () => {
+    expect(world.clock).toBe(full.clock);
+    // Entry ids are numbered across the federation, so only they differ.
+    const unnumbered = (entries: typeof world.journals.soc_1) => entries!.map(({ id: _id, ...entry }) => entry);
+    expect(unnumbered(world.journals.soc_1)).toEqual(unnumbered(full.journals.soc_1));
+    expect(Object.values(world.loans)).toEqual(Object.values(full.loans).filter((l) => l.loan.societyId === 'soc_1'));
+    for (const results of Object.values(invariantsBySociety(world))) {
+      expect(results.filter((r) => !r.ok).map((r) => `${r.id} ${r.detail}`)).toEqual([]);
+    }
+    expect(trialBalanceOf(world, 'soc_1').balanced).toBe(true);
   });
 });
 

@@ -22,14 +22,15 @@ describe('the delinquency scenario, through the screens', () => {
 
     // The dashboard puts the two margins side by side.
     const tile = await screen.findByRole('link', { name: /^Realised against theoretical margin/ });
-    expect(tile).toHaveTextContent('₹3,200');
-    expect(tile).toHaveTextContent('Theoretical ₹7,115');
+    // To the paisa, as the books hold them.
+    expect(tile).toHaveTextContent('₹3,199.53');
+    expect(tile).toHaveTextContent('Theoretical ₹7,114.67');
 
     // One click explains the difference in words.
     await user.click(tile);
     const year = await screen.findByRole('region', { name: 'Margin: This financial year' });
     expect(year).toHaveTextContent(
-      'Members paid ₹3,915 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
+      'Members paid ₹3,915.10 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
     );
 
     // Who is behind.
@@ -68,7 +69,7 @@ describe('the walkthrough', () => {
 
     const panel = await screen.findByRole('complementary', { name: 'Walkthrough' });
     expect(store.getState().scenarioId).toBe('B');
-    expect(panel).toHaveTextContent('step 1 of 8');
+    expect(panel).toHaveTextContent('step 1 of 7');
     expect(router.state.location.pathname).toBe('/dashboard');
 
     const next = () => user.click(within(panel).getByRole('button', { name: /Next/ }));
@@ -76,9 +77,9 @@ describe('the walkthrough', () => {
     expect(router.state.location.pathname).toBe('/reports');
     await next();
     expect(router.state.location.search).toBe('?tab=ageing');
-    for (let i = 0; i < 4; i += 1) await next();
-    expect(panel).toHaveTextContent('Holding principal back costs margin for good');
-    expect(store.getState().session.userId).toBe('usr_secretary_2');
+    for (let i = 0; i < 3; i += 1) await next();
+    expect(panel).toHaveTextContent('The margin comes back');
+    expect(store.getState().session.userId).toBe('usr_secretary');
     await next();
     expect(router.state.location.pathname).toBe('/apex');
     await user.click(within(panel).getByRole('button', { name: 'Finish' }));

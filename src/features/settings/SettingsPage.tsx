@@ -44,7 +44,6 @@ export function SettingsPage() {
               <Row label="Penal interest" value={`${formatBps(policy.penalRateBps)} a year on overdue amounts, after ${plural(policy.graceDays, 'day')} of grace`} />
               <Row label="Loan size" value={`${formatPaise(policy.minTicket)} to ${formatPaise(policy.maxTicket)}, and no more than ${formatPaise(policy.maxTicket)} owed by any one member`} />
               <Row label="Tenure" value={`${MIN_TENURE_MONTHS} to ${MAX_TENURE_MONTHS} months`} />
-              <Row label="Officer approval limit" value={`${formatPaise(policy.officerApprovalLimit)}; above it, the secretary decides`} />
               <Row label="Pool size" value={`${policy.poolMinMembers} to ${policy.poolMaxMembers} members`} />
               <Row label="Repayment burden" value={`Shown against ${percent(REPAYMENT_CAP_SHARE)} of monthly income at appraisal; it informs, not blocks`} />
               <Row label="Prepayment" value="Allowed at any time, without a fee" />

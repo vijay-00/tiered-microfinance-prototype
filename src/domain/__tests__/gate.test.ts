@@ -397,10 +397,10 @@ describe('the invariants are not vacuous: each catches the corruption it exists 
     expect(failing({ ...healthy, pools: [...healthy.pools, second] })).toContain(9);
   });
 
-  it('a pool submitted with nine members trips 10', () => {
+  it('a pool submitted with no members trips 10', () => {
     const small = {
       id: 'pool_03',
-      applicationIds: Array.from({ length: 9 }, (_, i) => `app_x${i}`),
+      applicationIds: [],
       status: 'SUBMITTED' as const,
     };
     expect(failing({ ...healthy, pools: [...healthy.pools, small] })).toContain(10);

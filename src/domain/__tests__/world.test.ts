@@ -71,8 +71,15 @@ describe('the reducer', () => {
 });
 
 describe('pools', () => {
-  it('will not mark a pool ready below ten members, and says why', () => {
-    // pool_04 is being assembled with eight members.
+  it('will not mark an empty pool ready, and says why', () => {
+    // pool_04 is being assembled; emptied, it has nothing to send.
+    const emptied = applyEvent(seedWorld(), {
+      type: 'POOL_APPLICATIONS_SET',
+      on: '2026-10-29',
+      poolId: 'pool_04',
+      applicationIds: [],
+      recordedBy: 'usr_secretary',
+    });
     const event: WorldEvent = {
       type: 'POOL_STATUS_CHANGED',
       on: '2026-10-29',
@@ -80,7 +87,18 @@ describe('pools', () => {
       to: 'READY',
       recordedBy: 'usr_secretary',
     };
-    expectError(() => applyEvent(seedWorld(), event), WorldError, /Add 2 more members/);
+    expectError(() => applyEvent(emptied, event), WorldError, /Choose at least one approved application/);
+  });
+
+  it('marks a pool of a single member ready: one application is enough to go to the federation', () => {
+    const one = applyEvent(seedWorld(), {
+      type: 'POOL_APPLICATIONS_SET',
+      on: '2026-10-29',
+      poolId: 'pool_04',
+      applicationIds: ['app_061'],
+      recordedBy: 'usr_secretary',
+    });
+    expect(one.pools.find((p) => p.id === 'pool_04')?.status).toBe('READY');
   });
 
   it('locks applications to the pool on submission', () => {

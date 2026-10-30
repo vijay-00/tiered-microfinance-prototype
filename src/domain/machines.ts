@@ -116,6 +116,9 @@ export function poolReadiness(
   memberCount: number,
   policy: Pick<Policy, 'poolMinMembers' | 'poolMaxMembers'>,
 ): Readiness {
+  if (memberCount === 0) {
+    return { ready: false, reason: 'Choose at least one approved application to send.' };
+  }
   if (memberCount < policy.poolMinMembers) {
     const short = policy.poolMinMembers - memberCount;
     return {

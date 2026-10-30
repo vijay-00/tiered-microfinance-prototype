@@ -263,13 +263,12 @@ describe('pools', () => {
     recordedBy,
   });
 
-  it('is ready once it holds ten, and goes back to being built below that', () => {
+  it('is ready once it holds one, and goes back to being built when emptied', () => {
     let world = seedWorld();
-    const eight = poolOf(world, 'pool_04').applicationIds;
-    world = applyEvent(world, set([...eight, ...LOOSE]));
-    expect(poolOf(world, 'pool_04')).toMatchObject({ status: 'READY', applicationIds: [...eight, ...LOOSE] });
+    world = applyEvent(world, set(['app_061']));
+    expect(poolOf(world, 'pool_04')).toMatchObject({ status: 'READY', applicationIds: ['app_061'] });
     expect(applicationOf(world, 'app_061').poolId).toBe('pool_04');
-    world = applyEvent(world, set([...eight]));
+    world = applyEvent(world, set([]));
     expect(poolOf(world, 'pool_04').status).toBe('OPEN');
     expect(applicationOf(world, 'app_061').poolId).toBeUndefined();
   });
@@ -496,7 +495,8 @@ describe('read models', () => {
     // Charged on the same balances, wholesale interest is 9.5/11.5 of retail, give or take rounding.
     expect(economics.wholesaleInterest / economics.retailInterest).toBeCloseTo(950 / 1150, 2);
     expect(economics.readiness.ready).toBe(true);
-    expect(poolEconomics(world, ids.slice(0, 8)).readiness.reason).toBe('Add 2 more members: a pool needs at least 10.');
+    expect(poolEconomics(world, ids.slice(0, 1)).readiness.ready).toBe(true);
+    expect(poolEconomics(world, []).readiness.reason).toBe('Choose at least one approved application to send.');
   });
 
   it('queues submitted pools for the federation, oldest first, and caps a sanction at the headroom', () => {

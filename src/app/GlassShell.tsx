@@ -58,7 +58,15 @@ function useWaiting(tier: Tier): Record<string, number> {
         (a) => a.societyId === societyId && (stageOf(a) === 'NEEDS_APPRAISAL' || stageOf(a) === 'AWAITING_DECISION'),
       ).length,
   );
-  return tier === 'apex' ? { '/apex/requests': requests } : { '/applications': applications };
+  // A sanction not yet drawn: the society's next step after the federation says yes.
+  const toDraw = useAppStore(
+    (s) =>
+      Object.values(s.world.tranches).filter((t) => t.tranche.societyId === societyId && t.tranche.status === 'SANCTIONED')
+        .length,
+  );
+  return tier === 'apex'
+    ? { '/apex/requests': requests }
+    : { '/applications': applications, '/tranches': toDraw };
 }
 
 function GlassSidebar({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {

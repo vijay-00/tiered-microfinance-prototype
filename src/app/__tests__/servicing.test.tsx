@@ -90,7 +90,7 @@ describe('the payment drawer', () => {
 describe('who may do what', () => {
   it('lets only the secretary remit', async () => {
     const { user } = renderApp('/tranches/trn_01', toNovember15);
-    await user.selectOptions(within(demoBar()).getByRole('combobox'), 'Loan Officer');
+    await user.selectOptions(within(demoBar()).getByRole('combobox'), 'Auditor');
     const next = await screen.findByRole('region', { name: 'Next remittance' });
     expect(within(next).getByText("Only the society's secretary can record a remittance.")).toBeInTheDocument();
     expect(within(next).queryByRole('button', { name: 'Record remittance' })).not.toBeInTheDocument();

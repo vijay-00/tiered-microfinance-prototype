@@ -5,7 +5,7 @@ import { Facts } from '@/components/Facts';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { PageHeader } from '@/components/PageHeader';
 import { MoneyText } from '@/components/finance/MoneyText';
-import { ApplicationStageBadge, AuthorityBadge, PoolStatusBadge } from '@/components/finance/StatusBadges';
+import { ApplicationStageBadge, PoolStatusBadge } from '@/components/finance/StatusBadges';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, Input, NativeSelect, Textarea } from '@/components/ui/form';
@@ -92,7 +92,7 @@ export function ApplicationDetailPage() {
         can(user.role, 'APPRAISE_APPLICATION') ? (
           <AppraisalForm detail={data} />
         ) : (
-          <Notice>A loan officer or the secretary appraises the application next.</Notice>
+          <Notice>The secretary appraises the application next.</Notice>
         )
       ) : (
         <div className="space-y-5">
@@ -101,7 +101,7 @@ export function ApplicationDetailPage() {
             can(user.role, 'DECIDE_APPLICATION') ? (
               <DecisionForm detail={data} user={user} />
             ) : (
-              <Notice>A loan officer or the secretary decides it next.</Notice>
+              <Notice>The secretary decides it next.</Notice>
             )
           ) : (
             <DecisionSummary detail={data} />
@@ -367,7 +367,6 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
     <Card role="region" aria-label="Decision">
       <CardHeader>
         <CardTitle>Decision</CardTitle>
-        <AuthorityBadge authority={authority} />
       </CardHeader>
       <CardContent>
         <form

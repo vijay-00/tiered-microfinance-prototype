@@ -105,20 +105,20 @@ describe('money', () => {
   });
 
   it('formats with Indian digit grouping', () => {
-    expect(formatPaise(10_633_775)).toBe('₹1,06,338');
+    expect(formatPaise(10_633_775)).toBe('₹1,06,337.75');
+    expect(formatPaise(10_633_700)).toBe('₹1,06,337');
     expect(formatBps(950)).toBe('9.5%');
     expect(formatBps(1150)).toBe('11.5%');
     expect(formatBps(200)).toBe('2%');
   });
 
-  it('shows whole rupees: 50 paise and above round up, below round down', () => {
-    expect(formatPaise(4_863_022)).toBe('₹48,630');
-    expect(formatPaise(4_863_049)).toBe('₹48,630');
-    expect(formatPaise(4_863_050)).toBe('₹48,631');
-    expect(formatPaise(4_863_099)).toBe('₹48,631');
-    expect(formatPaise(-59_681)).toBe('-₹597');
-    expect(formatPaise(-40)).toBe('₹0');
-    // Display only: the exact amount survives for an input to edit.
+  it('shows whole rupees plainly and anything else to the paisa, never rounded', () => {
+    expect(formatPaise(4_863_000)).toBe('₹48,630');
+    expect(formatPaise(4_863_022)).toBe('₹48,630.22');
+    expect(formatPaise(4_863_050)).toBe('₹48,630.50');
+    expect(formatPaise(-59_681)).toBe('-₹596.81');
+    expect(formatPaise(-40)).toBe('-₹0.40');
+    expect(formatPaise(0)).toBe('₹0');
     expect(formatPaisePlain(4_863_022)).toBe('48,630.22');
   });
 });

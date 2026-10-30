@@ -42,13 +42,13 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         go: { userId: 'usr_member', path: '/me' },
       },
       {
-        title: 'The field officer appraises and approves',
-        body: 'Open Veerappan Pandian’s application in the queue. Enter the monthly income, 40000, to see the repayment burden against the 50% cap, and Record appraisal. Within the officer’s limit, Approve it.',
-        go: { userId: 'usr_officer', path: '/applications' },
+        title: 'The secretary appraises and approves',
+        body: 'Open Veerappan Pandian’s application in the queue. Enter the monthly income, 40000, to see the repayment burden against the 50% cap, and Record appraisal. Then Approve it.',
+        go: { userId: 'usr_secretary', path: '/applications' },
       },
       {
         title: 'The secretary pools and submits',
-        body: 'Approved applications go to the federation 10 to 20 at a time. Choose Add to ANN/POOL/2026-27/02, Select all, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as it fills.',
+        body: 'Approved applications go to the federation in a pool of one to twenty. Choose Add to ANN/POOL/2026-27/02, Select all, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as it fills.',
         go: { userId: 'usr_secretary', path: '/pools' },
       },
       {
@@ -58,7 +58,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The society draws down and pays out',
-        body: 'Open the new sanction, PACF/SAN/2026-27/022, and choose Draw down and disburse. One drawdown and twelve disbursements post to the ledger, and each loan gets its schedule.',
+        body: 'Open the new sanction, PACF/SAN/2026-27/015, and choose Draw down and disburse. One drawdown and twelve disbursements post to the ledger, and each loan gets its schedule.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -69,11 +69,11 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       {
         title: 'A month on, members repay',
         body: 'Use Next due date in the demo bar until twelve instalments are due today, then Record all due today. Each payment is split into what goes on to the federation and what the society keeps.',
-        go: { userId: 'usr_officer', path: '/collections' },
+        go: { userId: 'usr_secretary', path: '/collections' },
       },
       {
         title: 'The society remits',
-        body: 'Open PACF/SAN/2026-27/022 and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
+        body: 'Open PACF/SAN/2026-27/015 and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -86,7 +86,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   {
     id: 'delinquency',
     title: 'When members fall behind',
-    summary: 'Scenario B: late members cost the society cash, not margin; holding principal back from the federation costs margin for good.',
+    summary: 'Scenario B: late members cost the society cash, not margin, and the margin comes back as they catch up.',
     steps: [
       {
         title: 'The margin the schedules promised, and the one in the books',
@@ -119,13 +119,8 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         go: { path: '/reports' },
       },
       {
-        title: 'Holding principal back costs margin for good',
-        body: 'At Grama Valarchi, the society paid the federation its August interest but held the principal back and paid it with September’s remittance. That month the principal kept attracting wholesale interest. September’s margin shows it as extra wholesale interest, lost for good.',
-        go: { userId: 'usr_secretary_2', path: '/reports' },
-      },
-      {
         title: 'What the federation sees',
-        body: 'The apex officer sees each society’s share of late members and whether its remittances are current. Annapoorani’s members are late, but its remittances are not: the society, not the federation, carried the arrears.',
+        body: 'The apex officer sees the society’s share of late members and whether its remittances are current. Annapoorani’s members are late, but its remittances are not: the society, not the federation, carried the arrears.',
         go: { userId: 'usr_apex', path: '/apex' },
       },
     ],
@@ -184,7 +179,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'Where loans come from',
-        body: 'Applications are taken, appraised and decided, pooled ten to twenty at a time, and sent to the federation for a wholesale tranche. Pool ANN/POOL/2026-27/02 is being built: add the approved applications and submit it.',
+        body: 'Applications are taken, appraised and decided, pooled, one to twenty at a time, and sent to the federation for a wholesale tranche. Pool ANN/POOL/2026-27/02 is being built: add the approved applications and submit it.',
         go: { path: '/pools' },
       },
     ],

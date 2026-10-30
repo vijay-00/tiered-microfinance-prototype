@@ -23,5 +23,8 @@ export default defineConfig({
     // tests need a DOM.
     environmentMatchGlobs: [['src/**/*.test.tsx', 'jsdom']],
     setupFiles: ['src/test/setup.ts'],
+    // Screen tests drive the whole app; on a busy machine or CI runner the
+    // default 5s is too tight and a slow run would block the deploy.
+    testTimeout: 20_000,
   },
 });

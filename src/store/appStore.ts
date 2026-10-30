@@ -3,6 +3,7 @@ import { roleInfo } from '@/app/roles';
 import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
+import { restrictToSociety } from '@/data/seed';
 import {
   clearPersisted,
   loadPersisted,
@@ -60,17 +61,25 @@ export interface AppActions {
 export type AppStoreState = AppState & AppActions;
 export type AppStore = StoreApi<AppStoreState>;
 
-const seedWorlds = new Map<ScenarioId, { world: WorldState; version: string }>();
+const seedWorlds = new Map<string, { world: WorldState; version: string }>();
 
-function seedWorldFor(id: ScenarioId): { world: WorldState; version: string } {
-  const cached = seedWorlds.get(id);
+function seedWorldFor(id: ScenarioId, onlySociety?: ID): { world: WorldState; version: string } {
+  const key = `${id}:${onlySociety ?? '*'}`;
+  const cached = seedWorlds.get(key);
   if (cached) return cached;
   const load = scenario(id).load;
   if (!load) throw new Error(`scenario ${id} is not available yet`);
-  const seed = load();
+  const full = load();
+  const seed = onlySociety ? restrictToSociety(full, onlySociety) : full;
   const built = { world: replay(createWorld(seed.base), seed.events), version: seed.version };
-  seedWorlds.set(id, built);
+  seedWorlds.set(key, built);
   return built;
+}
+
+/** A user the demo can log in as: in this world, and not in a hidden role. */
+function canLogInAs(world: WorldState, userId: ID): boolean {
+  const user = world.users.find((u) => u.id === userId);
+  return !!user && !roleInfo(user.role).hidden;
 }
 
 /** The demo society's user for a role, falling back to anyone with it. */
@@ -96,14 +105,20 @@ function message(error: unknown): string {
  * `startAs` is the role a first visit opens as, and the fallback when a
  * scenario lacks the current user. The demo opens as the apex officer
  * (main.tsx); tests start as the secretary, where their scripts begin.
+ *
+ * `onlySociety` cuts every scenario down to that one society and the
+ * federation. The demo shows only the society its member belongs to; tests
+ * leave it unset and run against all three.
  */
-export function createAppStore(options: { storage?: StorageLike; startAs?: Role } = {}): AppStore {
-  const { storage, startAs = 'SECRETARY' } = options;
+export function createAppStore(
+  options: { storage?: StorageLike; startAs?: Role; onlySociety?: ID } = {},
+): AppStore {
+  const { storage, startAs = 'SECRETARY', onlySociety } = options;
   const saved = loadPersisted(storage);
 
   let scenarioId: ScenarioId = DEFAULT_SCENARIO;
   if (saved && scenario(saved.scenarioId).load) scenarioId = saved.scenarioId;
-  const seed = seedWorldFor(scenarioId);
+  const seed = seedWorldFor(scenarioId, onlySociety);
 
   let world = seed.world;
   let userEvents: readonly WorldEvent[] = [];
@@ -120,7 +135,7 @@ export function createAppStore(options: { storage?: StorageLike; startAs?: Role 
       }
     }
   }
-  const savedUser = saved && world.users.some((u) => u.id === saved.session.userId);
+  const savedUser = saved && canLogInAs(world, saved.session.userId);
   const session = savedUser ? saved.session : defaultSession(world, startAs);
 
   const store = createStore<AppStoreState>()((set, get) => ({
@@ -165,7 +180,7 @@ export function createAppStore(options: { storage?: StorageLike; startAs?: Role 
 
     loadScenario(id) {
       try {
-        const next = seedWorldFor(id);
+        const next = seedWorldFor(id, onlySociety);
         const current = get().session.userId;
         set({
           scenarioId: id,
@@ -173,7 +188,7 @@ export function createAppStore(options: { storage?: StorageLike; startAs?: Role 
           seedWorld: next.world,
           world: next.world,
           userEvents: [],
-          session: next.world.users.some((u) => u.id === current) ? { userId: current } : defaultSession(next.world, startAs),
+          session: canLogInAs(next.world, current) ? { userId: current } : defaultSession(next.world, startAs),
           notice: undefined,
         });
         return { ok: true };
@@ -186,7 +201,7 @@ export function createAppStore(options: { storage?: StorageLike; startAs?: Role 
 
     reset() {
       clearPersisted(storage);
-      const current = seedWorldFor(get().scenarioId);
+      const current = seedWorldFor(get().scenarioId, onlySociety);
       set({ world: current.world, seedWorld: current.world, userEvents: [], session: { userId: get().session.userId }, notice: undefined });
     },
 
