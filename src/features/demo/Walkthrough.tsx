@@ -23,6 +23,14 @@ export interface Walkthrough {
   readonly title: string;
   readonly summary: string;
   readonly steps: readonly WalkStep[];
+  /** Tells a story about past loans, so the demo's clean start does not offer it. */
+  readonly needsHistory?: true;
+}
+
+/** The walkthroughs this world can tell. */
+export function useWalkthroughs(): readonly Walkthrough[] {
+  const demo = useAppStore((s) => s.demo);
+  return demo ? WALKTHROUGHS.filter((w) => !w.needsHistory) : WALKTHROUGHS;
 }
 
 export const WALKTHROUGHS: readonly Walkthrough[] = [
@@ -53,12 +61,12 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The federation sanctions',
-        body: 'The apex officer opens ANN/POOL/2026-27/02, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
+        body: 'The apex officer opens the society’s new pool, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
         go: { userId: 'usr_apex', path: '/apex/requests' },
       },
       {
         title: 'The society draws down and pays out',
-        body: 'Open the new sanction, PACF/SAN/2026-27/015, and choose Draw down and disburse. One drawdown, and a disbursement for each member in the pool, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
+        body: 'Open the new sanction and choose Draw down and disburse. One drawdown, and a disbursement for each member in the pool, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -73,7 +81,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The society remits',
-        body: 'Open PACF/SAN/2026-27/015 and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
+        body: 'Open the sanction and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -85,6 +93,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   },
   {
     id: 'delinquency',
+    needsHistory: true,
     title: 'When members fall behind',
     summary: 'Scenario B: late members cost the society cash, not margin, and the margin comes back as they catch up.',
     steps: [
@@ -127,6 +136,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   },
   {
     id: 'prepayment',
+    needsHistory: true,
     title: 'Prepayment and recovery',
     summary: 'Scenario C: a part-prepayment shortens a loan, a foreclosure passes straight to the federation, and partial recoveries pay interest before principal.',
     steps: [
@@ -154,6 +164,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   },
   {
     id: 'clean',
+    needsHistory: true,
     title: 'A month in the life of a pool',
     summary: 'Scenario A: collect from twelve members, pay the federation, and trace the margin to the journal.',
     steps: [
@@ -262,9 +273,10 @@ export function useWalkthrough(): WalkthroughState {
 /** The tours, each started with one click. Starting reloads its scenario. */
 export function WalkthroughList() {
   const { start } = useWalkthrough();
+  const walkthroughs = useWalkthroughs();
   return (
     <ul className="space-y-3">
-      {WALKTHROUGHS.map((w) => (
+      {walkthroughs.map((w) => (
         <li key={w.id} className="rounded-md border p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-medium">{w.title}</p>

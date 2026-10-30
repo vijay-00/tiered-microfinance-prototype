@@ -13,16 +13,16 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { addDaysISO, addMonthsISO } from '@/domain/dates';
 import type { Role } from '@/domain/types';
-import { SCENARIOS, scenario } from '@/data/scenarios';
 import { cn } from '@/lib/cn';
 import { formatDate, formatDateLong, plural } from '@/lib/format';
 import { useAppStore } from '@/store/context';
-import { useWalkthrough, WALKTHROUGHS } from './Walkthrough';
+import { useWalkthrough, useWalkthroughs } from './Walkthrough';
 import {
   selectCurrentUser,
   selectInvariantHealth,
   selectInvariants,
   selectNextDueDateForViewer,
+  selectScenarios,
 } from '@/store/selectors';
 
 /**
@@ -67,7 +67,8 @@ function SocietySwitcher() {
   const switchUser = useAppStore((s) => s.switchUser);
   const peers = users.filter((u) => u.role === user.role && u.societyId);
   const current = societies.find((s) => s.id === user.societyId);
-  if (!current || peers.length < 2) return null;
+  // Members are picked by name, below; they share one society's books.
+  if (user.role === 'MEMBER' || !current || peers.length < 2) return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -92,6 +93,40 @@ function SocietySwitcher() {
             </DropdownMenuItem>
           );
         })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Viewing as a member, this picks which one: each has a login of their own. */
+function MemberSwitcher() {
+  const user = useAppStore(selectCurrentUser);
+  const users = useAppStore((s) => s.world.users);
+  const members = useAppStore((s) => s.world.members);
+  const switchUser = useAppStore((s) => s.switchUser);
+  if (user.role !== 'MEMBER') return null;
+  const logins = users.filter((u) => u.role === 'MEMBER');
+  if (logins.length < 2) return null;
+  const villageOf = (u: (typeof logins)[number]) => members.find((m) => m.id === u.memberId)?.village;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="outline" className={stripButton} aria-label={`Member: ${user.name}`}>
+          {user.name}
+          <ChevronDown aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuLabel>View as member</DropdownMenuLabel>
+        {logins.map((u) => (
+          <DropdownMenuItem key={u.id} onSelect={() => switchUser(u.id)}>
+            <span className="font-medium">
+              {u.name}
+              {u.id === user.id ? ' (current)' : ''}
+            </span>
+            <span className="text-xs text-muted-foreground">{villageOf(u)}</span>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -133,17 +168,19 @@ function ScenarioMenu() {
   const changes = useAppStore((s) => s.userEvents.length);
   const load = useAppStore((s) => s.loadScenario);
   const reset = useAppStore((s) => s.reset);
+  const scenarios = useAppStore(selectScenarios);
+  const currentName = scenarios.find((s) => s.id === current)?.name ?? '';
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button size="sm" variant="outline" className={stripButton}>
-          Scenario {current} · {scenario(current).name}
+          {scenarios.length > 1 ? `Scenario ${current} · ${currentName}` : currentName}
           <ChevronDown aria-hidden />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        <DropdownMenuLabel>Load a scenario</DropdownMenuLabel>
-        {SCENARIOS.map((s) => (
+        <DropdownMenuLabel>{scenarios.length > 1 ? 'Load a scenario' : 'The demo'}</DropdownMenuLabel>
+        {scenarios.map((s) => (
           <DropdownMenuItem key={s.id} disabled={!s.load} onSelect={() => load(s.id)}>
             <span className="font-medium">
               {s.id}. {s.name}
@@ -170,6 +207,7 @@ function ScenarioMenu() {
 
 function WalkthroughMenu() {
   const { start } = useWalkthrough();
+  const walkthroughs = useWalkthroughs();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -181,7 +219,7 @@ function WalkthroughMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuLabel>Guided walkthroughs</DropdownMenuLabel>
-        {WALKTHROUGHS.map((w) => (
+        {walkthroughs.map((w) => (
           <DropdownMenuItem key={w.id} onSelect={() => start(w.id)}>
             <span className="font-medium">{w.title}</span>
             <span className="max-w-72 text-xs text-muted-foreground">{w.summary}</span>
@@ -277,6 +315,7 @@ export function DemoToolbar() {
         </span>
         <RoleSwitcher />
         <SocietySwitcher />
+        <MemberSwitcher />
         <span aria-hidden className="hidden h-5 w-px bg-demo-border md:block" />
         <ClockControl />
         <span aria-hidden className="hidden h-5 w-px bg-demo-border md:block" />

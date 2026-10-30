@@ -74,7 +74,9 @@ function Margin({ data }: { data: SocietyDashboard }) {
       </div>
       <BigMoney paise={margin.realised.value} />
       <div className="g-sub">
-        {close ? (
+        {margin.theoretical === 0 && margin.realised.value === 0 ? (
+          'Nothing has fallen due yet'
+        ) : close ? (
           'On schedule: members paid what the schedules promised'
         ) : margin.difference < 0 ? (
           <>

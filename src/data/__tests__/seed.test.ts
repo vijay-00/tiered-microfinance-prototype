@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { invariantsBySociety, createWorld, replay } from '@/domain/world';
 import { trialBalanceOf } from '@/domain/reporting';
 import { buildScenario, buildScenarioA, SEED_TODAY } from '../../../scripts/seed/scenario-a';
-import { loadSeed, parseSeed, restrictToSociety, SeedError, loadScenarioA } from '../seed';
+import { cleanStart, loadSeed, parseSeed, SeedError, loadScenarioA } from '../seed';
 import federation from '../mock/federation.json';
 import policy from '../mock/policy.json';
 import societies from '../mock/societies.json';
@@ -33,25 +33,36 @@ describe.each(['B', 'C'] as const)('scenario %s', (id) => {
   });
 });
 
-describe.each(['A', 'B', 'C'] as const)('scenario %s cut down to the member’s society', (id) => {
-  const full = replay(createWorld(loadSeed(id).base), loadSeed(id).events);
-  const seed = restrictToSociety(loadSeed(id), 'soc_1');
+describe('the demo’s clean start', () => {
+  const seed = cleanStart(loadScenarioA(), 'soc_1', 5, (role) => role === 'LOAN_OFFICER');
   const world = replay(createWorld(seed.base), seed.events);
 
-  it('holds Annapoorani and the federation, and nothing of the others', () => {
-    expect(world.societies.map((s) => s.id)).toEqual(['soc_1']);
-    expect(world.users.every((u) => u.societyId === 'soc_1' || u.role === 'APEX_OFFICER')).toBe(true);
-    expect(world.users.some((u) => u.role === 'MEMBER')).toBe(true);
-    expect(world.pools.every((p) => p.societyId === 'soc_1')).toBe(true);
-    expect(Object.values(world.tranches).every((t) => t.tranche.societyId === 'soc_1')).toBe(true);
+  it('holds Annapoorani alone, with five active members, each with a login, and nothing on file', () => {
+    expect(world.societies.map((s) => s.name)).toEqual(['Annapoorani Credit Society']);
+    expect(world.members).toHaveLength(5);
+    expect(world.members.every((m) => m.societyId === 'soc_1' && m.status === 'ACTIVE')).toBe(true);
+    const logins = world.users.filter((u) => u.role === 'MEMBER');
+    expect(logins.map((u) => u.memberId)).toEqual(world.members.map((m) => m.id));
+    expect(logins.map((u) => u.name)).toEqual(world.members.map((m) => m.name));
+    // The seed's member login comes first, under the same id.
+    expect(logins[0]).toMatchObject({ id: 'usr_member', name: 'Veerappan Pandian' });
+    expect(world.applications).toEqual([]);
+    expect(world.pools).toEqual([]);
+    expect(world.loans).toEqual({});
+    expect(world.tranches).toEqual({});
   });
 
-  it('leaves Annapoorani’s books exactly as they were, with every invariant green', () => {
-    expect(world.clock).toBe(full.clock);
-    // Entry ids are numbered across the federation, so only they differ.
-    const unnumbered = (entries: typeof world.journals.soc_1) => entries!.map(({ id: _id, ...entry }) => entry);
-    expect(unnumbered(world.journals.soc_1)).toEqual(unnumbered(full.journals.soc_1));
-    expect(Object.values(world.loans)).toEqual(Object.values(full.loans).filter((l) => l.loan.societyId === 'soc_1'));
+  it('has the secretary, the auditor and the apex officer, and nobody in a hidden role', () => {
+    expect(world.users.filter((u) => u.role !== 'MEMBER').map((u) => u.role).sort()).toEqual([
+      'APEX_OFFICER',
+      'AUDITOR',
+      'SECRETARY',
+    ]);
+  });
+
+  it('opens with the society’s reserves and nothing else, on the seed’s last day, with the books whole', () => {
+    expect(world.clock).toBe(SEED_TODAY);
+    expect(world.journals.soc_1!.map((e) => e.sourceType)).toEqual(['OPENING']);
     for (const results of Object.values(invariantsBySociety(world))) {
       expect(results.filter((r) => !r.ok).map((r) => `${r.id} ${r.detail}`)).toEqual([]);
     }

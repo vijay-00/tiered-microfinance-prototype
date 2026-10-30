@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
-import { SCENARIOS, type ScenarioId } from '@/data/scenarios';
+import type { ScenarioId } from '@/data/scenarios';
 import { formatBps, formatPaise } from '@/domain/money';
 import { REPAYMENT_CAP_SHARE } from '@/domain/origination';
 import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
@@ -13,6 +13,7 @@ import { cn } from '@/lib/cn';
 import { plural } from '@/lib/format';
 import { percent } from '@/lib/labels';
 import { useAppStore } from '@/store/context';
+import { selectScenarios } from '@/store/selectors';
 import { WalkthroughList } from '@/features/demo/Walkthrough';
 
 /**
@@ -26,6 +27,7 @@ export function SettingsPage() {
   const changes = useAppStore((s) => s.userEvents.length);
   const loadScenario = useAppStore((s) => s.loadScenario);
   const reset = useAppStore((s) => s.reset);
+  const scenarios = useAppStore(selectScenarios);
 
   return (
     <>
@@ -81,7 +83,7 @@ export function SettingsPage() {
             </span>
           </CardHeader>
           <CardContent className="space-y-3">
-            {SCENARIOS.map((s) => (
+            {scenarios.map((s) => (
               <div key={s.id} className={cn('rounded-md border p-3', s.id === scenarioId && 'border-primary bg-accent/40')}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium">

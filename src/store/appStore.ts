@@ -4,13 +4,7 @@ import { compareISO } from '@/domain/dates';
 import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
-import {
-  freshStartForMemberLogin,
-  reassignUser,
-  restrictToSociety,
-  withoutDraftPools,
-  type LoadedSeed,
-} from '@/data/seed';
+import { cleanStart } from '@/data/seed';
 import { catchUpEvents } from './commands';
 import {
   clearPersisted,
@@ -41,6 +35,11 @@ export interface AppState {
   session: Session;
   /** The last thing that could not be done, for the UI to say so. */
   notice: string | undefined;
+  /**
+   * The demo's clean start: no history, so the scenarios and walkthroughs
+   * that tell a story about past loans are not offered.
+   */
+  demo: boolean;
 }
 
 export interface DispatchOptions {
@@ -71,16 +70,20 @@ export type AppStore = StoreApi<AppStoreState>;
 
 const seedWorlds = new Map<string, { world: WorldState; version: string }>();
 
-function seedWorldFor(id: ScenarioId, onlySociety?: ID, today?: ISODate): { world: WorldState; version: string } {
-  const key = `${id}:${onlySociety ?? '*'}:${today ?? ''}`;
+/** The demo's world: one society, a few members, nothing on file. */
+export interface DemoOptions {
+  societyId: ID;
+  members: number;
+}
+
+function seedWorldFor(id: ScenarioId, demo?: DemoOptions, today?: ISODate): { world: WorldState; version: string } {
+  const key = `${id}:${demo ? `${demo.societyId}/${demo.members}` : '*'}:${today ?? ''}`;
   const cached = seedWorlds.get(key);
   if (cached) return cached;
   const load = scenario(id).load;
   if (!load) throw new Error(`scenario ${id} is not available yet`);
   const full = load();
-  const seed = onlySociety
-    ? withoutDraftPools(freshStartForMemberLogin(withoutHiddenRoles(restrictToSociety(full, onlySociety))))
-    : full;
+  const seed = demo ? cleanStart(full, demo.societyId, demo.members, (role) => !!roleInfo(role).hidden) : full;
   const replayed = replay(createWorld(seed.base), seed.events);
   // The seed's history ends on its own day. Carried forward to today, the
   // demo opens on the real date with every month in between gone as usual.
@@ -90,16 +93,6 @@ function seedWorldFor(id: ScenarioId, onlySociety?: ID, today?: ISODate): { worl
       : { world: replayed, version: seed.version };
   seedWorlds.set(key, built);
   return built;
-}
-
-/** The demo's seed with each hidden role's people folded into their society's secretary. */
-function withoutHiddenRoles(seed: LoadedSeed): LoadedSeed {
-  return seed.base.users
-    .filter((u) => roleInfo(u.role).hidden)
-    .reduce((next, hidden) => {
-      const secretary = next.base.users.find((u) => u.role === 'SECRETARY' && u.societyId === hidden.societyId);
-      return secretary ? reassignUser(next, hidden.id, secretary.id) : next;
-    }, seed);
 }
 
 /** A user the demo can log in as: in this world, and not in a hidden role. */
@@ -132,26 +125,26 @@ function message(error: unknown): string {
  * scenario lacks the current user. The demo opens as the apex officer
  * (main.tsx); tests start as the secretary, where their scripts begin.
  *
- * `onlySociety` cuts every scenario down to that one society and the
- * federation, and credits what hidden roles did (the loan officer's
- * appraisals and receipts) to the society's secretary, so nobody the demo
- * cannot show turns up in its history. The member you log in as starts with
- * no loan on file, and no pool is half-built for you. The demo shows only the society its
- * member belongs to; tests leave it unset and run against all three.
+ * `demo` opens a clean start instead of the seed's history: one society,
+ * that many members each with a login of their own, no loans, and nobody in
+ * a role the demo hides (see cleanStart). Tests leave it unset and run the
+ * three societies' year of history.
  *
- * `today` is the real date: the seed's history is carried forward to it,
- * instalments paid and remittances made as usual, so the demo opens on the
- * day it is used. Tests leave it unset and stay on the seed's own day.
+ * `today` is the real date: the world is carried forward to it, instalments
+ * paid and remittances made as usual, so the demo opens on the day it is
+ * used. Tests leave it unset and stay on the seed's own day.
  */
 export function createAppStore(
-  options: { storage?: StorageLike; startAs?: Role; onlySociety?: ID; today?: ISODate } = {},
+  options: { storage?: StorageLike; startAs?: Role; demo?: DemoOptions; today?: ISODate } = {},
 ): AppStore {
-  const { storage, startAs = 'SECRETARY', onlySociety, today } = options;
+  const { storage, startAs = 'SECRETARY', demo, today } = options;
   const saved = loadPersisted(storage);
 
   let scenarioId: ScenarioId = DEFAULT_SCENARIO;
   if (saved && scenario(saved.scenarioId).load) scenarioId = saved.scenarioId;
-  const seed = seedWorldFor(scenarioId, onlySociety, today);
+  // The clean start has no history for another scenario to tell.
+  if (demo) scenarioId = DEFAULT_SCENARIO;
+  const seed = seedWorldFor(scenarioId, demo, today);
 
   let world = seed.world;
   let userEvents: readonly WorldEvent[] = [];
@@ -183,6 +176,7 @@ export function createAppStore(
     world,
     session,
     notice,
+    demo: !!demo,
 
     dispatch(event, options) {
       return get().dispatchMany([event], options);
@@ -217,7 +211,7 @@ export function createAppStore(
 
     loadScenario(id) {
       try {
-        const next = seedWorldFor(id, onlySociety, today);
+        const next = seedWorldFor(id, demo, today);
         const current = get().session.userId;
         set({
           scenarioId: id,
@@ -238,7 +232,7 @@ export function createAppStore(
 
     reset() {
       clearPersisted(storage);
-      const current = seedWorldFor(get().scenarioId, onlySociety, today);
+      const current = seedWorldFor(get().scenarioId, demo, today);
       set({ world: current.world, seedWorld: current.world, userEvents: [], session: { userId: get().session.userId }, notice: undefined });
     },
 

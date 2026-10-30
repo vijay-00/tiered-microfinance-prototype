@@ -166,52 +166,43 @@ describe('the role a first visit opens as', () => {
   });
 });
 
-describe.each(['A', 'B', 'C'] as const)('the demo, cut down to the member’s society, in scenario %s', (id) => {
-  const store = createAppStore({ onlySociety: 'soc_1' });
-  if (id !== 'A') store.getState().loadScenario(id);
+const DEMO = { societyId: 'soc_1', members: 5 };
+
+describe('the demo’s clean start', () => {
+  const store = createAppStore({ demo: DEMO, today: '2026-10-30' });
   const world = () => store.getState().world;
 
-  it('has one society, one member to log in as, and nobody in a hidden role', () => {
+  it('opens on today with one society, five members to log in as, and nobody in a hidden role', () => {
+    expect(store.getState().demo).toBe(true);
+    expect(world().clock).toBe('2026-10-30');
     expect(world().societies.map((s) => s.name)).toEqual(['Annapoorani Credit Society']);
-    expect(world().users.map((u) => `${u.name}, ${u.role}`).sort()).toEqual([
-      'Dr. Sudha Ramanathan, APEX_OFFICER',
-      'Meenakshi Sundaram, SECRETARY',
-      'R. N. Subramanian, AUDITOR',
-      'Veerappan Pandian, MEMBER',
-    ]);
+    const roles = world().users.map((u) => u.role);
+    expect(roles.filter((r) => r === 'MEMBER')).toHaveLength(5);
+    expect(roles.filter((r) => r !== 'MEMBER').sort()).toEqual(['APEX_OFFICER', 'AUDITOR', 'SECRETARY']);
   });
 
-  it('credits the loan officer’s past work to the secretary, so his name is nowhere in it', () => {
-    expect(JSON.stringify(world())).not.toContain('usr_officer');
-    const appraised = world().applications.filter((a) => a.appraisal);
-    expect(appraised.length).toBeGreaterThan(0);
-    expect(appraised.every((a) => a.appraisal!.officerId === 'usr_secretary')).toBe(true);
-    expect(store.getState().userEvents).toHaveLength(0);
-  });
-
-  it('has no pool half-built in advance: every approved application waits to be picked', () => {
-    expect(world().pools.filter((p) => p.status === 'OPEN' || p.status === 'READY')).toEqual([]);
-    const waiting = world().applications.filter((a) => a.status === 'APPROVED');
-    expect(waiting.length).toBeGreaterThan(0);
-    expect(waiting.every((a) => a.poolId === undefined)).toBe(true);
-  });
-
-  it('starts Veerappan Pandian with no loan and no application on file', () => {
-    const login = world().users.find((u) => u.role === 'MEMBER')!;
-    const member = world().members.find((m) => m.id === login.memberId)!;
-    expect(member.name).toBe('Veerappan Pandian');
-    expect(member.status).toBe('ACTIVE');
-    expect(world().applications.filter((a) => a.memberId === member.id)).toEqual([]);
-    expect(Object.values(world().loans).filter((l) => l.loan.memberId === member.id)).toEqual([]);
-    // Nothing of his is due, so the member's Next due date has nowhere to go.
-    store.getState().switchUser(login.id);
+  it('has no loan, application or pool for anyone, and every figure at nothing', () => {
+    expect(world().applications).toEqual([]);
+    expect(world().pools).toEqual([]);
+    expect(world().loans).toEqual({});
+    expect(world().tranches).toEqual({});
+    expect(selectInvariantHealth(world()).ok).toBe(true);
+    // Nothing of a member's is due, so their Next due date has nowhere to go.
+    store.getState().switchUser('usr_member');
     expect(selectNextDueDateForViewer(store.getState())).toBeUndefined();
+  });
+
+  it('stays on the clean start whatever scenario was saved', () => {
+    const storage = new MemoryStorage();
+    const full = createAppStore({ storage });
+    full.getState().loadScenario('B');
+    expect(createAppStore({ storage, demo: DEMO }).getState().scenarioId).toBe('A');
   });
 });
 
 describe('the demo member’s first loan', () => {
   it('can be for the full Rs 5,00,000, and falls due on the same day each month', () => {
-    const store = createAppStore({ onlySociety: 'soc_1' });
+    const store = createAppStore({ demo: DEMO });
     const { world, dispatch } = store.getState();
     const login = world.users.find((u) => u.role === 'MEMBER')!;
     const on = world.clock;
@@ -271,8 +262,8 @@ describe('the demo member’s first loan', () => {
 });
 
 describe.each(['A', 'B', 'C'] as const)('the demo on the real date, in scenario %s', (id) => {
-  const atSeed = createAppStore({ onlySociety: 'soc_1' });
-  const store = createAppStore({ onlySociety: 'soc_1', today: '2027-03-10' });
+  const atSeed = createAppStore();
+  const store = createAppStore({ today: '2027-03-10' });
   if (id !== 'A') {
     atSeed.getState().loadScenario(id);
     store.getState().loadScenario(id);
@@ -297,13 +288,13 @@ describe.each(['A', 'B', 'C'] as const)('the demo on the real date, in scenario 
 
 describe('the demo on the seed’s own day', () => {
   it('stays as the seed left it when today is not later', () => {
-    const store = createAppStore({ onlySociety: 'soc_1', today: '2026-10-01' });
+    const store = createAppStore({ today: '2026-10-01' });
     expect(store.getState().world.clock).toBe('2026-10-29');
   });
 
   it('only moves the calendar when no instalment falls due before today', () => {
-    const store = createAppStore({ onlySociety: 'soc_1', today: '2026-10-30' });
-    const plain = createAppStore({ onlySociety: 'soc_1' });
+    const store = createAppStore({ today: '2026-10-30' });
+    const plain = createAppStore();
     expect(store.getState().world.clock).toBe('2026-10-30');
     expect(store.getState().world.eventCount).toBe(plain.getState().world.eventCount + 1);
   });

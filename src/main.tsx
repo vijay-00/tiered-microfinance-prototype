@@ -9,11 +9,11 @@ import { AppProviders } from './store/context';
 import { browserStorage } from './store/persistence';
 
 // The demo opens on the federation's view; the demo bar switches to any other role.
-// It shows one society, the one the demo's member belongs to, on today's date
+// It shows one society on a clean start, five members and no loans, on today's date
 // where the person using it is.
 const now = new Date();
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-const store = createAppStore({ storage: browserStorage(), startAs: 'APEX_OFFICER', onlySociety: 'soc_1', today });
+const store = createAppStore({ storage: browserStorage(), startAs: 'APEX_OFFICER', demo: { societyId: 'soc_1', members: 5 }, today });
 const repositories = createRepositories(store);
 const router = createAppRouter();
 

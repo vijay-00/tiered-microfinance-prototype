@@ -39,6 +39,16 @@ export const SCENARIOS: readonly Scenario[] = [
 
 export const DEFAULT_SCENARIO: ScenarioId = 'A';
 
+/** What the demo's clean start offers: scenario A, with nothing on file, and no other. */
+export const CLEAN_START_SCENARIOS: readonly Scenario[] = [
+  {
+    id: 'A',
+    name: 'Fresh start',
+    summary: 'Annapoorani with five members and no loans yet: every application, pool and loan is one you make.',
+    load: () => loadSeed('A'),
+  },
+];
+
 export function scenario(id: ScenarioId): Scenario {
   const found = SCENARIOS.find((s) => s.id === id);
   if (!found) throw new Error(`no scenario ${id}`);

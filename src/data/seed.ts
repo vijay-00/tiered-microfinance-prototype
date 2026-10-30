@@ -9,6 +9,8 @@ import {
   userSchema,
   type ID,
   type ISODate,
+  type Role,
+  type User,
 } from '@/domain/types';
 import { worldEventSchema, type WorldBase, type WorldEvent } from '@/domain/world';
 import applicationsJson from './mock/applications.json';
@@ -187,152 +189,69 @@ export function loadSeed(id: SeedScenario): LoadedSeed {
 export const loadScenarioA = (): LoadedSeed => loadSeed('A');
 
 /**
- * The seed cut down to one society and the federation: its people, members,
- * applications and pools, and the events that touch them. Each society keeps
- * its own books, so dropping the others leaves the one kept exactly as it was.
+ * The demo's world: one society on a clean start. Its first `memberCount`
+ * members, every one active with nothing on file, each with a login of their
+ * own; its secretary and auditor; the federation and its apex officer. No
+ * application, pool, tranche or loan: the society's opening reserves and
+ * nothing else, so every figure starts at zero and grows only from what is
+ * done in the demo. The calendar starts where the seed's history ends.
+ *
+ * The member the seed logs in as comes first, under the same login. Roles the
+ * demo hides, the loan officer, have nobody.
  */
-export function restrictToSociety(seed: LoadedSeed, societyId: ID): LoadedSeed {
+export function cleanStart(
+  seed: LoadedSeed,
+  societyId: ID,
+  memberCount: number,
+  hidden: (role: Role) => boolean,
+): LoadedSeed {
   const { base } = seed;
-  if (!base.societies.some((s) => s.id === societyId)) throw new SeedError([`no society ${societyId} to keep`]);
+  const society = base.societies.find((s) => s.id === societyId);
+  if (!society) throw new SeedError([`no society ${societyId} to start`]);
+  const login = base.users.find((u) => u.role === 'MEMBER' && u.societyId === societyId);
+  const ofSociety = base.members.filter((m) => m.societyId === societyId);
+  const first = ofSociety.find((m) => m.id === login?.memberId);
+  const members = [...(first ? [first] : []), ...ofSociety.filter((m) => m !== first)]
+    .slice(0, memberCount)
+    .map((m) => ({ ...m, status: 'ACTIVE' as const }));
+  if (members.length < memberCount) throw new SeedError([`${society.name} has fewer than ${memberCount} members`]);
 
-  const userSociety = new Map<ID, ID | undefined>(base.users.map((u) => [u.id, u.societyId]));
-  const memberSociety = new Map(base.members.map((m) => [m.id, m.societyId]));
-  const applicationSociety = new Map<ID, ID | undefined>(base.applications.map((a) => [a.id, a.societyId]));
-  const poolSociety = new Map<ID, ID | undefined>(base.pools.map((p) => [p.id, p.societyId]));
-  const trancheSociety = new Map<ID, ID | undefined>();
-  const loanSociety = new Map<ID, ID | undefined>();
+  const staff = base.users.filter(
+    (u) => u.role !== 'MEMBER' && !hidden(u.role) && (u.societyId === societyId || !u.societyId),
+  );
+  const memberLogins: User[] = members.map((m, i) => ({
+    id: i === 0 && login ? login.id : `usr_member_${i + 1}`,
+    name: m.name,
+    role: 'MEMBER',
+    title: 'Member',
+    societyId,
+    memberId: m.id,
+  }));
 
-  // In order, so a pool, tranche or loan is known before the events that use it.
-  const societyOf = (event: WorldEvent): ID | undefined => {
-    switch (event.type) {
-      case 'CLOCK_ADVANCED':
-        return undefined;
-      case 'RESERVES_OPENED':
-      case 'PERIOD_CLOSED':
-        return event.societyId;
-      case 'APPLICATION_SUBMITTED': {
-        const society = memberSociety.get(event.memberId);
-        applicationSociety.set(event.applicationId, society);
-        return society;
-      }
-      case 'APPLICATION_APPRAISED':
-      case 'APPLICATION_DECIDED':
-        return applicationSociety.get(event.applicationId);
-      case 'POOL_CREATED': {
-        const society = userSociety.get(event.recordedBy);
-        poolSociety.set(event.poolId, society);
-        return society;
-      }
-      case 'POOL_APPLICATIONS_SET':
-      case 'POOL_STATUS_CHANGED':
-      case 'POOL_RESCOPED':
-        return poolSociety.get(event.poolId);
-      case 'TRANCHE_SANCTIONED': {
-        const society = poolSociety.get(event.poolId);
-        trancheSociety.set(event.trancheId, society);
-        return society;
-      }
-      case 'TRANCHE_DRAWN':
-      case 'REMITTANCE_RECORDED':
-        return trancheSociety.get(event.trancheId);
-      case 'LOAN_DISBURSED': {
-        const society = applicationSociety.get(event.applicationId);
-        loanSociety.set(event.loanId, society);
-        return society;
-      }
-      case 'FEE_CHARGED':
-      case 'PAYMENT_RECEIVED':
-        return loanSociety.get(event.loanId);
+  // The society's opening reserves, on their day, then the calendar on to the
+  // last day of the seed's history.
+  const events: WorldEvent[] = [];
+  let opened: ISODate | undefined;
+  for (const event of seed.events) {
+    if (event.type === 'RESERVES_OPENED' && event.societyId === societyId) {
+      opened = event.on;
+      events.push({ type: 'CLOCK_ADVANCED', to: opened }, event);
+      break;
     }
-  };
+  }
+  const lastDay = seed.events.reduce<ISODate | undefined>(
+    (day, event) => (event.type === 'CLOCK_ADVANCED' ? event.to : day),
+    undefined,
+  );
+  if (lastDay && (!opened || lastDay > opened)) events.push({ type: 'CLOCK_ADVANCED', to: lastDay });
 
-  const keep = (id: ID | undefined) => id === undefined || id === societyId;
-  const restricted: WorldBase = {
+  const clean: WorldBase = {
     ...base,
-    societies: base.societies.filter((s) => s.id === societyId),
-    users: base.users.filter((u) => keep(u.societyId)),
-    members: base.members.filter((m) => m.societyId === societyId),
-    applications: base.applications.filter((a) => a.societyId === societyId),
-    pools: base.pools.filter((p) => p.societyId === societyId),
+    societies: [society],
+    users: [...staff, ...memberLogins],
+    members,
+    applications: [],
+    pools: [],
   };
-  const events = seed.events.filter((event) => {
-    if (event.type === 'CLOCK_ADVANCED') return true;
-    return societyOf(event) === societyId;
-  });
-  return { base: restricted, events, version: fnv1a(JSON.stringify({ base: restricted, events })) };
-}
-
-/**
- * The seed with one person's work credited to another: every record that
- * names `fromId` (who appraised, decided or took a payment) names `toId`
- * instead, and `fromId` is gone. For a role the demo hides, so its people do
- * not turn up in the history either.
- */
-export function reassignUser(seed: LoadedSeed, fromId: ID, toId: ID): LoadedSeed {
-  if (!seed.base.users.some((u) => u.id === toId)) throw new SeedError([`no user ${toId} to credit`]);
-  const swap = (value: unknown): unknown => {
-    if (value === fromId) return toId;
-    if (Array.isArray(value)) return value.map(swap);
-    if (value && typeof value === 'object') {
-      return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, swap(inner)]));
-    }
-    return value;
-  };
-  const base = swap({ ...seed.base, users: seed.base.users.filter((u) => u.id !== fromId) }) as WorldBase;
-  const events = swap(seed.events) as WorldEvent[];
-  return { base, events, version: fnv1a(JSON.stringify({ base, events })) };
-}
-
-/**
- * The member login starts with nothing on file: no loan, no application, so
- * the demo shows a member's first loan from the start, up to the full limit
- * per member. The login moves to an active member of the same society who
- * has never applied, and the two swap names, so the person you log in as is
- * still who the demo says it is; the old history stays, under the other name.
- */
-export function freshStartForMemberLogin(seed: LoadedSeed): LoadedSeed {
-  const login = seed.base.users.find((u) => u.role === 'MEMBER' && u.memberId);
-  if (!login) return seed;
-  const applied = new Set([
-    ...seed.base.applications.map((a) => a.memberId),
-    ...seed.events.flatMap((e) => (e.type === 'APPLICATION_SUBMITTED' ? [e.memberId] : [])),
-  ]);
-  if (!applied.has(login.memberId!)) return seed;
-  const current = seed.base.members.find((m) => m.id === login.memberId)!;
-  const fresh = seed.base.members.find(
-    (m) => m.societyId === current.societyId && m.status === 'ACTIVE' && !applied.has(m.id),
-  );
-  if (!fresh) throw new SeedError([`no member of ${current.societyId} without history to log in as`]);
-  const base: WorldBase = {
-    ...seed.base,
-    users: seed.base.users.map((u) => (u.id === login.id ? { ...u, memberId: fresh.id } : u)),
-    members: seed.base.members.map((m) =>
-      m.id === fresh.id ? { ...m, name: current.name } : m.id === current.id ? { ...m, name: fresh.name } : m,
-    ),
-  };
-  return { base, events: seed.events, version: fnv1a(JSON.stringify({ base, events: seed.events })) };
-}
-
-/**
- * No pool half-built in advance: a draft the seed starts with is dissolved
- * and its applications go back to approved and waiting, so whoever builds the
- * next pool picks every member in it. Only drafts nothing has happened to are
- * dropped; a pool any event names is left alone.
- */
-export function withoutDraftPools(seed: LoadedSeed): LoadedSeed {
-  const named = new Set(seed.events.flatMap((e) => ('poolId' in e ? [e.poolId] : [])));
-  const drafts = new Set(
-    seed.base.pools.filter((p) => (p.status === 'OPEN' || p.status === 'READY') && !named.has(p.id)).map((p) => p.id),
-  );
-  if (drafts.size === 0) return seed;
-  const base: WorldBase = {
-    ...seed.base,
-    pools: seed.base.pools.filter((p) => !drafts.has(p.id)),
-    applications: seed.base.applications.map((a) => {
-      if (!a.poolId || !drafts.has(a.poolId)) return a;
-      const { poolId: _dropped, ...rest } = a;
-      return rest;
-    }),
-  };
-  return { base, events: seed.events, version: fnv1a(JSON.stringify({ base, events: seed.events })) };
+  return { base: clean, events, version: fnv1a(JSON.stringify({ base: clean, events })) };
 }

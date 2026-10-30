@@ -2,7 +2,13 @@ import type { InvariantResult } from '@/domain/invariants';
 import type { ID, ISODate, User } from '@/domain/types';
 import { invariantsBySociety, nextDueDate, type WorldState } from '@/domain/world';
 import { roleInfo, type RoleInfo } from '@/app/roles';
+import { CLEAN_START_SCENARIOS, SCENARIOS, type Scenario } from '@/data/scenarios';
 import type { AppStoreState } from './appStore';
+
+/** The scenarios this store can load: the demo's clean start has only its own. */
+export function selectScenarios(state: AppStoreState): readonly Scenario[] {
+  return state.demo ? CLEAN_START_SCENARIOS : SCENARIOS;
+}
 
 /**
  * Selectors over the store. Anything derived from the world is memoised on the
