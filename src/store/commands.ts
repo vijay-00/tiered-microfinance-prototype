@@ -171,11 +171,20 @@ export function nextPoolId(world: WorldState): ID {
   return `pool_${String(highest(world.pools.map((p) => p.id), /^pool_(\d+)$/) + 1).padStart(2, '0')}`;
 }
 
-/** ANN/POOL/2026-27/03: the society's pools are numbered afresh each financial year. */
+/**
+ * ANN/BATCH/2026-27/03: the society's batches are numbered afresh each
+ * financial year. Batches were once called pools, and the numbering carries
+ * on from any ANN/POOL/ reference of the same year, so none repeats.
+ */
 export function nextPoolReference(world: WorldState, societyId: ID): string {
-  const prefix = `${societyOf(world, societyId).code}/POOL/${financialYear(world.clock)}/`;
-  const last = highestAfter(world.pools.map((p) => p.reference), prefix);
-  return `${prefix}${String(last + 1).padStart(2, '0')}`;
+  const { code } = societyOf(world, societyId);
+  const year = financialYear(world.clock);
+  const references = world.pools.map((p) => p.reference);
+  const last = Math.max(
+    highestAfter(references, `${code}/BATCH/${year}/`),
+    highestAfter(references, `${code}/POOL/${year}/`),
+  );
+  return `${code}/BATCH/${year}/${String(last + 1).padStart(2, '0')}`;
 }
 
 export function nextTrancheId(world: WorldState): ID {

@@ -46,7 +46,7 @@ export function DisbursePanel({ trancheId, sanctionRef, canDisburse }: { tranche
         <CardContent className="text-sm">
           The members of {plan.rescope.reference} ask for <MoneyText paise={plan.rescope.asked} /> against the{' '}
           <MoneyText paise={plan.rescope.sanctioned} /> the federation sanctioned. Cut every loan pro rata, or remove
-          members until the pool fits; then draw down and disburse.
+          members until the batch fits; then draw down and disburse.
         </CardContent>
       </Card>
     );
@@ -87,7 +87,7 @@ export function DisbursePanel({ trancheId, sanctionRef, canDisburse }: { tranche
         {plan.candidates.length > 0 && !fits ? (
           <p className="text-muted-foreground">
             The sanction has <MoneyText paise={plan.capacity} /> left to lend, less than any loan still waiting. These
-            members stay pooled until further funding.
+            members stay batched until further funding.
           </p>
         ) : plan.candidates.length > 0 ? (
           <p className="text-muted-foreground">

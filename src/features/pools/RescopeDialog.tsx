@@ -68,19 +68,19 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button onClick={start}>Re-scope the pool</Button>
+      <Button onClick={start}>Re-scope the batch</Button>
       <DialogContent className="max-w-2xl">
         <DialogTitle>Re-scope {props.reference}</DialogTitle>
         <DialogDescription>
           The federation sanctioned <MoneyText paise={sanctioned} /> against <MoneyText paise={asked} /> asked for,{' '}
-          <MoneyText paise={asked - sanctioned} /> short. Choose how the pool fits.
+          <MoneyText paise={asked - sanctioned} /> short. Choose how the batch fits.
         </DialogDescription>
 
         <div role="radiogroup" aria-label="How to fit the sanction" className="mt-4 grid gap-2 sm:grid-cols-2">
           {(
             [
               ['PRO_RATA', 'Cut every loan pro rata', `Each member gets ${Math.floor((sanctioned / asked) * 1000) / 10}% of what was approved.`],
-              ['REMOVE', 'Remove members', 'The rest keep their full amounts; those removed can join another pool.'],
+              ['REMOVE', 'Remove members', 'The rest keep their full amounts; those removed can join another batch.'],
             ] as const
           ).map(([value, label, hint]) => (
             <button
@@ -105,7 +105,7 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
 
         <div className="mt-4 max-h-72 overflow-y-auto rounded-md border">
           <Table>
-            <caption className="sr-only">The pool after re-scoping</caption>
+            <caption className="sr-only">The batch after re-scoping</caption>
             <THead>
               <tr>
                 {method === 'REMOVE' ? (
@@ -161,7 +161,7 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
 
         <div className="mt-3 space-y-3 text-sm">
           <p>
-            The pool would ask for <span className="font-semibold"><MoneyText paise={newTotal} /></span> of the{' '}
+            The batch would ask for <span className="font-semibold"><MoneyText paise={newTotal} /></span> of the{' '}
             <MoneyText paise={sanctioned} /> sanctioned
             {method === 'REMOVE' ? `, from ${keptRows.length} of ${rows.length} members` : ''}.
           </p>
@@ -183,7 +183,7 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
             label={
               method === 'PRO_RATA'
                 ? 'Each member has agreed to the reduced amount and instalment'
-                : 'The members removed have been told they will wait for another pool'
+                : 'The members removed have been told they will wait for another batch'
             }
             hint="Re-scoping changes what members were promised, so it needs their word, not just the arithmetic."
           />
@@ -199,7 +199,7 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
           <Button onClick={() => void save()} disabled={!fits || !confirmed || pending}>
-            {pending ? 'Re-scoping…' : 'Re-scope the pool'}
+            {pending ? 'Re-scoping…' : 'Re-scope the batch'}
           </Button>
         </DialogFooter>
       </DialogContent>

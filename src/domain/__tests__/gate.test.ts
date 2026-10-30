@@ -391,13 +391,13 @@ describe('the invariants are not vacuous: each catches the corruption it exists 
     expect(failing({ ...healthy, loans: [{ ...first!, receipts }, ...rest] })).toContain(7);
   });
 
-  it('one application in two pools trips 9', () => {
+  it('one application in two batches trips 9', () => {
     const pool = healthy.pools[0]!;
     const second = { id: 'pool_02', applicationIds: [pool.applicationIds[0]!], status: 'OPEN' as const };
     expect(failing({ ...healthy, pools: [...healthy.pools, second] })).toContain(9);
   });
 
-  it('a pool submitted with no members trips 10', () => {
+  it('a batch submitted with no members trips 10', () => {
     const small = {
       id: 'pool_03',
       applicationIds: [],
@@ -420,7 +420,7 @@ describe('the invariants are not vacuous: each catches the corruption it exists 
     expect(failing({ ...healthy, loans: [{ ...first!, schedule }, ...rest] })).toContain(6);
   });
 
-  it('covers every member of the pool used for the gate', () => {
+  it('covers every member of the batch used for the gate', () => {
     expect(healthy.loans).toHaveLength(POOL_OF_TWELVE.length);
   });
 });

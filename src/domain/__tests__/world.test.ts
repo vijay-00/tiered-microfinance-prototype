@@ -70,8 +70,8 @@ describe('the reducer', () => {
   });
 });
 
-describe('pools', () => {
-  it('will not mark an empty pool ready, and says why', () => {
+describe('batches', () => {
+  it('will not mark an empty batch ready, and says why', () => {
     // pool_04 is being assembled; emptied, it has nothing to send.
     const emptied = applyEvent(seedWorld(), {
       type: 'POOL_APPLICATIONS_SET',
@@ -90,7 +90,7 @@ describe('pools', () => {
     expectError(() => applyEvent(emptied, event), WorldError, /Choose at least one approved application/);
   });
 
-  it('marks a pool of a single member ready: one application is enough to go to the federation', () => {
+  it('marks a batch of a single member ready: one application is enough to go to the federation', () => {
     const one = applyEvent(seedWorld(), {
       type: 'POOL_APPLICATIONS_SET',
       on: '2026-10-29',
@@ -101,7 +101,7 @@ describe('pools', () => {
     expect(one.pools.find((p) => p.id === 'pool_04')?.status).toBe('READY');
   });
 
-  it('locks applications to the pool on submission', () => {
+  it('locks applications to the batch on submission', () => {
     const sim = new Simulation({ start: '2026-04-01', specs: POOL_OF_TWELVE });
     sim.movePool('READY');
     sim.movePool('SUBMITTED');
@@ -121,7 +121,7 @@ describe('pools', () => {
       recordedBy,
       remarks,
     });
-    expectError(() => applyEvent(sim.state, decline('usr_secretary')), WorldError, /cannot review a pool as a Secretary/);
+    expectError(() => applyEvent(sim.state, decline('usr_secretary')), WorldError, /cannot review a batch as a Secretary/);
     expectError(() => applyEvent(sim.state, decline('usr_apex', ' ')), WorldError, /needs remarks/);
     const declined = applyEvent(sim.state, decline('usr_apex'));
     expect(poolOf(declined, 'pool_01').status).toBe('DECLINED');
@@ -153,7 +153,7 @@ describe('pools', () => {
       remarks: '',
       recordedBy: 'usr_secretary_2',
     };
-    expectError(() => applyEvent(seedWorld(), event), WorldError, /cannot review a pool as a Secretary/);
+    expectError(() => applyEvent(seedWorld(), event), WorldError, /cannot review a batch as a Secretary/);
   });
 
   it('refuses a status change the machine does not allow', () => {
@@ -272,7 +272,7 @@ describe('money events', () => {
     expect(() => applyEvent(world, remit('usr_secretary'))).not.toThrow();
   });
 
-  it('moves a pool to servicing on its first remittance and closes it with its last', () => {
+  it('moves a batch to servicing on its first remittance and closes it with its last', () => {
     const sim = setUpPool({ checkEveryStep: false });
     expect(poolOf(sim.state, 'pool_01').status).toBe('DISBURSED');
     sim.advanceTo('2026-05-15');

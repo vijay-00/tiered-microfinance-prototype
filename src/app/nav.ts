@@ -38,7 +38,7 @@ export const NAV: Record<Tier, NavGroup[]> = {
       items: [
         { to: '/members', label: 'Members', icon: Users },
         { to: '/applications', label: 'Applications', icon: FileText },
-        { to: '/pools', label: 'Pools', icon: Layers },
+        { to: '/pools', label: 'Batches', icon: Layers },
       ],
     },
     {

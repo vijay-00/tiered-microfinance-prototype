@@ -79,19 +79,20 @@ describe('dispatching several events', () => {
 describe('origination numbering', () => {
   const world = seedWorld();
 
-  it('continues the application, pool and tranche ids', () => {
+  it('continues the application, batch and tranche ids', () => {
     expect(nextApplicationId(world)).toBe('app_070');
     expect(nextPoolId(world)).toBe('pool_06');
     expect(nextTrancheId(world)).toBe('trn_04');
   });
 
-  it('numbers each society’s pools afresh each financial year', () => {
-    // Annapoorani has /01 and /02 this year; Sakthi Mahalir /01; Grama Valarchi’s /04 was last year’s.
-    expect(nextPoolReference(world, 'soc_1')).toBe('ANN/POOL/2026-27/03');
-    expect(nextPoolReference(world, 'soc_2')).toBe('GRM/POOL/2026-27/03');
-    expect(nextPoolReference(world, 'soc_3')).toBe('SHM/POOL/2026-27/02');
+  it('numbers each society’s batches afresh each financial year', () => {
+    // Annapoorani has POOL /01 and /02 this year; Sakthi Mahalir /01; Grama Valarchi’s /04 was last year’s.
+    // New ones are batches, numbered on from the pools of the same year.
+    expect(nextPoolReference(world, 'soc_1')).toBe('ANN/BATCH/2026-27/03');
+    expect(nextPoolReference(world, 'soc_2')).toBe('GRM/BATCH/2026-27/03');
+    expect(nextPoolReference(world, 'soc_3')).toBe('SHM/BATCH/2026-27/02');
     const april = applyEvent(world, { type: 'CLOCK_ADVANCED', to: '2027-04-01' });
-    expect(nextPoolReference(april, 'soc_1')).toBe('ANN/POOL/2027-28/01');
+    expect(nextPoolReference(april, 'soc_1')).toBe('ANN/BATCH/2027-28/01');
   });
 
   it('numbers sanctions across the federation', () => {
@@ -110,11 +111,11 @@ describe('origination numbering', () => {
     expect(loanIdFor(world, 'app_070', new Set(['loan_070']))).toBe('loan_071');
   });
 
-  it('opens a pool, or changes one, and submits it in the same breath', () => {
+  it('opens a batch, or changes one, and submits it in the same breath', () => {
     const opened = savePoolEvents(world, { societyId: 'soc_1', applicationIds: ['app_061'] }, 'usr_secretary', false);
     expect(opened.poolId).toBe('pool_06');
     expect(opened.events).toEqual([
-      expect.objectContaining({ type: 'POOL_CREATED', poolId: 'pool_06', reference: 'ANN/POOL/2026-27/03' }),
+      expect.objectContaining({ type: 'POOL_CREATED', poolId: 'pool_06', reference: 'ANN/BATCH/2026-27/03' }),
     ]);
     const ids = [...world.pools.find((p) => p.id === 'pool_04')!.applicationIds, 'app_061', 'app_062'];
     const submitted = savePoolEvents(world, { societyId: 'soc_1', poolId: 'pool_04', applicationIds: ids }, 'usr_secretary', true);

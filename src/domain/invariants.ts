@@ -287,7 +287,7 @@ export function checkInvariants(world: World): InvariantResult[] {
     }
   }
   results.push(
-    check(9, 'No application sits in two pools', doubled.length === 0, () => doubled.join('; ')),
+    check(9, 'No application sits in two batches', doubled.length === 0, () => doubled.join('; ')),
   );
 
   // 10
@@ -301,7 +301,7 @@ export function checkInvariants(world: World): InvariantResult[] {
   results.push(
     check(
       10,
-      `Every pool awaiting sanction has ${policy.poolMinMembers} to ${policy.poolMaxMembers} members`,
+      `Every batch awaiting sanction has ${policy.poolMinMembers} to ${policy.poolMaxMembers} members`,
       misSized.length === 0,
       () => misSized.map((p) => `${p.id} has ${p.applicationIds.length}`).join('; '),
     ),

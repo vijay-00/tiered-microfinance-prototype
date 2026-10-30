@@ -25,19 +25,19 @@ export function PoolDetailPage() {
   const policy = useAppStore((s) => s.world.policy);
   const exists = useAppStore((s) => s.world.pools.find((p) => p.id === poolId)?.societyId === user.societyId);
   const repositories = useRepositories();
-  const { data, error } = useQuery(`pool:${poolId}:${version}`, () =>
+  const { data, error } = useQuery(`batch:${poolId}:${version}`, () =>
     exists ? repositories.pools.getDetail(poolId) : Promise.reject(new Error('missing')),
   );
 
   if (!exists) {
     return (
       <PageHeader
-        title="Pool not found"
+        title="Batch not found"
         description={
           <>
-            There is no pool {poolId} in this society.{' '}
+            There is no batch {poolId} in this society.{' '}
             <Link to="/pools" className="text-primary underline">
-              Back to pools
+              Back to batches
             </Link>
             .
           </>
@@ -45,14 +45,14 @@ export function PoolDetailPage() {
       />
     );
   }
-  if (error) return <p className="text-sm text-bad">The pool could not be loaded: {error}</p>;
+  if (error) return <p className="text-sm text-bad">The batch could not be loaded: {error}</p>;
   if (!data) return <LoadingTiles count={3} className="sm:grid-cols-3" />;
 
   const { pool } = data;
   const editable = pool.status === 'OPEN' || pool.status === 'READY';
   return (
     <>
-      <Breadcrumb items={[{ label: 'Pools', to: '/pools' }, { label: pool.reference }]} />
+      <Breadcrumb items={[{ label: 'Batches', to: '/pools' }, { label: pool.reference }]} />
       <PageHeader
         title={pool.reference}
         description={`${plural(pool.applicationIds.length, 'member')} · ${data.society.name} · opened ${formatDate(pool.createdOn)}`}
@@ -61,7 +61,7 @@ export function PoolDetailPage() {
             <PoolStatusBadge status={pool.status} />
             {editable && can(user.role, 'MANAGE_POOL') ? (
               <Button variant="outline" size="sm" asChild>
-                <Link to={`/pools/new?pool=${pool.id}`}>Edit pool</Link>
+                <Link to={`/pools/new?pool=${pool.id}`}>Edit batch</Link>
               </Button>
             ) : null}
           </>
@@ -78,10 +78,10 @@ export function PoolDetailPage() {
               </CardTitle>
             </CardHeader>
             {data.applications.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-muted-foreground">No one is in this pool yet.</p>
+              <p className="px-4 py-3 text-sm text-muted-foreground">No one is in this batch yet.</p>
             ) : (
               <Table>
-                <caption className="sr-only">Applications in this pool</caption>
+                <caption className="sr-only">Applications in this batch</caption>
                 <THead>
                   <tr>
                     <TH>Member</TH>
@@ -170,7 +170,7 @@ function FederationDecision({ detail }: { detail: PoolDetail }) {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>{pool.apexReview?.remarks}</p>
-          <p className="text-muted-foreground">Its applications are free to go into another pool.</p>
+          <p className="text-muted-foreground">Its applications are free to go into another batch.</p>
         </CardContent>
       </Card>
     );
@@ -198,7 +198,7 @@ function FederationDecision({ detail }: { detail: PoolDetail }) {
             <p className="font-medium text-warn">Re-scope needed</p>
             <p>
               The members ask for <MoneyText paise={tranche.sanctionedAmount + detail.shortfall} />,{' '}
-              <MoneyText paise={detail.shortfall} /> more than was sanctioned. Nothing can be drawn until the pool fits:
+              <MoneyText paise={detail.shortfall} /> more than was sanctioned. Nothing can be drawn until the batch fits:
               cut every loan pro rata, or remove members.
             </p>
             {can(user.role, 'MANAGE_POOL') ? (

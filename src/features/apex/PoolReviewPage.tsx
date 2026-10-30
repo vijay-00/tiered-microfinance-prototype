@@ -37,7 +37,7 @@ export function PoolReviewPage() {
         title="Request not found"
         sub={
           <>
-            No society has submitted a pool {poolId}.{' '}
+            No society has submitted a batch {poolId}.{' '}
             <Link to="/apex/requests" className="underline">
               Back to funding requests
             </Link>
@@ -296,7 +296,7 @@ function Composition({ review }: { review: PoolReview }) {
   const top = Math.max(1, ...composition.purposes.map((p) => p.amount));
   return (
     <section className="g-card g-blur" aria-label="What the money is for">
-      <div className="g-tabs" role="tablist" aria-label="The loans in this pool">
+      <div className="g-tabs" role="tablist" aria-label="The loans in this batch">
         <button
           type="button"
           role="tab"
@@ -346,7 +346,7 @@ function Composition({ review }: { review: PoolReview }) {
       ) : (
         <div role="tabpanel" id="panel-members" aria-labelledby="tab-members" className="g-scroll">
           <table className="g-table">
-            <caption className="sr-only">The loans this pool would fund</caption>
+            <caption className="sr-only">The loans this batch would fund</caption>
             <thead>
               <tr>
                 <th scope="col">Member</th>
@@ -652,7 +652,7 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
             </button>
             <DialogContent>
               <DialogTitle>Decline {pool.reference}?</DialogTitle>
-              <DialogDescription>The society is told why, and its applications are released to go into another pool.</DialogDescription>
+              <DialogDescription>The society is told why, and its applications are released to go into another batch.</DialogDescription>
               <Field label="Remarks for the society" className="mt-4">
                 {({ id }) => <Textarea id={id} value={declineRemarks} onChange={(e) => setDeclineRemarks(e.target.value)} />}
               </Field>
@@ -666,7 +666,7 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
                   <Button variant="ghost">Cancel</Button>
                 </DialogClose>
                 <Button onClick={() => void decline()} disabled={pending || !declineRemarks.trim()}>
-                  {pending ? 'Declining…' : 'Decline the pool'}
+                  {pending ? 'Declining…' : 'Decline the batch'}
                 </Button>
               </DialogFooter>
             </DialogContent>

@@ -141,7 +141,7 @@ function QueueSection(props: {
           <THead>
             <tr>
               <TH>Member</TH>
-              <TH>Pool</TH>
+              <TH>Batch</TH>
               <TH>{props.upcoming ? 'Falls due' : 'Due since'}</TH>
               <TH>Status</TH>
               <TH numeric>{props.upcoming ? 'Instalment' : 'Amount due'}</TH>

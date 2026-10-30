@@ -117,7 +117,7 @@ function SocietyCard({ row }: { row: FederationSocietyRow }) {
         ) : null}
         {row.awaitingReview.length > 0 ? (
           <Pill tone="warn" icon={<Clock aria-hidden />}>
-            {plural(row.awaitingReview.length, 'pool')} to review
+            {plural(row.awaitingReview.length, 'batch', 'batches')} to review
           </Pill>
         ) : null}
       </div>

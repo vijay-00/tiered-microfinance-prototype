@@ -31,7 +31,7 @@ describe('the collections queue', () => {
     expect([queue.dueToday.length, queue.overdue.length, queue.upcoming.length]).toEqual([0, 0, 0]);
   });
 
-  it('shows the demo pool coming up, then due, then in grace, then overdue with penal', () => {
+  it('shows the demo batch coming up, then due, then in grace, then overdue with penal', () => {
     expect(collectionsQueue(at(world, '2026-11-10'), 'soc_1').upcoming).toHaveLength(12);
     expect(collectionsQueue(at(world, '2026-11-15'), 'soc_1').dueToday).toHaveLength(12);
 

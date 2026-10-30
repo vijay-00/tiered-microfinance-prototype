@@ -272,16 +272,16 @@ function Detail({ data }: { data: FederationSocietyDetail }) {
             )}
           </section>
 
-          <section className="g-card g-blur flush" aria-label="Pools">
+          <section className="g-card g-blur flush" aria-label="Batches">
             <div className="g-listhead">
-              <b>Pools</b>
+              <b>Batches</b>
               <span className="rt">
                 {submitted} submitted{building.length ? ` · ${building.map((p) => '/' + p.pool.reference.split('/').pop()).join(', ')} being built` : ''}
               </span>
             </div>
             {data.pools.length === 0 ? (
               <p className="g-sub" style={{ padding: '20px var(--g-pad)', margin: 0 }}>
-                No pool built yet.
+                No batch built yet.
               </p>
             ) : (
               <ul className="m-0 list-none p-0">

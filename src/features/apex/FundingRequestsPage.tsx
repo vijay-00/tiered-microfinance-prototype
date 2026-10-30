@@ -21,7 +21,7 @@ export function FundingRequestsPage() {
     <>
       <PageHead
         title="Funding requests"
-        sub="Pools submitted by societies, oldest first"
+        sub="Batches submitted by societies, oldest first"
         actions={
           data ? (
             <button type="button" className="g-btn" onClick={() => downloadCsv(`${federation.shortName}-requests-${clock}.csv`, deskCsv(data))}>
@@ -80,10 +80,10 @@ function Desk({ data }: { data: FundingDesk }) {
         ) : (
           <div className="g-scroll">
             <table className="g-table" style={{ minWidth: 980 }}>
-              <caption className="sr-only">Pools awaiting a decision</caption>
+              <caption className="sr-only">Batches awaiting a decision</caption>
               <thead>
                 <tr>
-                  <th scope="col">Pool</th>
+                  <th scope="col">Batch</th>
                   <th scope="col" className="r">Members</th>
                   <th scope="col" className="r">Requested</th>
                   <th scope="col">Longest loan</th>
@@ -145,15 +145,15 @@ function Desk({ data }: { data: FundingDesk }) {
         </div>
         {data.decided.length === 0 ? (
           <p className="g-sub" style={{ padding: '20px var(--g-pad)', margin: 0 }}>
-            No pool has been decided yet.
+            No batch has been decided yet.
           </p>
         ) : (
           <div className="g-scroll">
             <table className="g-table" style={{ minWidth: 980 }}>
-              <caption className="sr-only">Pools the federation has decided, newest first</caption>
+              <caption className="sr-only">Batches the federation has decided, newest first</caption>
               <thead>
                 <tr>
-                  <th scope="col">Pool</th>
+                  <th scope="col">Batch</th>
                   <th scope="col" className="r">Members</th>
                   <th scope="col" className="r">Requested</th>
                   <th scope="col" className="r">Sanctioned</th>
@@ -223,7 +223,7 @@ function Desk({ data }: { data: FundingDesk }) {
 
 function deskCsv(data: FundingDesk): string {
   return toCsv(
-    ['Pool', 'Society', 'Members', 'Requested', 'Status', 'Submitted', 'Days waiting', 'Sanctioned', 'Decided', 'Took (days)', 'Sanction'],
+    ['Batch', 'Society', 'Members', 'Requested', 'Status', 'Submitted', 'Days waiting', 'Sanctioned', 'Decided', 'Took (days)', 'Sanction'],
     [
       ...data.requests.map((r) => [r.pool.reference, r.society.name, r.members, rupeesCell(r.pool.requestedAmount), r.pool.status === 'UNDER_APEX_REVIEW' ? 'Under review' : 'Submitted', r.pool.submittedOn ?? '', r.waitingDays, '', '', '', '']),
       ...data.decided.map((d) => [

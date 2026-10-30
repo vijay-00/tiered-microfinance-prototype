@@ -37,7 +37,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   {
     id: 'journey',
     title: 'A member’s loan, start to finish',
-    summary: 'Scenario A: a member applies, the society appraises, pools and submits, the federation sanctions, the society pays out, the member repays and the society remits.',
+    summary: 'Scenario A: a member applies, the society appraises, batches and submits, the federation sanctions, the society pays out, the member repays and the society remits.',
     steps: [
       {
         title: 'The member applies',
@@ -55,18 +55,18 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         go: { userId: 'usr_secretary', path: '/applications' },
       },
       {
-        title: 'The secretary pools and submits',
-        body: 'Approved applications go to the federation in a pool of one to twenty. Choose Start a pool, tick Veerappan Pandian’s application and any others you want to send, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as you pick.',
+        title: 'The secretary batches and submits',
+        body: 'Approved applications go to the federation in a batch of one to twenty. Choose Start a batch, tick Veerappan Pandian’s application and any others you want to send, and Submit to the federation. The batch shows its wholesale cost and the society’s 2% spread as you pick.',
         go: { userId: 'usr_secretary', path: '/pools' },
       },
       {
         title: 'The federation sanctions',
-        body: 'The apex officer opens the society’s new pool, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
+        body: 'The apex officer opens the society’s new batch, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
         go: { userId: 'usr_apex', path: '/apex/requests' },
       },
       {
         title: 'The society draws down and pays out',
-        body: 'Open the new sanction and choose Draw down and disburse. One drawdown, and a disbursement for each member in the pool, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
+        body: 'Open the new sanction and choose Draw down and disburse. One drawdown, and a disbursement for each member in the batch, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -165,7 +165,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
   {
     id: 'clean',
     needsHistory: true,
-    title: 'A month in the life of a pool',
+    title: 'A month in the life of a batch',
     summary: 'Scenario A: collect from twelve members, pay the federation, and trace the margin to the journal.',
     steps: [
       {
@@ -190,7 +190,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'Where loans come from',
-        body: 'Applications are taken, appraised and decided, pooled, one to twenty at a time, and sent to the federation for a wholesale tranche. Pool ANN/POOL/2026-27/02 is being built: add the approved applications and submit it.',
+        body: 'Applications are taken, appraised and decided, batched, one to twenty at a time, and sent to the federation for a wholesale tranche. Batch ANN/POOL/2026-27/02 is being built: add the approved applications and submit it.',
         go: { path: '/pools' },
       },
     ],

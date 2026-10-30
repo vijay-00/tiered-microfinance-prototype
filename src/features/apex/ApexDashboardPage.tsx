@@ -112,7 +112,7 @@ function Exposure({ data, trends }: { data: FederationHome; trends: FederationTr
         ) : (
           <>
             <div className="g-mid">Nothing waiting</div>
-            <div className="g-sub">Every pool submitted has been decided.</div>
+            <div className="g-sub">Every batch submitted has been decided.</div>
           </>
         )}
       </section>
@@ -211,7 +211,7 @@ function Exposure({ data, trends }: { data: FederationHome; trends: FederationTr
                 <th scope="col">Remittances</th>
                 <th scope="col">Members late</th>
                 <th scope="col" className="r">Interest this year</th>
-                <th scope="col">Pools</th>
+                <th scope="col">Batches</th>
               </tr>
             </thead>
             <tbody>

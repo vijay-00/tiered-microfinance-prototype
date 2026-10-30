@@ -34,7 +34,7 @@ export function ApplicationsPage() {
     <>
       <PageHeader
         title="Applications"
-        description="A member applies for themselves, or the society applies for them. Each moves from appraisal to a decision by the secretary, into a pool, and out as a loan."
+        description="A member applies for themselves, or the society applies for them. Each moves from appraisal to a decision by the secretary, into a batch, and out as a loan."
         actions={
           can(user.role, 'SUBMIT_APPLICATION') ? (
             <Button asChild>
@@ -84,7 +84,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
           <TH numeric>Amount</TH>
           <TH numeric>Tenure</TH>
           <TH numeric>EMI</TH>
-          <TH>{stage === 'IN_POOL' || stage === 'READY_TO_POOL' ? 'Pool' : stage === 'DISBURSED' ? 'Loan' : stage === 'REJECTED' ? 'Reason' : 'Applied by'}</TH>
+          <TH>{stage === 'IN_POOL' || stage === 'READY_TO_POOL' ? 'Batch' : stage === 'DISBURSED' ? 'Loan' : stage === 'REJECTED' ? 'Reason' : 'Applied by'}</TH>
         </tr>
       </THead>
       <TBody>
@@ -108,7 +108,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
                 row.poolReference ? (
                   <Link to={`/pools/${row.application.poolId}`} className="text-xs hover:underline">{row.poolReference}</Link>
                 ) : (
-                  <span className="text-xs text-muted-foreground">Not yet pooled</span>
+                  <span className="text-xs text-muted-foreground">Not yet batched</span>
                 )
               ) : stage === 'DISBURSED' ? (
                 row.loanId ? <Link to={`/loans/${row.loanId}`} className="text-xs hover:underline">{row.loanId}</Link> : null

@@ -63,9 +63,9 @@ describe('from a member’s application to the federation’s remittance', () =>
 
     // The secretary pools it with the other approved applications and submits the pool.
     await viewAs(user, 'Society Secretary');
-    await user.click(within(sidebar()).getByRole('link', { name: 'Pools' }));
+    await user.click(within(sidebar()).getByRole('link', { name: 'Batches' }));
     await user.click(await screen.findByRole('link', { name: 'Add to ANN/POOL/2026-27/02' }));
-    const pool = await screen.findByRole('region', { name: 'The pool' });
+    const pool = await screen.findByRole('region', { name: 'The batch' });
     await user.click(screen.getByRole('button', { name: 'Select all' }));
     expect(within(pool).getByText('12 of 1–20 members')).toBeInTheDocument();
     await user.click(within(pool).getByRole('button', { name: 'Submit to the federation' }));
@@ -225,7 +225,7 @@ describe('the roles the demo offers', () => {
   });
 });
 
-describe('pop-ups when the federation decides a pool', () => {
+describe('pop-ups when the federation decides a batch', () => {
   it('tells the society, the members in it and the apex officer, each with the same amounts', async () => {
     const { user, store } = renderApp('/dashboard');
     const on = store.getState().world.clock;
@@ -249,6 +249,6 @@ describe('pop-ups when the federation decides a pool', () => {
     const society = await screen.findByRole('dialog', { name: 'Funding sanctioned' });
     expect(society).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
     expect(society).toHaveTextContent('so they add up to ₹6,00,000');
-    expect(within(society).getByRole('button', { name: 'Fit the pool to the sanction' })).toBeInTheDocument();
+    expect(within(society).getByRole('button', { name: 'Fit the batch to the sanction' })).toBeInTheDocument();
   });
 });

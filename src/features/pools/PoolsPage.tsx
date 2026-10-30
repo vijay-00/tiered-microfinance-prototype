@@ -18,7 +18,7 @@ export function PoolsPage() {
   const policy = useAppStore((s) => s.world.policy);
   const repositories = useRepositories();
   const societyId = user.societyId!;
-  const { data, error, loading } = useQuery(`pools:${societyId}:${version}`, async () => {
+  const { data, error, loading } = useQuery(`batches:${societyId}:${version}`, async () => {
     const [pools, queue] = await Promise.all([
       repositories.pools.list(societyId),
       repositories.applications.getQueue(societyId),
@@ -31,17 +31,17 @@ export function PoolsPage() {
   return (
     <>
       <PageHeader
-        title="Pools"
+        title="Batches"
         description={`Approved applications go to the federation up to ${policy.poolMaxMembers} at a time, as one request for a wholesale tranche. A single application is enough to send.`}
         actions={
           manage ? (
             <Button asChild>
-              <Link to="/pools/new">New pool</Link>
+              <Link to="/pools/new">New batch</Link>
             </Button>
           ) : null
         }
       />
-      {error ? <p className="mb-4 text-sm text-bad">The pools could not be loaded: {error}</p> : null}
+      {error ? <p className="mb-4 text-sm text-bad">The batches could not be loaded: {error}</p> : null}
       {!data ? (
         <LoadingTiles count={1} />
       ) : (
@@ -50,12 +50,12 @@ export function PoolsPage() {
             <Card className="mb-4">
               <CardContent className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <p>
-                  {plural(data.unpooled, 'approved application')} {data.unpooled === 1 ? 'is' : 'are'} waiting to be pooled.
+                  {plural(data.unpooled, 'approved application')} {data.unpooled === 1 ? 'is' : 'are'} waiting to be batched.
                 </p>
                 {manage ? (
                   <Button variant="outline" size="sm" asChild>
                     <Link to={building ? `/pools/new?pool=${building.pool.id}` : '/pools/new'}>
-                      {building ? `Add to ${building.pool.reference}` : 'Start a pool'}
+                      {building ? `Add to ${building.pool.reference}` : 'Start a batch'}
                     </Link>
                   </Button>
                 ) : null}
@@ -64,10 +64,10 @@ export function PoolsPage() {
           ) : null}
           <Card aria-busy={loading}>
             <Table>
-              <caption className="sr-only">Pools of this society</caption>
+              <caption className="sr-only">Batches of this society</caption>
               <THead>
                 <tr>
-                  <TH>Pool</TH>
+                  <TH>Batch</TH>
                   <TH>Status</TH>
                   <TH numeric>Members</TH>
                   <TH numeric>Requested</TH>

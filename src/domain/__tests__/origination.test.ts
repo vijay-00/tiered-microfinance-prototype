@@ -254,7 +254,7 @@ describe('applications', () => {
   });
 });
 
-describe('pools', () => {
+describe('batches', () => {
   const set = (applicationIds: string[], recordedBy = 'usr_secretary'): WorldEvent => ({
     type: 'POOL_APPLICATIONS_SET',
     on: ON,
@@ -273,7 +273,7 @@ describe('pools', () => {
     expect(applicationOf(world, 'app_061').poolId).toBeUndefined();
   });
 
-  it('takes only approved applications of its own society that no other pool holds', () => {
+  it('takes only approved applications of its own society that no other batch holds', () => {
     const world = seedWorld();
     const eight = poolOf(world, 'pool_04').applicationIds;
     expectError(() => applyEvent(world, set([...eight, 'app_064'])), /app_064 is UNDER_APPRAISAL, not approved/);
@@ -289,16 +289,16 @@ describe('pools', () => {
           applicationIds: [eight[0]!],
           recordedBy: 'usr_secretary',
         }),
-      /already in another pool/,
+      /already in another batch/,
     );
   });
 
   it('is built and submitted only by the secretary', () => {
     const world = seedWorld();
-    expectError(() => applyEvent(world, set([...LOOSE], 'usr_officer')), /cannot build or submit a pool as a Field Officer/);
+    expectError(() => applyEvent(world, set([...LOOSE], 'usr_officer')), /cannot build or submit a batch as a Field Officer/);
     expectError(
       () => applyEvent(world, { type: 'POOL_CREATED', on: ON, poolId: 'pool_99', reference: 'X', applicationIds: [], recordedBy: 'usr_apex' }),
-      /cannot build or submit a pool/,
+      /cannot build or submit a batch/,
     );
     expectError(() => applyEvent(world, set([...LOOSE], 'usr_secretary_2')), /for another society/);
   });
@@ -342,10 +342,10 @@ describe('sanction and disbursement', () => {
     expect(() => applyEvent(tight, sanction(100_000))).not.toThrow();
   });
 
-  it('runs at least as long as the longest loan in the pool, and never above what was asked', () => {
+  it('runs at least as long as the longest loan in the batch, and never above what was asked', () => {
     const world = seedWorld();
-    expectError(() => applyEvent(world, sanction(75_000_000, 18)), /at least as long as the pool's longest loan, 24 months/);
-    expectError(() => applyEvent(world, sanction(75_000_100)), /cannot exceed what the pool requested/);
+    expectError(() => applyEvent(world, sanction(75_000_000, 18)), /at least as long as the batch's longest loan, 24 months/);
+    expectError(() => applyEvent(world, sanction(75_000_100)), /cannot exceed what the batch requested/);
   });
 
   it('lends only what has been drawn', () => {
@@ -363,7 +363,7 @@ describe('sanction and disbursement', () => {
     recordedBy = 'usr_secretary_2',
   ): WorldEvent => ({ type: 'POOL_RESCOPED', on: ON, poolId: 'pool_05', method, keep, recordedBy });
 
-  it('refuses any drawdown on an under-sanctioned pool until it is re-scoped', () => {
+  it('refuses any drawdown on an under-sanctioned batch until it is re-scoped', () => {
     const world = applyEvent(seedWorld(), sanction(60_000_000));
     expectError(
       () => applyEvent(world, draw(100_000)),
@@ -381,7 +381,7 @@ describe('sanction and disbursement', () => {
     expect(cut.every((c) => c.amount % 100 === 0)).toBe(true);
     expect(sum(cut.map((c) => c.amount))).toBeLessThanOrEqual(60_000_000);
     expectError(() => applyEvent(world, rescope('PRO_RATA', cut.slice(1))), /pro rata cut keeps every member/);
-    expectError(() => applyEvent(world, rescope('PRO_RATA', cut, 'usr_officer_2')), /cannot build or submit a pool/);
+    expectError(() => applyEvent(world, rescope('PRO_RATA', cut, 'usr_officer_2')), /cannot build or submit a batch/);
     world = applyEvent(world, rescope('PRO_RATA', cut));
     const first = applicationOf(world, ids[0]!);
     expect(first.decision).toMatchObject({ sanctionedAmount: cut[0]!.amount, rescopedFrom: lines[0]!.amount });
@@ -395,7 +395,7 @@ describe('sanction and disbursement', () => {
     expect(world.loans[ids[0]!.replace('app_', 'loan_')]!.loan.principal).toBe(cut[0]!.amount);
   });
 
-  it('removes members until the rest fit, releasing them for another pool', () => {
+  it('removes members until the rest fit, releasing them for another batch', () => {
     let world = applyEvent(seedWorld(), sanction(60_000_000));
     const ids = poolOf(world, 'pool_05').applicationIds;
     const amount = (id: string) => applicationOf(world, id).decision!.sanctionedAmount;
@@ -485,7 +485,7 @@ describe('read models', () => {
     expect(repaymentCapacity(0, 0, 300_000)).toMatchObject({ share: undefined, withinCap: false });
   });
 
-  it('prices a pool at both rates, and the margin is the difference', () => {
+  it('prices a batch at both rates, and the margin is the difference', () => {
     const world = seedWorld();
     const ids = [...poolOf(world, 'pool_04').applicationIds, ...LOOSE];
     const economics = poolEconomics(world, ids);
@@ -499,7 +499,7 @@ describe('read models', () => {
     expect(poolEconomics(world, []).readiness.reason).toBe('Choose at least one approved application to send.');
   });
 
-  it('queues submitted pools for the federation, oldest first, and caps a sanction at the headroom', () => {
+  it('queues submitted batches for the federation, oldest first, and caps a sanction at the headroom', () => {
     let world = seedWorld();
     world = applyEvent(world, {
       type: 'POOL_APPLICATIONS_SET',

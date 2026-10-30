@@ -500,7 +500,7 @@ function DecisionSummary({ detail }: { detail: ApplicationDetail }) {
         )}
         {detail.pool ? (
           <p className="flex flex-wrap items-center gap-2 text-sm">
-            In pool{' '}
+            In batch{' '}
             <Link to={`/pools/${detail.pool.id}`} className="font-medium hover:underline">
               {detail.pool.reference}
             </Link>
@@ -508,9 +508,9 @@ function DecisionSummary({ detail }: { detail: ApplicationDetail }) {
           </p>
         ) : approved && detail.row.stage === 'READY_TO_POOL' ? (
           <p className="text-sm text-muted-foreground">
-            Waiting to be pooled.{' '}
+            Waiting to be batched.{' '}
             <Link to="/pools" className="text-primary underline">
-              Go to pools
+              Go to batches
             </Link>
           </p>
         ) : null}

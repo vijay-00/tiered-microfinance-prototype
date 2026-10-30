@@ -14,7 +14,7 @@ describe('the society summary', () => {
   const world = seedWorld();
   const summary = societySummary(world, 'soc_1');
 
-  it('starts scenario A with the demo pool up to date', () => {
+  it('starts scenario A with the demo batch up to date', () => {
     expect(summary.asOf).toBe('2026-10-29');
     expect(summary.activeLoans).toBe(12);
     expect(summary.dueToday.count).toBe(0);
@@ -29,7 +29,7 @@ describe('the society summary', () => {
     expect(summary.netInterestIncome).toBeGreaterThan(0);
   });
 
-  it('points at the next remittance, on the demo pool date', () => {
+  it('points at the next remittance, on the demo batch date', () => {
     expect(summary.nextRemittance).toMatchObject({ trancheId: 'trn_01', dueOn: '2026-11-15', overdue: false });
     expect(summary.nextRemittance!.due.totalDue).toBeGreaterThan(0);
   });
@@ -56,7 +56,7 @@ describe('the apex exposure', () => {
     for (const row of rows) expect(row.headroom).toBe(row.creditLimit - row.sanctioned);
   });
 
-  it('shows the part-drawn tranche and the pool awaiting review', () => {
+  it('shows the part-drawn tranche and the batch awaiting review', () => {
     const sahakar = rows.find((r) => r.society.id === 'soc_3')!;
     expect(sahakar.drawn).toBeLessThan(sahakar.sanctioned);
     const gramodaya = rows.find((r) => r.society.id === 'soc_2')!;

@@ -38,13 +38,13 @@ describe('origination, through the screens', () => {
     const decision = await screen.findByRole('region', { name: 'Decision' });
     await user.click(within(decision).getByRole('button', { name: /^Approve ₹40,000$/ }));
     expect(await screen.findByRole('heading', { name: 'Approved' })).toBeInTheDocument();
-    expect(screen.getByText(/Waiting to be pooled/)).toBeInTheDocument();
+    expect(screen.getByText(/Waiting to be batched/)).toBeInTheDocument();
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
 
     // The secretary adds it, and the other approved applications, to the open pool and submits it.
-    await user.click(within(sidebar()).getByRole('link', { name: 'Pools' }));
+    await user.click(within(sidebar()).getByRole('link', { name: 'Batches' }));
     await user.click(await screen.findByRole('link', { name: 'Add to ANN/POOL/2026-27/02' }));
-    const pool = await screen.findByRole('region', { name: 'The pool' });
+    const pool = await screen.findByRole('region', { name: 'The batch' });
     expect(within(pool).getByText('8 of 1–20 members')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Select all' }));
     expect(within(pool).getByText('12 of 1–20 members')).toBeInTheDocument();
@@ -99,10 +99,10 @@ describe('the secretary decides', () => {
   });
 });
 
-describe('the pool builder', () => {
-  it('sends a pool of a single member, and only an empty one is held back', async () => {
+describe('the batch builder', () => {
+  it('sends a batch of a single member, and only an empty one is held back', async () => {
     const { user } = renderApp('/pools/new');
-    const pool = await screen.findByRole('region', { name: 'The pool' });
+    const pool = await screen.findByRole('region', { name: 'The batch' });
     expect(within(pool).getByText('Choose at least one approved application to send.')).toBeInTheDocument();
     expect(within(pool).getByRole('button', { name: 'Submit to the federation' })).toBeDisabled();
     await user.click(screen.getByRole('checkbox', { name: 'Include Gomathi Govindan' }));
@@ -112,14 +112,14 @@ describe('the pool builder', () => {
 });
 
 describe('the federation', () => {
-  it('declines a pool with remarks, releasing its applications', async () => {
+  it('declines a batch with remarks, releasing its applications', async () => {
     const { user, store } = renderApp('/apex/requests/pool_05', (s) => s.getState().switchRole('APEX_OFFICER'));
     const terms = await screen.findByRole('region', { name: 'Terms' });
     await user.click(within(terms).getByRole('button', { name: 'Decline' }));
     const dialog = await screen.findByRole('dialog', { name: 'Decline GRM/POOL/2026-27/02?' });
-    expect(within(dialog).getByRole('button', { name: 'Decline the pool' })).toBeDisabled();
+    expect(within(dialog).getByRole('button', { name: 'Decline the batch' })).toBeDisabled();
     await user.type(within(dialog).getByLabelText('Remarks for the society'), 'Two members are already late elsewhere.');
-    await user.click(within(dialog).getByRole('button', { name: 'Decline the pool' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Decline the batch' }));
     const recorded = await screen.findByRole('dialog', { name: 'Decline recorded' });
     expect(recorded).toHaveTextContent('Two members are already late elsewhere.');
     await user.click(within(recorded).getByRole('button', { name: 'Close' }));
@@ -129,7 +129,7 @@ describe('the federation', () => {
   });
 });
 
-describe('an under-sanctioned pool', () => {
+describe('an under-sanctioned batch', () => {
   it('goes back to the secretary to re-scope before anything is drawn', async () => {
     const { user } = renderApp('/tranches/trn_04', (store) => {
       const { world, dispatch, switchUser } = store.getState();
@@ -151,16 +151,16 @@ describe('an under-sanctioned pool', () => {
     // The pop-up takes the secretary to the facility, where the re-scope comes first.
     const popup = await screen.findByRole('dialog', { name: 'Funding sanctioned' });
     expect(popup).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
-    await user.click(within(popup).getByRole('button', { name: 'Fit the pool to the sanction' }));
+    await user.click(within(popup).getByRole('button', { name: 'Fit the batch to the sanction' }));
     const notice = await screen.findByRole('region', { name: 'Re-scope needed' });
     expect(notice).toHaveTextContent('ask for ₹7,50,000 against the ₹6,00,000 the federation sanctioned');
     expect(screen.queryByRole('button', { name: 'Draw down and disburse' })).not.toBeInTheDocument();
 
-    await user.click(within(notice).getByRole('button', { name: 'Re-scope the pool' }));
+    await user.click(within(notice).getByRole('button', { name: 'Re-scope the batch' }));
     const dialog = await screen.findByRole('dialog', { name: 'Re-scope GRM/POOL/2026-27/02' });
     // Pro rata is offered first, and nothing happens until the members' agreement is confirmed.
     expect(within(dialog).getByRole('radio', { name: /Cut every loan pro rata/ })).toHaveAttribute('aria-checked', 'true');
-    const save = within(dialog).getByRole('button', { name: 'Re-scope the pool' });
+    const save = within(dialog).getByRole('button', { name: 'Re-scope the batch' });
     expect(save).toBeDisabled();
     await user.click(within(dialog).getByLabelText('Each member has agreed to the reduced amount and instalment'));
     await user.click(save);

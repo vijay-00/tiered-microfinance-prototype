@@ -96,7 +96,7 @@ describe('the committed seed', () => {
     }
   });
 
-  it('puts every pool and loan where scenario A says it should be', () => {
+  it('puts every batch and loan where scenario A says it should be', () => {
     const world = replay(createWorld(seed.base), seed.events);
     const status = Object.fromEntries(world.pools.map((p) => [p.id, p.status]));
     expect(status).toEqual({
@@ -139,7 +139,7 @@ describe('a broken seed', () => {
     }
   });
 
-  it('fails on a pool that lists an application it does not own', () => {
+  it('fails on a batch that lists an application it does not own', () => {
     const [first, ...rest] = pools;
     const bad = { ...raw, pools: [{ ...first!, applicationIds: [...first!.applicationIds, 'app_069'] }, ...rest] };
     expect(() => parseSeed(bad)).toThrow(/lists app_069, which belongs elsewhere/);

@@ -123,14 +123,14 @@ export function poolReadiness(
     const short = policy.poolMinMembers - memberCount;
     return {
       ready: false,
-      reason: `Add ${short} more member${short === 1 ? '' : 's'}: a pool needs at least ${policy.poolMinMembers}.`,
+      reason: `Add ${short} more member${short === 1 ? '' : 's'}: a batch needs at least ${policy.poolMinMembers}.`,
     };
   }
   if (memberCount > policy.poolMaxMembers) {
     const over = memberCount - policy.poolMaxMembers;
     return {
       ready: false,
-      reason: `Remove ${over} member${over === 1 ? '' : 's'}: a pool takes at most ${policy.poolMaxMembers}.`,
+      reason: `Remove ${over} member${over === 1 ? '' : 's'}: a batch takes at most ${policy.poolMaxMembers}.`,
     };
   }
   return { ready: true };

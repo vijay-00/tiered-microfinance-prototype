@@ -219,7 +219,7 @@ describe('ageing, collections and margin, as members fall behind', () => {
     expect(july.reasons.map((r) => r.kind)).toContain('WHOLESALE_ABOVE_SCHEDULE');
   });
 
-  it('reports each funded pool, its repayment and its margin', () => {
+  it('reports each funded batch, its repayment and its margin', () => {
     const sim = lateMay();
     const [pool] = poolPerformance(sim.state, 'soc_1');
     expect(pool).toMatchObject({ loans: 12, activeLoans: 12, remittancesMade: 1, remittancesOnTime: 1 });

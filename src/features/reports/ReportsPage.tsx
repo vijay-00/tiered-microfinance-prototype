@@ -13,7 +13,7 @@ const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'margin', label: 'Margin' },
   { id: 'ageing', label: 'Ageing' },
   { id: 'collections', label: 'Collection efficiency' },
-  { id: 'pools', label: 'Pool performance' },
+  { id: 'pools', label: 'Batch performance' },
 ];
 
 export function ReportsPage() {

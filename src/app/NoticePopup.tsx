@@ -36,7 +36,7 @@ function poolCopy(n: PoolNotice): Copy {
     if (n.audience === 'MEMBER') {
       return {
         title: 'Funding for your loan was declined',
-        body: `The federation declined funding for the pool your loan was in${why} The society will tell you what happens next.`,
+        body: `The federation declined funding for the batch your loan was in${why} The society will tell you what happens next.`,
         action: 'See where it stands',
         to: '/me',
         later: 'Close',
@@ -45,12 +45,12 @@ function poolCopy(n: PoolNotice): Copy {
       };
     }
     return {
-      title: n.audience === 'APEX' ? 'Decline recorded' : 'The federation declined a pool',
+      title: n.audience === 'APEX' ? 'Decline recorded' : 'The federation declined a batch',
       body:
         n.audience === 'APEX'
           ? `You declined ${n.societyName}’s ${n.poolReference}, asking ${formatPaise(n.requested)}${why}`
           : `The federation declined ${n.poolReference}, which asked for ${formatPaise(n.requested)}${why}`,
-      action: n.audience === 'APEX' ? 'Back to funding requests' : 'Open the pool',
+      action: n.audience === 'APEX' ? 'Back to funding requests' : 'Open the batch',
       to: n.audience === 'APEX' ? '/apex/requests' : `/pools/${n.poolId}`,
       later: 'Close',
       icon: CircleX,
@@ -65,7 +65,7 @@ function poolCopy(n: PoolNotice): Copy {
     return {
       title: 'Funding for your loan is approved',
       body: inFull
-        ? 'The federation approved funding for the pool your loan is in. The society pays your loan out to you next.'
+        ? 'The federation approved funding for the batch your loan is in. The society pays your loan out to you next.'
         : 'The federation approved part of the funding the society asked for. The society confirms the amount it pays out to you next.',
       action: 'See where it stands',
       to: '/me',
@@ -90,7 +90,7 @@ function poolCopy(n: PoolNotice): Copy {
     body: inFull
       ? `The federation sanctioned ${n.poolReference}: ${terms}, as ${t.sanctionRef}. Draw it down to pay out the members’ loans.`
       : `The federation sanctioned ${n.poolReference}: ${terms}, as ${t.sanctionRef}. Fit the members’ loans to the sanction so they add up to ${formatPaise(t.sanctioned)}, then draw it down.`,
-    action: n.readOnly ? 'Open the facility' : inFull ? 'Draw down and disburse' : 'Fit the pool to the sanction',
+    action: n.readOnly ? 'Open the facility' : inFull ? 'Draw down and disburse' : 'Fit the batch to the sanction',
     // The facility page offers the re-scope first when the sanction fell short.
     to: `/tranches/${t.id}`,
     later: 'Later',

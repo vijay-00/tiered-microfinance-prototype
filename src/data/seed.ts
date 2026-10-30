@@ -128,16 +128,16 @@ export function parseSeed(raw: {
       problems.push(`application ${a.id} is for a member outside its society`);
     }
     if (a.poolId && !pools.some((p) => p.id === a.poolId && p.applicationIds.includes(a.id))) {
-      problems.push(`application ${a.id} names pool ${a.poolId}, which does not list it`);
+      problems.push(`application ${a.id} names batch ${a.poolId}, which does not list it`);
     }
   }
   for (const p of pools) {
-    if (!societyIds.has(p.societyId)) problems.push(`pool ${p.id} belongs to unknown society`);
+    if (!societyIds.has(p.societyId)) problems.push(`batch ${p.id} belongs to unknown society`);
     for (const id of p.applicationIds) {
       const a = applicationById.get(id);
-      if (!a) problems.push(`pool ${p.id} lists unknown application ${id}`);
+      if (!a) problems.push(`batch ${p.id} lists unknown application ${id}`);
       else if (a.poolId !== p.id || a.societyId !== p.societyId) {
-        problems.push(`pool ${p.id} lists ${id}, which belongs elsewhere`);
+        problems.push(`batch ${p.id} lists ${id}, which belongs elsewhere`);
       }
     }
   }

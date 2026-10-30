@@ -181,7 +181,7 @@ describe('the demo’s clean start', () => {
     expect(roles.filter((r) => r !== 'MEMBER').sort()).toEqual(['APEX_OFFICER', 'AUDITOR', 'SECRETARY']);
   });
 
-  it('has no loan, application or pool for anyone, and every figure at nothing', () => {
+  it('has no loan, application or batch for anyone, and every figure at nothing', () => {
     expect(world().applications).toEqual([]);
     expect(world().pools).toEqual([]);
     expect(world().loans).toEqual({});

@@ -323,7 +323,7 @@ function poolNotices(state: WorldState, user: User): PoolNotice[] {
     notices.push({
       // Per person: the demo switches people in one session, and the apex
       // officer closing theirs must not hide the society's.
-      key: `pool-${review.decision.toLowerCase()}:${pool.id}:${user.id}`,
+      key: `batch-${review.decision.toLowerCase()}:${pool.id}:${user.id}`,
       kind: review.decision === 'SANCTIONED' ? 'POOL_SANCTIONED' : 'POOL_DECLINED',
       audience,
       poolId: pool.id,

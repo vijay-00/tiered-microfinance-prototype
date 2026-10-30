@@ -27,24 +27,24 @@ export function PoolBuilderPage() {
   const [params] = useSearchParams();
   const poolId = params.get('pool') ?? undefined;
   const societyId = user.societyId!;
-  const { data, error } = useQuery(`pool-builder:${societyId}:${poolId ?? 'new'}:${version}`, () =>
+  const { data, error } = useQuery(`batch-builder:${societyId}:${poolId ?? 'new'}:${version}`, () =>
     repositories.pools.getBuilder(societyId, poolId),
   );
 
   if (!can(user.role, 'MANAGE_POOL')) {
-    return <PageHeader title="Pool builder" description="Only the secretary builds pools and submits them to the federation." />;
+    return <PageHeader title="Batch builder" description="Only the secretary builds batches and submits them to the federation." />;
   }
-  if (error) return <p className="text-sm text-bad">The pool could not be loaded: {error}</p>;
+  if (error) return <p className="text-sm text-bad">The batch could not be loaded: {error}</p>;
   if (!data) return <LoadingTiles count={2} className="lg:grid-cols-2" />;
   if (poolId && !data.pool) {
     return (
       <PageHeader
-        title="Pool not found"
+        title="Batch not found"
         description={
           <>
-            There is no pool {poolId} in this society.{' '}
+            There is no batch {poolId} in this society.{' '}
             <Link to="/pools" className="text-primary underline">
-              Back to pools
+              Back to batches
             </Link>
             .
           </>
@@ -58,9 +58,9 @@ export function PoolBuilderPage() {
         title={data.pool.reference}
         description={
           <>
-            This pool has been submitted and can no longer change.{' '}
+            This batch has been submitted and can no longer change.{' '}
             <Link to={`/pools/${data.pool.id}`} className="text-primary underline">
-              See the pool
+              See the batch
             </Link>
             .
           </>
@@ -109,12 +109,12 @@ function Builder({ builder, societyId }: { builder: PoolBuilder; societyId: ID }
 
   return (
     <>
-      <Breadcrumb items={[{ label: 'Pools', to: '/pools' }, { label: builder.pool ? reference : 'New pool' }]} />
+      <Breadcrumb items={[{ label: 'Batches', to: '/pools' }, { label: builder.pool ? reference : 'New batch' }]} />
       <PageHeader
-        title={builder.pool ? reference : 'New pool'}
+        title={builder.pool ? reference : 'New batch'}
         description={
           builder.pool
-            ? 'Choose who goes to the federation in this pool. Saving keeps it as a draft.'
+            ? 'Choose who goes to the federation in this batch. Saving keeps it as a draft.'
             : `It will be ${reference}. Choose who goes to the federation in it.`
         }
         actions={builder.pool ? <PoolStatusBadge status={builder.pool.status} /> : null}
@@ -149,11 +149,11 @@ function Builder({ builder, societyId }: { builder: PoolBuilder; societyId: ID }
             </p>
           ) : (
             <Table>
-              <caption className="sr-only">Approved applications that can go into the pool</caption>
+              <caption className="sr-only">Approved applications that can go into the batch</caption>
               <THead>
                 <tr>
                   <TH className="w-8">
-                    <span className="sr-only">In the pool</span>
+                    <span className="sr-only">In the batch</span>
                   </TH>
                   <TH>Member</TH>
                   <TH>Purpose</TH>
@@ -198,9 +198,9 @@ function Builder({ builder, societyId }: { builder: PoolBuilder; societyId: ID }
           )}
         </Card>
 
-        <Card role="region" aria-label="The pool" className="lg:sticky lg:top-4">
+        <Card role="region" aria-label="The batch" className="lg:sticky lg:top-4">
           <CardHeader>
-            <CardTitle>The pool</CardTitle>
+            <CardTitle>The batch</CardTitle>
             <span className={cn('text-sm font-semibold tabular-nums', economics.readiness.ready ? 'text-good' : 'text-warn')}>
               {count} of {policy.poolMinMembers}–{policy.poolMaxMembers} members
             </span>
@@ -232,7 +232,7 @@ function Builder({ builder, societyId }: { builder: PoolBuilder; societyId: ID }
                   <DialogTitle>Submit {reference}?</DialogTitle>
                   <DialogDescription>
                     {count} members asking for <MoneyText paise={economics.total} /> go to the federation for review. Their
-                    applications are locked to this pool until it decides.
+                    applications are locked to this batch until it decides.
                   </DialogDescription>
                   <DialogFooter>
                     <DialogClose asChild>
@@ -259,7 +259,7 @@ function MemberBand({ count, min, max }: { count: number; min: number; max: numb
     <div
       className="relative h-2 overflow-hidden rounded-full bg-muted"
       role="meter"
-      aria-label="Members in the pool"
+      aria-label="Members in the batch"
       aria-valuemin={0}
       aria-valuemax={max}
       aria-valuenow={count}

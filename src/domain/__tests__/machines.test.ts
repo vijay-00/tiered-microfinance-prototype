@@ -44,13 +44,13 @@ describe('state machines', () => {
     expect(isTerminal(applicationMachine, 'REJECTED')).toBe(true);
   });
 
-  it('lets a pooled application go back to approved, but not a disbursed one', () => {
+  it('lets a batched application go back to approved, but not a disbursed one', () => {
     expect(canTransition(applicationMachine, 'POOLED', 'APPROVED')).toBe(true);
     expect(canTransition(applicationMachine, 'DISBURSED', 'APPROVED')).toBe(false);
   });
 
   it('refuses to skip apex review', () => {
-    expect(() => assertTransition('pool', poolMachine, 'SUBMITTED', 'SANCTIONED')).toThrow(
+    expect(() => assertTransition('batch', poolMachine, 'SUBMITTED', 'SANCTIONED')).toThrow(
       TransitionError,
     );
   });
@@ -62,14 +62,14 @@ describe('state machines', () => {
 });
 
 describe('guards', () => {
-  it('blocks an empty pool and says what to do', () => {
+  it('blocks an empty batch and says what to do', () => {
     expect(poolReadiness(0, DEFAULT_POLICY)).toEqual({
       ready: false,
       reason: 'Choose at least one approved application to send.',
     });
     // A higher minimum, if a federation sets one, says how many more are needed.
     expect(poolReadiness(7, { ...DEFAULT_POLICY, poolMinMembers: 10 }).reason).toBe(
-      'Add 3 more members: a pool needs at least 10.',
+      'Add 3 more members: a batch needs at least 10.',
     );
   });
 
@@ -78,10 +78,10 @@ describe('guards', () => {
     expect(poolReadiness(20, DEFAULT_POLICY).ready).toBe(true);
   });
 
-  it('blocks a pool above twenty members', () => {
+  it('blocks a batch above twenty members', () => {
     expect(poolReadiness(21, DEFAULT_POLICY)).toEqual({
       ready: false,
-      reason: 'Remove 1 member: a pool takes at most 20.',
+      reason: 'Remove 1 member: a batch takes at most 20.',
     });
   });
 
@@ -90,7 +90,7 @@ describe('guards', () => {
     expect(approvalAuthority(5_000_001, DEFAULT_POLICY)).toBe('SECRETARY');
   });
 
-  it('flags a pool sanctioned below its request for re-scoping', () => {
+  it('flags a batch sanctioned below its request for re-scoping', () => {
     expect(needsRescope(1_000_000, 900_000)).toBe(true);
     expect(needsRescope(1_000_000, 1_000_000)).toBe(false);
   });

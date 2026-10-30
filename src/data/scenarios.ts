@@ -44,7 +44,7 @@ export const CLEAN_START_SCENARIOS: readonly Scenario[] = [
   {
     id: 'A',
     name: 'Fresh start',
-    summary: 'Annapoorani with five members and no loans yet: every application, pool and loan is one you make.',
+    summary: 'Annapoorani with five members and no loans yet: every application, batch and loan is one you make.',
     load: () => loadSeed('A'),
   },
 ];

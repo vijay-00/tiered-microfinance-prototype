@@ -15,8 +15,8 @@ export const PURPOSE_LABEL: Record<LoanPurpose, string> = {
 export const STAGE_LABEL: Record<ApplicationStage, string> = {
   NEEDS_APPRAISAL: 'Needs appraisal',
   AWAITING_DECISION: 'Awaiting decision',
-  READY_TO_POOL: 'Ready to pool',
-  IN_POOL: 'In a pool',
+  READY_TO_POOL: 'Ready for a batch',
+  IN_POOL: 'In a batch',
   DISBURSED: 'Disbursed',
   REJECTED: 'Rejected',
 };

@@ -336,7 +336,7 @@ export function societyOf(state: WorldState, id: ID): Society {
 }
 
 export function poolOf(state: WorldState, id: ID): Pool {
-  return state.pools.find((p) => p.id === id) ?? notFound('pool', id);
+  return state.pools.find((p) => p.id === id) ?? notFound('batch', id);
 }
 
 export function applicationOf(state: WorldState, id: ID): LoanApplication {
@@ -430,11 +430,11 @@ export function memberExposure(state: WorldState, memberId: ID): Paise {
 function setPoolApplications(state: WorldState, poolId: ID, ids: readonly ID[]): WorldState {
   const pool = poolOf(state, poolId);
   if (pool.status !== 'OPEN' && pool.status !== 'READY') {
-    throw new WorldError('INVALID_STATE', `pool ${pool.reference} is ${pool.status} and can no longer change`);
+    throw new WorldError('INVALID_STATE', `batch ${pool.reference} is ${pool.status} and can no longer change`);
   }
   if (new Set(ids).size !== ids.length) throw new WorldError('INVALID_STATE', 'an application is listed twice');
   if (ids.length > state.policy.poolMaxMembers) {
-    throw new WorldError('OVER_LIMIT', `a pool takes at most ${state.policy.poolMaxMembers} members`);
+    throw new WorldError('OVER_LIMIT', `a batch takes at most ${state.policy.poolMaxMembers} members`);
   }
   const chosen = ids.map((id) => applicationOf(state, id));
   for (const application of chosen) {
@@ -445,7 +445,7 @@ function setPoolApplications(state: WorldState, poolId: ID, ids: readonly ID[]):
       throw new WorldError('INVALID_STATE', `${application.id} is ${application.status}, not approved`);
     }
     if (application.poolId !== undefined && application.poolId !== pool.id) {
-      throw new WorldError('INVALID_STATE', `${application.id} is already in another pool`);
+      throw new WorldError('INVALID_STATE', `${application.id} is already in another batch`);
     }
   }
   const keep = new Set(ids);
@@ -462,7 +462,7 @@ function setPoolApplications(state: WorldState, poolId: ID, ids: readonly ID[]):
   };
   const ready = poolReadiness(ids.length, state.policy).ready;
   const status = ready ? 'READY' : 'OPEN';
-  if (status !== pool.status) assertTransition('pool', poolMachine, pool.status, status);
+  if (status !== pool.status) assertTransition('batch', poolMachine, pool.status, status);
   next = replacePool(next, {
     ...pool,
     status,
@@ -500,7 +500,7 @@ function replacePool(state: WorldState, pool: Pool): WorldState {
 
 function movePool(state: WorldState, poolId: ID, to: Pool['status']): WorldState {
   const pool = poolOf(state, poolId);
-  assertTransition('pool', poolMachine, pool.status, to);
+  assertTransition('batch', poolMachine, pool.status, to);
   return replacePool(state, { ...pool, status: to });
 }
 
@@ -707,14 +707,14 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
     }
 
     case 'POOL_CREATED': {
-      requireNotAfterClock(state, event.on, 'a new pool');
+      requireNotAfterClock(state, event.on, 'a new batch');
       if (state.pools.some((p) => p.id === event.poolId)) {
-        throw new WorldError('DUPLICATE_ID', `pool ${event.poolId} already exists`);
+        throw new WorldError('DUPLICATE_ID', `batch ${event.poolId} already exists`);
       }
       const societyId = userOf(state, event.recordedBy).societyId;
       requireActor(state, event.recordedBy, 'MANAGE_POOL', societyId);
       if (state.pools.some((p) => p.reference === event.reference)) {
-        throw new WorldError('DUPLICATE_ID', `a pool ${event.reference} already exists`);
+        throw new WorldError('DUPLICATE_ID', `a batch ${event.reference} already exists`);
       }
       const pool: Pool = {
         id: event.poolId,
@@ -730,20 +730,20 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
     }
 
     case 'POOL_APPLICATIONS_SET': {
-      requireNotAfterClock(state, event.on, 'a pool change');
+      requireNotAfterClock(state, event.on, 'a batch change');
       const pool = poolOf(state, event.poolId);
       requireActor(state, event.recordedBy, 'MANAGE_POOL', pool.societyId);
       return setPoolApplications(state, pool.id, event.applicationIds);
     }
 
     case 'POOL_STATUS_CHANGED': {
-      requireNotAfterClock(state, event.on, 'a pool status change');
+      requireNotAfterClock(state, event.on, 'a batch status change');
       const pool = poolOf(state, event.poolId);
       const derived: Pool['status'][] = ['SANCTIONED', 'DISBURSED', 'SERVICING', 'CLOSED'];
       if (derived.includes(event.to)) {
         throw new WorldError(
           'INVALID_STATE',
-          `a pool becomes ${event.to} through its sanction, disbursement or servicing, not directly`,
+          `a batch becomes ${event.to} through its sanction, disbursement or servicing, not directly`,
         );
       }
       // The society builds and submits; the federation reviews and declines.
@@ -751,7 +751,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       const actor = requireActor(state, event.recordedBy, byApex ? 'REVIEW_POOL' : 'MANAGE_POOL', pool.societyId);
       if (event.to === 'READY') {
         const readiness = poolReadiness(pool.applicationIds.length, state.policy);
-        if (!readiness.ready) throw new WorldError('INVALID_STATE', readiness.reason ?? 'pool not ready');
+        if (!readiness.ready) throw new WorldError('INVALID_STATE', readiness.reason ?? 'batch not ready');
       }
       let next = movePool(state, pool.id, event.to);
       if (event.to === 'SUBMITTED') {
@@ -788,12 +788,12 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       const officer = requireActor(state, event.recordedBy, 'REVIEW_POOL');
       const pool = poolOf(state, event.poolId);
       if (event.sanctionedAmount > pool.requestedAmount) {
-        throw new WorldError('OVER_LIMIT', 'a sanction cannot exceed what the pool requested');
+        throw new WorldError('OVER_LIMIT', 'a sanction cannot exceed what the batch requested');
       }
       if (event.tenureMonths < pool.requestedTenureMonths) {
         throw new WorldError(
           'INVALID_STATE',
-          `the tranche must run at least as long as the pool's longest loan, ${pool.requestedTenureMonths} months`,
+          `the tranche must run at least as long as the batch's longest loan, ${pool.requestedTenureMonths} months`,
         );
       }
       const society = societyOf(state, pool.societyId);
@@ -871,7 +871,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       if (total > sanctioned) {
         throw new WorldError(
           'OVER_LIMIT',
-          `the pool would still ask for ${formatPaise(total)} against a ${formatPaise(sanctioned)} sanction`,
+          `the batch would still ask for ${formatPaise(total)} against a ${formatPaise(sanctioned)} sanction`,
         );
       }
       const amounts = new Map(event.keep.map((k) => [k.applicationId, k.amount]));
@@ -951,7 +951,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       const application = applicationOf(state, event.applicationId);
       requireActor(state, event.recordedBy, 'DISBURSE', application.societyId);
       if (application.poolId !== trancheEntry.tranche.poolId) {
-        throw new WorldError('INVALID_STATE', `${application.id} is not in the pool this tranche funds`);
+        throw new WorldError('INVALID_STATE', `${application.id} is not in the batch this tranche funds`);
       }
       const decision = application.decision;
       if (!decision || decision.outcome !== 'APPROVED') {

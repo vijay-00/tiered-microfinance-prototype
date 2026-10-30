@@ -239,7 +239,7 @@ export function sanctionEconomics(
   wholesaleRateBps: Bps,
 ): { readonly retail: Paise; readonly wholesale: Paise; readonly margin: Paise } {
   const pool = state.pools.find((p) => p.id === poolId);
-  if (!pool) throw new Error(`no pool ${poolId}`);
+  if (!pool) throw new Error(`no batch ${poolId}`);
   const apps = pool.applicationIds.map((id) => state.applications.find((a) => a.id === id)!).filter((a) => a.decision);
   const amounts = new Map(
     proRataRescope(

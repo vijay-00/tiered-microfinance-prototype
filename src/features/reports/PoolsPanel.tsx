@@ -15,21 +15,21 @@ import { useAppStore, useRepositories } from '@/store/context';
 export function PoolsPanel({ societyId, filePrefix }: { societyId: ID; filePrefix: string }) {
   const version = useAppStore((s) => s.world.eventCount);
   const repositories = useRepositories();
-  const { data, error } = useQuery(`pool-performance:${societyId}:${version}`, () => repositories.reports.getPools(societyId));
-  if (error) return <p className="text-sm text-bad">Pool performance could not be loaded: {error}</p>;
+  const { data, error } = useQuery(`batch-performance:${societyId}:${version}`, () => repositories.reports.getPools(societyId));
+  if (error) return <p className="text-sm text-bad">Batch performance could not be loaded: {error}</p>;
   if (!data) return <LoadingTiles count={1} />;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          Pools funded <span className="font-normal text-muted-foreground">· {data.length}</span>
+          Batches funded <span className="font-normal text-muted-foreground">· {data.length}</span>
         </CardTitle>
         <CsvButton
-          filename={`${filePrefix}-pools.csv`}
+          filename={`${filePrefix}-batches.csv`}
           build={() =>
             toCsv(
-              ['Pool', 'Sanction', 'Loans', 'Active', 'Disbursed', 'Outstanding', 'Repaid %', 'Late loans', 'At risk %', 'Member interest', 'Wholesale interest', 'Margin', 'Remittances', 'On time'],
+              ['Batch', 'Sanction', 'Loans', 'Active', 'Disbursed', 'Outstanding', 'Repaid %', 'Late loans', 'At risk %', 'Member interest', 'Wholesale interest', 'Margin', 'Remittances', 'On time'],
               data.map((p) => [
                 p.pool.reference,
                 p.tranche.sanctionRef,
@@ -51,13 +51,13 @@ export function PoolsPanel({ societyId, filePrefix }: { societyId: ID; filePrefi
         />
       </CardHeader>
       {data.length === 0 ? (
-        <p className="px-4 py-6 text-center text-sm text-muted-foreground">No pool has been disbursed yet.</p>
+        <p className="px-4 py-6 text-center text-sm text-muted-foreground">No batch has been disbursed yet.</p>
       ) : (
         <Table>
-          <caption className="sr-only">Performance of each funded pool</caption>
+          <caption className="sr-only">Performance of each funded batch</caption>
           <THead>
             <tr>
-              <TH>Pool</TH>
+              <TH>Batch</TH>
               <TH numeric>Loans</TH>
               <TH numeric>Disbursed</TH>
               <TH numeric>Outstanding</TH>

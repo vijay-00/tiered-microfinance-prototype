@@ -404,13 +404,13 @@ export interface PoolDetail {
 
 export function poolDetail(state: WorldState, poolId: ID): PoolDetail {
   const pool = state.pools.find((p) => p.id === poolId);
-  if (!pool) throw new Error(`no pool ${poolId}`);
+  if (!pool) throw new Error(`no batch ${poolId}`);
   const tranche = Object.values(state.tranches).find((t) => t.tranche.poolId === pool.id)?.tranche;
   const applications = pool.applicationIds
     .map((id) => state.applications.find((a) => a.id === id)!)
     .map((a) => applicationRow(state, a));
 
-  const trail: TrailStep[] = [{ on: pool.createdOn, label: 'Pool opened' }];
+  const trail: TrailStep[] = [{ on: pool.createdOn, label: 'Batch opened' }];
   if (pool.submittedOn) trail.push({ on: pool.submittedOn, label: 'Submitted to the federation' });
   if (pool.rescope) {
     trail.push({
