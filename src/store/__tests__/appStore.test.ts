@@ -161,3 +161,27 @@ describe('the role a first visit opens as', () => {
     expect(plain.getState().world.users.find((u) => u.id === plain.getState().session.userId)?.role).toBe('SECRETARY');
   });
 });
+
+describe.each(['A', 'B', 'C'] as const)('the demo, cut down to the member’s society, in scenario %s', (id) => {
+  const store = createAppStore({ onlySociety: 'soc_1' });
+  if (id !== 'A') store.getState().loadScenario(id);
+  const world = () => store.getState().world;
+
+  it('has one society, one member to log in as, and nobody in a hidden role', () => {
+    expect(world().societies.map((s) => s.name)).toEqual(['Annapoorani Credit Society']);
+    expect(world().users.map((u) => `${u.name}, ${u.role}`).sort()).toEqual([
+      'Dr. Sudha Ramanathan, APEX_OFFICER',
+      'Meenakshi Sundaram, SECRETARY',
+      'R. N. Subramanian, AUDITOR',
+      'Veerappan Pandian, MEMBER',
+    ]);
+  });
+
+  it('credits the loan officer’s past work to the secretary, so his name is nowhere in it', () => {
+    expect(JSON.stringify(world())).not.toContain('usr_officer');
+    const appraised = world().applications.filter((a) => a.appraisal);
+    expect(appraised.length).toBeGreaterThan(0);
+    expect(appraised.every((a) => a.appraisal!.officerId === 'usr_secretary')).toBe(true);
+    expect(store.getState().userEvents).toHaveLength(0);
+  });
+});

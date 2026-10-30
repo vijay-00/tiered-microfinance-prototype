@@ -3,7 +3,7 @@ import { roleInfo } from '@/app/roles';
 import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
-import { restrictToSociety } from '@/data/seed';
+import { reassignUser, restrictToSociety, type LoadedSeed } from '@/data/seed';
 import {
   clearPersisted,
   loadPersisted,
@@ -70,10 +70,20 @@ function seedWorldFor(id: ScenarioId, onlySociety?: ID): { world: WorldState; ve
   const load = scenario(id).load;
   if (!load) throw new Error(`scenario ${id} is not available yet`);
   const full = load();
-  const seed = onlySociety ? restrictToSociety(full, onlySociety) : full;
+  const seed = onlySociety ? withoutHiddenRoles(restrictToSociety(full, onlySociety)) : full;
   const built = { world: replay(createWorld(seed.base), seed.events), version: seed.version };
   seedWorlds.set(key, built);
   return built;
+}
+
+/** The demo's seed with each hidden role's people folded into their society's secretary. */
+function withoutHiddenRoles(seed: LoadedSeed): LoadedSeed {
+  return seed.base.users
+    .filter((u) => roleInfo(u.role).hidden)
+    .reduce((next, hidden) => {
+      const secretary = next.base.users.find((u) => u.role === 'SECRETARY' && u.societyId === hidden.societyId);
+      return secretary ? reassignUser(next, hidden.id, secretary.id) : next;
+    }, seed);
 }
 
 /** A user the demo can log in as: in this world, and not in a hidden role. */
@@ -107,8 +117,10 @@ function message(error: unknown): string {
  * (main.tsx); tests start as the secretary, where their scripts begin.
  *
  * `onlySociety` cuts every scenario down to that one society and the
- * federation. The demo shows only the society its member belongs to; tests
- * leave it unset and run against all three.
+ * federation, and credits what hidden roles did (the loan officer's
+ * appraisals and receipts) to the society's secretary, so nobody the demo
+ * cannot show turns up in its history. The demo shows only the society its
+ * member belongs to; tests leave it unset and run against all three.
  */
 export function createAppStore(
   options: { storage?: StorageLike; startAs?: Role; onlySociety?: ID } = {},

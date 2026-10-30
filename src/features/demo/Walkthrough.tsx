@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Compass, X } from 'lucide-react';
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { ScenarioId } from '@/data/scenarios';
@@ -202,12 +202,26 @@ export function WalkthroughProvider({ children }: { children: ReactNode }) {
   const switchUser = useAppStore((s) => s.switchUser);
   const [active, setActive] = useState<Walkthrough>();
   const [index, setIndex] = useState(0);
+  // Where the step goes, held until the switch of person has rendered.
+  const [destination, setDestination] = useState<{ path: string }>();
+
+  // A new person on the old screen is sent to their own home by the tier
+  // guard. Navigating once that redirect has run, rather than with the switch,
+  // lets the step's screen win.
+  useEffect(() => {
+    if (!destination) return;
+    const timer = setTimeout(() => {
+      navigate(destination.path);
+      setDestination(undefined);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [destination, navigate]);
 
   const value = useMemo<WalkthroughState>(() => {
     const visit = (step: WalkStep) => {
       if (step.go.scenario) loadScenario(step.go.scenario);
       if (step.go.userId) switchUser(step.go.userId);
-      navigate(step.go.path);
+      setDestination({ path: step.go.path });
     };
     return {
       active,

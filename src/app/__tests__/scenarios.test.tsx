@@ -85,6 +85,30 @@ describe('the walkthrough', () => {
     await user.click(within(panel).getByRole('button', { name: 'Finish' }));
     expect(screen.queryByRole('complementary', { name: 'Walkthrough' })).not.toBeInTheDocument();
   });
+
+  it('opens each step’s own screen even when the step changes the person', async () => {
+    const { user, store, router } = renderApp('/dashboard');
+    await user.click(within(demoBar()).getByRole('button', { name: /Walkthrough/ }));
+    await user.click(await screen.findByRole('menuitem', { name: /^A member’s loan, start to finish/ }));
+    const panel = await screen.findByRole('complementary', { name: 'Walkthrough' });
+    const next = () => user.click(within(panel).getByRole('button', { name: /Next/ }));
+    const userId = () => store.getState().session.userId;
+
+    // Secretary to member: the member's apply screen, not their home.
+    await waitFor(() => expect(router.state.location.pathname).toBe('/me/apply'));
+    expect(userId()).toBe('usr_member');
+    await next();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/me'));
+    // Member to secretary: the application queue, not the dashboard.
+    await next();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/applications'));
+    expect(userId()).toBe('usr_secretary');
+    await next();
+    // Secretary to apex officer: the funding requests, not the exposure page.
+    await next();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/apex/requests'));
+    expect(userId()).toBe('usr_apex');
+  });
 });
 
 describe('demo controls', () => {

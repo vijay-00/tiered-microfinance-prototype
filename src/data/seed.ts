@@ -261,3 +261,24 @@ export function restrictToSociety(seed: LoadedSeed, societyId: ID): LoadedSeed {
   });
   return { base: restricted, events, version: fnv1a(JSON.stringify({ base: restricted, events })) };
 }
+
+/**
+ * The seed with one person's work credited to another: every record that
+ * names `fromId` (who appraised, decided or took a payment) names `toId`
+ * instead, and `fromId` is gone. For a role the demo hides, so its people do
+ * not turn up in the history either.
+ */
+export function reassignUser(seed: LoadedSeed, fromId: ID, toId: ID): LoadedSeed {
+  if (!seed.base.users.some((u) => u.id === toId)) throw new SeedError([`no user ${toId} to credit`]);
+  const swap = (value: unknown): unknown => {
+    if (value === fromId) return toId;
+    if (Array.isArray(value)) return value.map(swap);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, swap(inner)]));
+    }
+    return value;
+  };
+  const base = swap({ ...seed.base, users: seed.base.users.filter((u) => u.id !== fromId) }) as WorldBase;
+  const events = swap(seed.events) as WorldEvent[];
+  return { base, events, version: fnv1a(JSON.stringify({ base, events })) };
+}
