@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { rowInterestAt } from '@/domain/interest';
-import { positionOf, remittanceDueFor } from '@/domain/world';
+import { collectionsQueue } from '@/domain/servicing';
+import { positionOf, remittanceDueFor, type WorldState } from '@/domain/world';
 import { createAppStore } from '../appStore';
 import { selectInvariantHealth, selectNextDueDateForViewer } from '../selectors';
 import { STORAGE_KEY, STATE_VERSION, type StorageLike } from '../persistence';
@@ -266,5 +267,44 @@ describe('the demo member’s first loan', () => {
       }),
     ).toEqual({ ok: true });
     expect(selectInvariantHealth(store.getState().world).ok).toBe(true);
+  });
+});
+
+describe.each(['A', 'B', 'C'] as const)('the demo on the real date, in scenario %s', (id) => {
+  const atSeed = createAppStore({ onlySociety: 'soc_1' });
+  const store = createAppStore({ onlySociety: 'soc_1', today: '2027-03-10' });
+  if (id !== 'A') {
+    atSeed.getState().loadScenario(id);
+    store.getState().loadScenario(id);
+  }
+  const world = () => store.getState().world;
+  const overdueIds = (w: WorldState) =>
+    collectionsQueue(w, 'soc_1').overdue.map((r) => r.loanId).sort();
+
+  it('opens on today, with the books whole and nothing done in the app yet', () => {
+    expect(world().clock).toBe('2027-03-10');
+    expect(store.getState().userEvents).toHaveLength(0);
+    expect(selectInvariantHealth(world()).ok).toBe(true);
+    expect(store.getState().seedVersion).toMatch(/@2027-03-10$/);
+  });
+
+  it('pays every current member on each due date and remits each month, so only the late stay late', () => {
+    expect(overdueIds(world())).toEqual(overdueIds(atSeed.getState().world));
+    const tranche = world().tranches.trn_01!;
+    expect(tranche.remittances.at(-1)!.dueOn).toBe('2027-02-15');
+  });
+});
+
+describe('the demo on the seed’s own day', () => {
+  it('stays as the seed left it when today is not later', () => {
+    const store = createAppStore({ onlySociety: 'soc_1', today: '2026-10-01' });
+    expect(store.getState().world.clock).toBe('2026-10-29');
+  });
+
+  it('only moves the calendar when no instalment falls due before today', () => {
+    const store = createAppStore({ onlySociety: 'soc_1', today: '2026-10-30' });
+    const plain = createAppStore({ onlySociety: 'soc_1' });
+    expect(store.getState().world.clock).toBe('2026-10-30');
+    expect(store.getState().world.eventCount).toBe(plain.getState().world.eventCount + 1);
   });
 });

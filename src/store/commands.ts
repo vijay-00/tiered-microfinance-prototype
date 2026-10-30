@@ -1,8 +1,16 @@
-import { financialYear } from '@/domain/dates';
+import { compareISO, financialYear } from '@/domain/dates';
 import { collectionsQueue } from '@/domain/servicing';
 import type { ID, ISODate, LoanPurpose, Paise, PaymentMode } from '@/domain/types';
 import type { ReceiptSource } from '@/domain/reconciliation';
-import { societyOf, type WorldEvent, type WorldState } from '@/domain/world';
+import {
+  applyEvent,
+  nextDueDate,
+  nextRemittanceDate,
+  remittanceDueFor,
+  societyOf,
+  type WorldEvent,
+  type WorldState,
+} from '@/domain/world';
 
 /**
  * Turning what someone asked for into a complete event: fresh ids, the next
@@ -107,6 +115,48 @@ export function dueTodayEvents(world: WorldState, societyId: ID, recordedBy: ID)
     electPrepayment: false,
     recordedBy,
   }));
+}
+
+/**
+ * The world carried forward to `until`, as an ordinary month would go: on
+ * each due date every member who is current pays their instalment, and each
+ * society remits in full what its tranches owe the federation. Members
+ * already behind stay behind, so a scenario's story survives the move; the
+ * secretary records each of them as they catch up. Returns the events and the
+ * world they lead to, applied through the reducer like anything else.
+ */
+export function catchUpEvents(world: WorldState, until: ISODate): { events: WorldEvent[]; world: WorldState } {
+  const events: WorldEvent[] = [];
+  let state = world;
+  const emit = (event: WorldEvent) => {
+    state = applyEvent(state, event);
+    events.push(event);
+  };
+  const secretaryOf = (societyId: ID) =>
+    state.users.find((u) => u.role === 'SECRETARY' && u.societyId === societyId)?.id;
+
+  for (let day = nextDueDate(state); day && compareISO(day, until) <= 0; day = nextDueDate(state)) {
+    emit({ type: 'CLOCK_ADVANCED', to: day });
+    for (const society of state.societies) {
+      const secretary = secretaryOf(society.id);
+      if (secretary) dueTodayEvents(state, society.id, secretary).forEach(emit);
+    }
+    for (const entry of Object.values(state.tranches)) {
+      if (nextRemittanceDate(state, entry.tranche.id) !== day) continue;
+      const secretary = secretaryOf(entry.tranche.societyId);
+      if (!secretary) continue;
+      const due = remittanceDueFor(state, entry.tranche.id, day);
+      emit(
+        remittanceEvent(
+          state,
+          { trancheId: entry.tranche.id, dueOn: day, interestPaid: due.interestDue, principalPaid: due.principalDue },
+          secretary,
+        ),
+      );
+    }
+  }
+  if (compareISO(state.clock, until) < 0) emit({ type: 'CLOCK_ADVANCED', to: until });
+  return { events, world: state };
 }
 
 // ---------------------------------------------------------------------------

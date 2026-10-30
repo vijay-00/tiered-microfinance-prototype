@@ -1,5 +1,6 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { roleInfo } from '@/app/roles';
+import { compareISO } from '@/domain/dates';
 import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
@@ -10,6 +11,7 @@ import {
   withoutDraftPools,
   type LoadedSeed,
 } from '@/data/seed';
+import { catchUpEvents } from './commands';
 import {
   clearPersisted,
   loadPersisted,
@@ -69,8 +71,8 @@ export type AppStore = StoreApi<AppStoreState>;
 
 const seedWorlds = new Map<string, { world: WorldState; version: string }>();
 
-function seedWorldFor(id: ScenarioId, onlySociety?: ID): { world: WorldState; version: string } {
-  const key = `${id}:${onlySociety ?? '*'}`;
+function seedWorldFor(id: ScenarioId, onlySociety?: ID, today?: ISODate): { world: WorldState; version: string } {
+  const key = `${id}:${onlySociety ?? '*'}:${today ?? ''}`;
   const cached = seedWorlds.get(key);
   if (cached) return cached;
   const load = scenario(id).load;
@@ -79,7 +81,13 @@ function seedWorldFor(id: ScenarioId, onlySociety?: ID): { world: WorldState; ve
   const seed = onlySociety
     ? withoutDraftPools(freshStartForMemberLogin(withoutHiddenRoles(restrictToSociety(full, onlySociety))))
     : full;
-  const built = { world: replay(createWorld(seed.base), seed.events), version: seed.version };
+  const replayed = replay(createWorld(seed.base), seed.events);
+  // The seed's history ends on its own day. Carried forward to today, the
+  // demo opens on the real date with every month in between gone as usual.
+  const built =
+    today && compareISO(today, replayed.clock) > 0
+      ? { world: catchUpEvents(replayed, today).world, version: `${seed.version}@${today}` }
+      : { world: replayed, version: seed.version };
   seedWorlds.set(key, built);
   return built;
 }
@@ -130,23 +138,31 @@ function message(error: unknown): string {
  * cannot show turns up in its history. The member you log in as starts with
  * no loan on file, and no pool is half-built for you. The demo shows only the society its
  * member belongs to; tests leave it unset and run against all three.
+ *
+ * `today` is the real date: the seed's history is carried forward to it,
+ * instalments paid and remittances made as usual, so the demo opens on the
+ * day it is used. Tests leave it unset and stay on the seed's own day.
  */
 export function createAppStore(
-  options: { storage?: StorageLike; startAs?: Role; onlySociety?: ID } = {},
+  options: { storage?: StorageLike; startAs?: Role; onlySociety?: ID; today?: ISODate } = {},
 ): AppStore {
-  const { storage, startAs = 'SECRETARY', onlySociety } = options;
+  const { storage, startAs = 'SECRETARY', onlySociety, today } = options;
   const saved = loadPersisted(storage);
 
   let scenarioId: ScenarioId = DEFAULT_SCENARIO;
   if (saved && scenario(saved.scenarioId).load) scenarioId = saved.scenarioId;
-  const seed = seedWorldFor(scenarioId, onlySociety);
+  const seed = seedWorldFor(scenarioId, onlySociety, today);
 
   let world = seed.world;
   let userEvents: readonly WorldEvent[] = [];
   let notice: string | undefined;
   if (saved && saved.scenarioId === scenarioId) {
     if (saved.seedVersion !== seed.version) {
-      notice = 'The demo data has changed since your last visit, so the demo started fresh.';
+      // The same data on a later day only moved the calendar on.
+      notice =
+        saved.seedVersion.split('@')[0] === seed.version.split('@')[0]
+          ? 'A new day: the demo has moved on to today, so it started fresh.'
+          : 'The demo data has changed since your last visit, so the demo started fresh.';
     } else {
       try {
         world = replay(seed.world, saved.userEvents);
@@ -201,7 +217,7 @@ export function createAppStore(
 
     loadScenario(id) {
       try {
-        const next = seedWorldFor(id, onlySociety);
+        const next = seedWorldFor(id, onlySociety, today);
         const current = get().session.userId;
         set({
           scenarioId: id,
@@ -222,7 +238,7 @@ export function createAppStore(
 
     reset() {
       clearPersisted(storage);
-      const current = seedWorldFor(get().scenarioId, onlySociety);
+      const current = seedWorldFor(get().scenarioId, onlySociety, today);
       set({ world: current.world, seedWorld: current.world, userEvents: [], session: { userId: get().session.userId }, notice: undefined });
     },
 
