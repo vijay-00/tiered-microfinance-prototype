@@ -1,4 +1,4 @@
-import { addMonthsISO, compareISO, daysBetween } from './dates';
+import { addMonthsISO, compareISO, daysBetween, startOfMonth } from './dates';
 import { generateSchedule, MONTHS_PER_YEAR } from './interest';
 import { approvalAuthority, poolReadiness, type ApprovalAuthority, type Readiness } from './machines';
 import { formatPaise, mulRate, sum } from './money';
@@ -46,7 +46,7 @@ export function quoteLoan(amount: Paise, tenureMonths: number, rateBps: Bps, fro
       principal: amount,
       annualBps: rateBps,
       tenureMonths,
-      firstDueOn: addMonthsISO(from, 1),
+      firstDueOn: firstCollectionDay(from),
     });
     return { amount, tenureMonths, emi: schedule[0]!.instalment, totalInterest: sum(schedule.map((r) => r.interest)) };
   } catch {
@@ -317,7 +317,7 @@ export function poolEconomics(state: WorldState, applicationIds: readonly ID[]):
       principal: sanctionedAmount,
       annualBps: rateBps,
       tenureMonths,
-      firstDueOn: addMonthsISO(state.clock, 1),
+      firstDueOn: firstCollectionDay(state.clock),
     });
     retail += sum(schedule.map((r) => r.interest));
     wholesale += sum(schedule.map((r) => mulRate(r.opening, state.policy.wholesaleRateBps, MONTHS_PER_YEAR)));
@@ -661,6 +661,20 @@ export interface DisbursementPlan {
 /** Shortest gap, in days, between disbursing a loan and its first instalment. */
 export const MIN_DAYS_TO_FIRST_DUE = 15;
 
+/**
+ * The society collects on the 1st of every month, as a bank fixes its EMI
+ * date. The first full month starts on the 1st after payout (or on the day
+ * itself, if paid out on a 1st), and the first instalment falls due a month
+ * later. Paid out on 30 October: the month runs from 1 November, the first
+ * instalment is due on 1 December, and the two days from 30 October are a
+ * broken period charged with it. One day for everyone, and no instalment
+ * drifting in a short month.
+ */
+export function firstCollectionDay(from: ISODate): ISODate {
+  const monthStarts = startOfMonth(from) === from ? from : startOfMonth(addMonthsISO(from, 1));
+  return addMonthsISO(monthStarts, 1);
+}
+
 export function disbursementPlan(state: WorldState, trancheId: ID): DisbursementPlan {
   const entry = state.tranches[trancheId];
   if (!entry) throw new Error(`no tranche ${trancheId}`);
@@ -675,7 +689,7 @@ export function disbursementPlan(state: WorldState, trancheId: ID): Disbursement
   for (const id of entry.fundedLoanIds) for (const row of state.loans[id]!.schedule) dates.add(row.dueOn);
   const existingDueDates = [...dates].sort(compareISO).filter((d) => compareISO(d, state.clock) > 0);
   // Join the tranche's existing collection day when it leaves the member a
-  // fair first month; otherwise a month from today.
+  // fair first month; otherwise the society's collection day, the 1st.
   const aligned = existingDueDates.find((d) => daysBetween(state.clock, d) >= MIN_DAYS_TO_FIRST_DUE);
   return {
     trancheId,
@@ -684,7 +698,7 @@ export function disbursementPlan(state: WorldState, trancheId: ID): Disbursement
     undrawn: tranche.sanctionedAmount - drawn,
     capacity: tranche.sanctionedAmount - lent,
     existingDueDates,
-    suggestedFirstDueOn: aligned ?? addMonthsISO(state.clock, 1),
+    suggestedFirstDueOn: aligned ?? firstCollectionDay(state.clock),
     rescope:
       poolAsk(state, tranche.poolId) > tranche.sanctionedAmount
         ? {

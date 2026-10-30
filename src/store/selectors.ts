@@ -1,5 +1,5 @@
 import type { InvariantResult } from '@/domain/invariants';
-import type { ID, User } from '@/domain/types';
+import type { ID, ISODate, User } from '@/domain/types';
 import { invariantsBySociety, nextDueDate, type WorldState } from '@/domain/world';
 import { roleInfo, type RoleInfo } from '@/app/roles';
 import type { AppStoreState } from './appStore';
@@ -19,7 +19,15 @@ function memoOnWorld<T>(derive: (world: WorldState) => T): (world: WorldState) =
 }
 
 export const selectInvariants = memoOnWorld(invariantsBySociety);
-export const selectNextDueDate = memoOnWorld(nextDueDate);
+export const selectNextDueDate = memoOnWorld((world) => nextDueDate(world));
+
+/** The next due date the person viewing cares about: a member's own, or the society's next. */
+export function selectNextDueDateForViewer(state: AppStoreState): ISODate | undefined {
+  const user = selectCurrentUser(state);
+  return user.role === 'MEMBER' && user.memberId
+    ? nextDueDate(state.world, user.memberId)
+    : selectNextDueDate(state.world);
+}
 
 export interface InvariantHealth {
   readonly passing: number;

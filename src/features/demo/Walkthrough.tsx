@@ -48,7 +48,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The secretary pools and submits',
-        body: 'Approved applications go to the federation in a pool of one to twenty. Choose Add to ANN/POOL/2026-27/02, Select all, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as it fills.',
+        body: 'Approved applications go to the federation in a pool of one to twenty. Choose Start a pool, tick Veerappan Pandian’s application and any others you want to send, and Submit to the federation. The pool shows its wholesale cost and the society’s 2% spread as you pick.',
         go: { userId: 'usr_secretary', path: '/pools' },
       },
       {
@@ -58,7 +58,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The society draws down and pays out',
-        body: 'Open the new sanction, PACF/SAN/2026-27/015, and choose Draw down and disburse. One drawdown and twelve disbursements post to the ledger, and each loan gets its schedule.',
+        body: 'Open the new sanction, PACF/SAN/2026-27/015, and choose Draw down and disburse. One drawdown, and a disbursement for each member in the pool, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
@@ -68,7 +68,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'A month on, members repay',
-        body: 'Use Next due date in the demo bar until twelve instalments are due today, then Record all due today. Each payment is split into what goes on to the federation and what the society keeps.',
+        body: 'Use Next due date in the demo bar until the new loans’ first instalments are due today, on the 1st, then Record all due today. Each payment is split into what goes on to the federation and what the society keeps.',
         go: { userId: 'usr_secretary', path: '/collections' },
       },
       {

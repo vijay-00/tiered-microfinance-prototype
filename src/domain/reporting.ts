@@ -8,7 +8,7 @@ import {
   startOfFinancialQuarter,
   startOfMonth,
 } from './dates';
-import { MONTHS_PER_YEAR } from './interest';
+import { MONTHS_PER_YEAR, rowInterestAt } from './interest';
 import { ACCOUNTS, accountFor, type Account, type AccountCode } from './ledger';
 import { mulRate, sum } from './money';
 import { societyTrackRecord, type SocietyTrackRecord } from './origination';
@@ -487,7 +487,7 @@ export function marginFor(state: WorldState, societyId: ID, range: { from: ISODa
       if (!inRange(row.dueOn, { from: range.from, to })) continue;
       rows += 1;
       scheduledRetail += row.interest;
-      scheduledWholesale += mulRate(row.opening, rate, MONTHS_PER_YEAR);
+      scheduledWholesale += rowInterestAt(row, rate);
     }
   }
   const window = { from: range.from, to };

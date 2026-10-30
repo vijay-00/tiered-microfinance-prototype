@@ -175,7 +175,9 @@ export function MemberApplyPage() {
                     </dd>
                   </div>
                 </dl>
-                <p className="g-sub">The first instalment falls due about a month after the loan is paid out.</p>
+                <p className="g-sub">
+                  Instalments fall due on the 1st of every month. Interest for the days between payout and the next 1st is added to the first one.
+                </p>
               </>
             ) : (
               <p className="g-sub">Enter an amount to see your monthly instalment.</p>

@@ -22,7 +22,7 @@ import {
   selectCurrentUser,
   selectInvariantHealth,
   selectInvariants,
-  selectNextDueDate,
+  selectNextDueDateForViewer,
 } from '@/store/selectors';
 
 /**
@@ -99,7 +99,7 @@ function SocietySwitcher() {
 
 function ClockControl() {
   const clock = useAppStore((s) => s.world.clock);
-  const nextDue = useAppStore((s) => selectNextDueDate(s.world));
+  const nextDue = useAppStore(selectNextDueDateForViewer);
   const advance = useAppStore((s) => s.advanceClock);
   return (
     <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Simulated clock">

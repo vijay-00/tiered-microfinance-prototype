@@ -3,7 +3,13 @@ import { roleInfo } from '@/app/roles';
 import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
-import { reassignUser, restrictToSociety, type LoadedSeed } from '@/data/seed';
+import {
+  freshStartForMemberLogin,
+  reassignUser,
+  restrictToSociety,
+  withoutDraftPools,
+  type LoadedSeed,
+} from '@/data/seed';
 import {
   clearPersisted,
   loadPersisted,
@@ -70,7 +76,9 @@ function seedWorldFor(id: ScenarioId, onlySociety?: ID): { world: WorldState; ve
   const load = scenario(id).load;
   if (!load) throw new Error(`scenario ${id} is not available yet`);
   const full = load();
-  const seed = onlySociety ? withoutHiddenRoles(restrictToSociety(full, onlySociety)) : full;
+  const seed = onlySociety
+    ? withoutDraftPools(freshStartForMemberLogin(withoutHiddenRoles(restrictToSociety(full, onlySociety))))
+    : full;
   const built = { world: replay(createWorld(seed.base), seed.events), version: seed.version };
   seedWorlds.set(key, built);
   return built;
@@ -119,7 +127,8 @@ function message(error: unknown): string {
  * `onlySociety` cuts every scenario down to that one society and the
  * federation, and credits what hidden roles did (the loan officer's
  * appraisals and receipts) to the society's secretary, so nobody the demo
- * cannot show turns up in its history. The demo shows only the society its
+ * cannot show turns up in its history. The member you log in as starts with
+ * no loan on file, and no pool is half-built for you. The demo shows only the society its
  * member belongs to; tests leave it unset and run against all three.
  */
 export function createAppStore(

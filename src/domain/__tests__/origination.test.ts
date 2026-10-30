@@ -544,7 +544,8 @@ describe('read models', () => {
       recordedBy: 'usr_apex',
     });
     const fresh = disbursementPlan(world, 'trn_90');
-    expect(fresh).toMatchObject({ idle: 0, undrawn: 75_000_000, capacity: 75_000_000, suggestedFirstDueOn: '2026-11-29' });
+    // A fresh tranche collects on the 1st: on 29 October the first full month starts on 1 November.
+    expect(fresh).toMatchObject({ idle: 0, undrawn: 75_000_000, capacity: 75_000_000, suggestedFirstDueOn: '2026-12-01' });
     expect(fresh.candidates).toHaveLength(10);
 
     const first = fresh.candidates[0]!;

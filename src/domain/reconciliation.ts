@@ -1,6 +1,6 @@
 import { addDaysISO, compareISO, daysBetween, maxISO } from './dates';
-import { MONTHS_PER_YEAR, amortiseAtInstalment, generateSchedule } from './interest';
-import { BPS_SCALE, assertNonNegative, assertPaise, mulRate, roundHalfUp, sum } from './money';
+import { MONTHS_PER_YEAR, amortiseAtInstalment, generateSchedule, rowInterestAt } from './interest';
+import { BPS_SCALE, assertNonNegative, assertPaise, mulRate, mulRateDays, roundHalfUp, sum } from './money';
 import { allocationBuckets } from './types';
 import type {
   Allocation,
@@ -439,7 +439,7 @@ function attributedWholesale(
     const portion = Math.min(left, row.interest);
     left -= portion;
     if (row.interest === 0) continue;
-    const rowWholesale = mulRate(row.opening, wholesaleRateBps, MONTHS_PER_YEAR);
+    const rowWholesale = rowInterestAt(row, wholesaleRateBps);
     total += roundHalfUp((rowWholesale * portion) / row.interest);
   }
   return total;
@@ -767,8 +767,13 @@ export function computeRemittance(input: RemittanceInput): RemittanceDue {
   );
 
   const memberPrincipalScheduled = sum(windowRows.map((row) => row.principal));
-  const memberWholesaleScheduled = sum(
-    windowRows.map((row) => mulRate(row.opening, tranche.wholesaleRateBps, MONTHS_PER_YEAR)),
+  const memberWholesaleScheduled = sum(windowRows.map((row) => rowInterestAt(row, tranche.wholesaleRateBps)));
+  // The broken periods of loans first due in this window: the federation is
+  // paid for the same days, on the same balances, as their members pay for.
+  const brokenPeriodWholesale = sum(
+    windowRows.map((row) =>
+      row.brokenPeriodDays ? mulRateDays(row.opening, tranche.wholesaleRateBps, row.brokenPeriodDays) : 0,
+    ),
   );
   const prepaidPassThrough = sum(
     fundedLoans.flatMap((loan) =>
@@ -781,7 +786,8 @@ export function computeRemittance(input: RemittanceInput): RemittanceDue {
   assertNonNegative(trancheOpening, 'tranche opening balance');
 
   const period = priorRemittances.length + 1;
-  const wholesaleInterest = mulRate(trancheOpening, tranche.wholesaleRateBps, MONTHS_PER_YEAR);
+  const wholesaleInterest =
+    mulRate(trancheOpening, tranche.wholesaleRateBps, MONTHS_PER_YEAR) + brokenPeriodWholesale;
   // Each period's due already includes the arrears brought into it, so only
   // the most recent shortfall is carried, never the sum of all of them.
   const interestArrears = last ? last.interestDue - last.interestPaid : 0;

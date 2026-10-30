@@ -282,3 +282,57 @@ export function reassignUser(seed: LoadedSeed, fromId: ID, toId: ID): LoadedSeed
   const events = swap(seed.events) as WorldEvent[];
   return { base, events, version: fnv1a(JSON.stringify({ base, events })) };
 }
+
+/**
+ * The member login starts with nothing on file: no loan, no application, so
+ * the demo shows a member's first loan from the start, up to the full limit
+ * per member. The login moves to an active member of the same society who
+ * has never applied, and the two swap names, so the person you log in as is
+ * still who the demo says it is; the old history stays, under the other name.
+ */
+export function freshStartForMemberLogin(seed: LoadedSeed): LoadedSeed {
+  const login = seed.base.users.find((u) => u.role === 'MEMBER' && u.memberId);
+  if (!login) return seed;
+  const applied = new Set([
+    ...seed.base.applications.map((a) => a.memberId),
+    ...seed.events.flatMap((e) => (e.type === 'APPLICATION_SUBMITTED' ? [e.memberId] : [])),
+  ]);
+  if (!applied.has(login.memberId!)) return seed;
+  const current = seed.base.members.find((m) => m.id === login.memberId)!;
+  const fresh = seed.base.members.find(
+    (m) => m.societyId === current.societyId && m.status === 'ACTIVE' && !applied.has(m.id),
+  );
+  if (!fresh) throw new SeedError([`no member of ${current.societyId} without history to log in as`]);
+  const base: WorldBase = {
+    ...seed.base,
+    users: seed.base.users.map((u) => (u.id === login.id ? { ...u, memberId: fresh.id } : u)),
+    members: seed.base.members.map((m) =>
+      m.id === fresh.id ? { ...m, name: current.name } : m.id === current.id ? { ...m, name: fresh.name } : m,
+    ),
+  };
+  return { base, events: seed.events, version: fnv1a(JSON.stringify({ base, events: seed.events })) };
+}
+
+/**
+ * No pool half-built in advance: a draft the seed starts with is dissolved
+ * and its applications go back to approved and waiting, so whoever builds the
+ * next pool picks every member in it. Only drafts nothing has happened to are
+ * dropped; a pool any event names is left alone.
+ */
+export function withoutDraftPools(seed: LoadedSeed): LoadedSeed {
+  const named = new Set(seed.events.flatMap((e) => ('poolId' in e ? [e.poolId] : [])));
+  const drafts = new Set(
+    seed.base.pools.filter((p) => (p.status === 'OPEN' || p.status === 'READY') && !named.has(p.id)).map((p) => p.id),
+  );
+  if (drafts.size === 0) return seed;
+  const base: WorldBase = {
+    ...seed.base,
+    pools: seed.base.pools.filter((p) => !drafts.has(p.id)),
+    applications: seed.base.applications.map((a) => {
+      if (!a.poolId || !drafts.has(a.poolId)) return a;
+      const { poolId: _dropped, ...rest } = a;
+      return rest;
+    }),
+  };
+  return { base, events: seed.events, version: fnv1a(JSON.stringify({ base, events: seed.events })) };
+}

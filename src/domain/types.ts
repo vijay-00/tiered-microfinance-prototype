@@ -168,6 +168,13 @@ export const scheduleRowSchema = z.object({
   interest: paiseSchema.nonnegative(),
   principal: paiseSchema.nonnegative(),
   closing: paiseSchema.nonnegative(),
+  /**
+   * First row only, when the loan was paid out before its first full month
+   * began: the days from payout to the start of that month. Their interest,
+   * actual/365, is in `interest` and `instalment` on top of the month's.
+   */
+  brokenPeriodDays: z.number().int().positive().optional(),
+  brokenPeriodInterest: paiseSchema.nonnegative().optional(),
 });
 export type ScheduleRow = z.infer<typeof scheduleRowSchema>;
 

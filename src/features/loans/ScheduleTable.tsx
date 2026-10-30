@@ -30,7 +30,14 @@ export function ScheduleTable({ lines, caption }: { lines: readonly ScheduleLine
             <TD className="whitespace-nowrap">{formatDate(row.dueOn)}</TD>
             <TD numeric><MoneyText paise={row.opening} /></TD>
             <TD numeric><MoneyText paise={row.instalment} /></TD>
-            <TD numeric><MoneyText paise={row.interest} /></TD>
+            <TD numeric>
+              <MoneyText paise={row.interest} />
+              {row.brokenPeriodInterest ? (
+                <span className="block text-xs text-muted-foreground">
+                  incl. <MoneyText paise={row.brokenPeriodInterest} /> for {row.brokenPeriodDays} days before the month
+                </span>
+              ) : null}
+            </TD>
             <TD numeric><MoneyText paise={row.principal} /></TD>
             <TD numeric><MoneyText paise={row.closing} /></TD>
             <TD>

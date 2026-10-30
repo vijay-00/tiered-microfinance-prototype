@@ -205,8 +205,8 @@ export function NewApplicationPage() {
                   </div>
                 </dl>
                 <p className="pt-2 text-xs text-muted-foreground">
-                  At {formatBps(policy.retailRateBps)} a year on the reducing balance. The first instalment falls due
-                  about a month after the loan is paid out.
+                  At {formatBps(policy.retailRateBps)} a year on the reducing balance. Instalments fall due on the 1st
+                  of every month; interest for the days between payout and the next 1st is added to the first.
                 </p>
                 {overMemberLimit ? (
                   <p role="alert" className="pt-2 text-xs text-bad">

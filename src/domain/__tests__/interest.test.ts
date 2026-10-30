@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
   amortiseAtInstalment,
+  brokenPeriodDays,
   emi,
   exactEmi,
   generateSchedule,
   outstandingAfter,
+  rowInterestAt,
   rowsDueBy,
   scheduleTotals,
 } from '../interest';
+import { firstCollectionDay } from '../origination';
 import reference from './fixtures/reference-loan.json';
 
 describe('emi', () => {
@@ -137,6 +140,45 @@ describe('generateSchedule: dates', () => {
       firstDueOn: '2028-01-30',
     });
     expect(schedule.map((row) => row.dueOn)).toEqual(['2028-01-30', '2028-02-29']);
+  });
+});
+
+describe('generateSchedule: broken-period interest, the bank way', () => {
+  // Rs 1,00,000 at 11.5% over 12 months, paid out on 30 October; EMI on the 1st.
+  const base = { loanId: 'bpi', principal: 10_000_000, annualBps: 1150, tenureMonths: 12, firstDueOn: '2026-12-01' };
+  const plain = generateSchedule(base);
+  const broken = generateSchedule({ ...base, disbursedOn: '2026-10-30' });
+
+  it('charges the two days before 1 November with the first instalment, actual/365', () => {
+    expect(brokenPeriodDays('2026-10-30', '2026-12-01')).toBe(2);
+    // 1,00,000 x 11.5% x 2 / 365 = Rs 63.01
+    expect(broken[0]).toMatchObject({ brokenPeriodDays: 2, brokenPeriodInterest: 6_301 });
+    expect(broken[0]!.interest).toBe(plain[0]!.interest + 6_301);
+    expect(broken[0]!.instalment).toBe(plain[0]!.instalment + 6_301);
+  });
+
+  it('leaves the EMI, the principal and every later month exactly as they were', () => {
+    expect(broken.map((r) => r.principal)).toEqual(plain.map((r) => r.principal));
+    expect(broken.slice(1)).toEqual(plain.slice(1));
+  });
+
+  it('has no broken period when the loan is paid out on the 1st, or a month before its first due date', () => {
+    expect(brokenPeriodDays('2026-11-01', '2026-12-01')).toBe(0);
+    expect(generateSchedule({ ...base, disbursedOn: '2026-11-01' })).toEqual(plain);
+    expect(brokenPeriodDays('2026-11-15', '2026-12-01')).toBe(0);
+  });
+
+  it('sets the first EMI on the 1st a month after the first full month begins', () => {
+    expect(firstCollectionDay('2026-10-30')).toBe('2026-12-01');
+    expect(firstCollectionDay('2026-10-10')).toBe('2026-12-01');
+    expect(firstCollectionDay('2026-11-01')).toBe('2026-12-01');
+    expect(firstCollectionDay('2026-12-31')).toBe('2027-02-01');
+  });
+
+  it('charges the federation the same days at its own rate', () => {
+    // 1,00,000 x 9.5% / 12 = Rs 791.67, plus 1,00,000 x 9.5% x 2 / 365 = Rs 52.05
+    expect(rowInterestAt(broken[0]!, 950)).toBe(79_167 + 5_205);
+    expect(rowInterestAt(plain[0]!, 950)).toBe(79_167);
   });
 });
 

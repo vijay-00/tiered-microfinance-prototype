@@ -975,7 +975,9 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         annualBps: decision.rateBps,
         tenureMonths: decision.tenureMonths,
         firstDueOn: event.firstDueOn,
+        disbursedOn: event.on,
       });
+      const first = schedule[0]!;
       const loanState: LoanState = {
         loan: {
           id: event.loanId,
@@ -989,7 +991,8 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
           tenureMonths: decision.tenureMonths,
           disbursedOn: event.on,
           firstDueOn: event.firstDueOn,
-          emi: schedule[0]!.instalment,
+          // The monthly instalment; the first also carries any broken period.
+          emi: first.instalment - (first.brokenPeriodInterest ?? 0),
           status: 'ACTIVE',
         },
         schedule,
@@ -1222,11 +1225,15 @@ export function remittanceDueFor(state: WorldState, trancheId: ID, dueOn: ISODat
   });
 }
 
-/** The earliest instalment date after today on any active loan. */
-export function nextDueDate(state: WorldState): ISODate | undefined {
+/**
+ * The earliest instalment date after today on any active loan, or on one
+ * member's loans only: their own due date, the same day each month.
+ */
+export function nextDueDate(state: WorldState, memberId?: ID): ISODate | undefined {
   let next: ISODate | undefined;
   for (const entry of Object.values(state.loans)) {
     if (entry.loan.status !== 'ACTIVE') continue;
+    if (memberId !== undefined && entry.loan.memberId !== memberId) continue;
     const row = entry.schedule.find((r) => compareISO(r.dueOn, state.clock) > 0);
     if (row && (next === undefined || compareISO(row.dueOn, next) < 0)) next = row.dueOn;
   }

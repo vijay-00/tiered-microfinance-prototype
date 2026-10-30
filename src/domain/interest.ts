@@ -1,5 +1,5 @@
-import { addMonthsISO } from './dates';
-import { assertPaise, mulRate, roundHalfUp, sum, toWholeRupees } from './money';
+import { addMonthsISO, daysBetween } from './dates';
+import { assertPaise, mulRate, mulRateDays, roundHalfUp, sum, toWholeRupees } from './money';
 import type { Bps, ID, ISODate, Paise, ScheduleRow } from './types';
 
 /**
@@ -68,6 +68,29 @@ export interface ScheduleInput {
   annualBps: Bps;
   tenureMonths: number;
   firstDueOn: ISODate;
+  /**
+   * When the money was paid out. If that is before the first full month
+   * (the month ending on `firstDueOn`) begins, the days in between are a
+   * broken period, charged with the first instalment, as banks do.
+   */
+  disbursedOn?: ISODate;
+}
+
+/** Days from payout to the start of the first full month; zero if none. */
+export function brokenPeriodDays(disbursedOn: ISODate | undefined, firstDueOn: ISODate): number {
+  if (!disbursedOn) return 0;
+  return Math.max(0, daysBetween(disbursedOn, addMonthsISO(firstDueOn, -1)));
+}
+
+/**
+ * A row's interest at any rate on its opening balance: the month's, 30/360,
+ * plus any broken period, actual/365. The federation's wholesale share of a
+ * row is this at the wholesale rate, so it charges the same days the member
+ * pays for.
+ */
+export function rowInterestAt(row: Pick<ScheduleRow, 'opening' | 'brokenPeriodDays'>, annualBps: Bps): Paise {
+  const month = mulRate(row.opening, annualBps, MONTHS_PER_YEAR);
+  return row.brokenPeriodDays ? month + mulRateDays(row.opening, annualBps, row.brokenPeriodDays) : month;
 }
 
 /**
@@ -102,12 +125,17 @@ export function generateSchedule(input: ScheduleInput): readonly ScheduleRow[] {
 
 function buildRows(input: ScheduleInput, instalmentBase: Paise): ScheduleRow[] {
   const { loanId, principal, annualBps, tenureMonths, firstDueOn } = input;
+  const brokenDays = brokenPeriodDays(input.disbursedOn, firstDueOn);
   const rows: ScheduleRow[] = [];
   let opening: Paise = principal;
 
   for (let period = 1; period <= tenureMonths; period += 1) {
     const isLast = period === tenureMonths;
-    const interest = mulRate(opening, annualBps, MONTHS_PER_YEAR);
+    const monthInterest = mulRate(opening, annualBps, MONTHS_PER_YEAR);
+    // The broken period rides on the first instalment; the EMI, and so the
+    // principal it repays, is the same as every other month's.
+    const broken = period === 1 && brokenDays > 0 ? mulRateDays(opening, annualBps, brokenDays) : 0;
+    const interest = monthInterest + broken;
 
     let principalPart: Paise;
     let instalment: Paise;
@@ -116,7 +144,7 @@ function buildRows(input: ScheduleInput, instalmentBase: Paise): ScheduleRow[] {
       principalPart = opening;
       instalment = opening + interest;
     } else {
-      principalPart = instalmentBase - interest;
+      principalPart = instalmentBase - monthInterest;
       if (principalPart < 0) {
         // Only reachable if the rounded EMI does not cover one period's
         // interest, which would mean the balance grows instead of amortising.
@@ -141,6 +169,7 @@ function buildRows(input: ScheduleInput, instalmentBase: Paise): ScheduleRow[] {
         interest,
         principal: principalPart,
         closing,
+        ...(broken > 0 ? { brokenPeriodDays: brokenDays, brokenPeriodInterest: broken } : {}),
       }),
     );
 
