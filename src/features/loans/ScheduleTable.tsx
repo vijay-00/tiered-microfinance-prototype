@@ -6,7 +6,7 @@ import type { ScheduleRow } from '@/domain/types';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/cn';
 
-/** The amortisation schedule with each row's standing. Shared by the society and member views. */
+/** The amortisation schedule with each row's standing and what has been paid of it. Shared by the society and member views. */
 export function ScheduleTable({ lines, caption }: { lines: readonly ScheduleLine[]; caption: string }) {
   return (
     <Table>
@@ -20,11 +20,12 @@ export function ScheduleTable({ lines, caption }: { lines: readonly ScheduleLine
           <TH numeric>Interest</TH>
           <TH numeric>Principal</TH>
           <TH numeric>Closing</TH>
+          <TH numeric>Paid</TH>
           <TH>Status</TH>
         </tr>
       </THead>
       <TBody>
-        {lines.map(({ row, status, daysLate, unpaid }) => (
+        {lines.map(({ row, status, daysLate, paid, unpaid, inAdvance }) => (
           <tr key={row.period} className={cn(status === 'PAID' && 'text-muted-foreground')}>
             <TD numeric>{row.period}</TD>
             <TD className="whitespace-nowrap">{formatDate(row.dueOn)}</TD>
@@ -40,6 +41,10 @@ export function ScheduleTable({ lines, caption }: { lines: readonly ScheduleLine
             </TD>
             <TD numeric><MoneyText paise={row.principal} /></TD>
             <TD numeric><MoneyText paise={row.closing} /></TD>
+            <TD numeric>
+              {paid > 0 ? <MoneyText paise={paid} /> : '–'}
+              {inAdvance > 0 ? <span className="block text-xs text-muted-foreground">in advance</span> : null}
+            </TD>
             <TD>
               <ScheduleStatusBadge status={status} daysLate={daysLate} />
               {status === 'PARTLY_PAID' ? (

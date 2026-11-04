@@ -26,8 +26,8 @@ export const PERMISSIONS: Readonly<Record<Action, readonly Role[]>> = {
   // approvalAuthority in machines.ts, which the reducer applies on top.
   DECIDE_APPLICATION: ['LOAN_OFFICER', 'SECRETARY'],
   MANAGE_POOL: ['SECRETARY'],
-  // Above policy.apexSanctionLimit only the General Manager may sanction; the reducer applies that on top.
-  REVIEW_POOL: ['APEX_OFFICER', 'GENERAL_MANAGER'],
+  // The General Manager and the Assistant Registrar watch and act on the data outside the app; neither has an action here.
+  REVIEW_POOL: ['APEX_OFFICER'],
   DISBURSE: ['SECRETARY'],
   // A member may pay their own loan by UPI; the reducer refuses anything else.
   RECORD_PAYMENT: ['LOAN_OFFICER', 'SECRETARY', 'MEMBER'],

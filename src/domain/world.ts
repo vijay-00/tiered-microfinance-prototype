@@ -15,6 +15,7 @@ import {
   openingReservesEntry,
   periodCloseEntry,
   receiptEntry,
+  advanceRemittanceEntry,
   remittanceEntry,
   type AccountCode,
   type EntryHeader,
@@ -148,6 +149,8 @@ export const worldEventSchema = z.discriminatedUnion('type', [
     poolId: idSchema,
     reference: z.string().min(1),
     applicationIds: z.array(idSchema),
+    /** The society, when the federation opens this for an application it approved itself. */
+    directFor: idSchema.optional(),
     recordedBy: idSchema,
   }),
   z.object({
@@ -242,6 +245,14 @@ export const worldEventSchema = z.discriminatedUnion('type', [
     /** The secretary of the tranche's society who recorded it. */
     recordedBy: idSchema,
   }),
+  z.object({
+    type: z.literal('ADVANCE_REMITTED'),
+    on,
+    advanceId: idSchema,
+    trancheId: idSchema,
+    amount: paiseSchema.positive(),
+    recordedBy: idSchema,
+  }),
   z.object({ type: z.literal('PERIOD_CLOSED'), on, societyId: idSchema }),
 ]);
 
@@ -273,10 +284,16 @@ export interface RemittanceEntry extends RemittanceRecord {
   readonly recordedBy: ID;
   /** What was owed when it was settled, frozen as a receipt's split is. */
   readonly due: RemittanceDue;
+  /** How much of it had already reached the federation as an advance. */
+  readonly fromAdvance?: Paise;
 }
 
 export interface TrancheState extends WorldTranche {
   readonly remittances: readonly RemittanceEntry[];
+  /** Credit with the federation from advances, waiting to meet the next remittance. */
+  readonly advancePaid?: Paise;
+  /** Of what members hold in advance, the part already sent on: released as it meets their instalments. */
+  readonly advanceSent?: Paise;
 }
 
 /** Everything that is not financial history: who exists, before anything happened. */
@@ -400,6 +417,26 @@ function requireActor(state: WorldState, userId: ID, action: Action, societyId?:
     throw new WorldError('NOT_PERMITTED', `${user.name} cannot ${ACTION_VERBS[action]} for another society`);
   }
   return user;
+}
+
+/**
+ * Who appraises and decides. An application a member addressed to the
+ * federation is the federation's to decide; the rest are the society's.
+ */
+function requireCreditActor(state: WorldState, userId: ID, action: Action, application: LoanApplication): User {
+  return application.route === 'FEDERATION'
+    ? requireActor(state, userId, 'REVIEW_POOL')
+    : requireActor(state, userId, action, application.societyId);
+}
+
+/** Members' advances on this tranche not yet sent on to the federation. */
+export function advanceToRemit(state: WorldState, trancheId: ID): Paise {
+  const loans = Object.values(state.loans).filter((l) => l.loan.trancheId === trancheId);
+  const positions = loans.map((l) => positionOf(state, l.loan.id));
+  const held = sum(positions.map((p) => p.unappliedReceipts));
+  // Never more than the federation is still owed in principal.
+  const owed = sum(positions.map((p) => p.principalOutstanding));
+  return Math.max(0, Math.min(held, owed) - (state.tranches[trancheId]?.advanceSent ?? 0));
 }
 
 /**
@@ -696,7 +733,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
     case 'APPLICATION_APPRAISED': {
       requireNotAfterClock(state, event.on, 'an appraisal');
       const application = applicationOf(state, event.applicationId);
-      requireVisited(state, application, requireActor(state, event.recordedBy, 'APPRAISE_APPLICATION', application.societyId));
+      requireVisited(state, application, requireCreditActor(state, event.recordedBy, 'APPRAISE_APPLICATION', application));
       if (event.recommendedAmount > application.requestedAmount) {
         throw new WorldError('OVER_LIMIT', 'an appraisal cannot recommend more than was requested');
       }
@@ -718,10 +755,10 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
     case 'APPLICATION_DECIDED': {
       requireNotAfterClock(state, event.on, 'a decision');
       const application = applicationOf(state, event.applicationId);
-      const actor = requireActor(state, event.recordedBy, 'DECIDE_APPLICATION', application.societyId);
+      const actor = requireCreditActor(state, event.recordedBy, 'DECIDE_APPLICATION', application);
       requireVisited(state, application, actor);
       const atStake = event.outcome === 'APPROVED' ? event.sanctionedAmount : application.requestedAmount;
-      if (approvalAuthority(atStake, state.policy) === 'SECRETARY' && actor.role !== 'SECRETARY') {
+      if (application.route !== 'FEDERATION' && approvalAuthority(atStake, state.policy) === 'SECRETARY' && actor.role !== 'SECRETARY') {
         throw new WorldError(
           'NOT_PERMITTED',
           `${actor.name} cannot decide ${formatPaise(atStake)}: above the ${formatPaise(state.policy.officerApprovalLimit)} officer limit, the secretary decides`,
@@ -776,8 +813,11 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       if (state.pools.some((p) => p.id === event.poolId)) {
         throw new WorldError('DUPLICATE_ID', `batch ${event.poolId} already exists`);
       }
-      const societyId = userOf(state, event.recordedBy).societyId;
-      requireActor(state, event.recordedBy, 'MANAGE_POOL', societyId);
+      const societyId = event.directFor ?? userOf(state, event.recordedBy).societyId;
+      requireActor(state, event.recordedBy, event.directFor ? 'REVIEW_POOL' : 'MANAGE_POOL', societyId);
+      if (event.directFor && event.applicationIds.some((id) => applicationOf(state, id).route !== 'FEDERATION')) {
+        throw new WorldError('INVALID_STATE', 'the federation opens a batch only for an application addressed to it');
+      }
       if (state.pools.some((p) => p.reference === event.reference)) {
         throw new WorldError('DUPLICATE_ID', `a batch ${event.reference} already exists`);
       }
@@ -811,8 +851,10 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
           `a batch becomes ${event.to} through its sanction, disbursement or servicing, not directly`,
         );
       }
-      // The society builds and submits; the federation reviews and declines.
-      const byApex = event.to === 'UNDER_APEX_REVIEW' || event.to === 'DECLINED';
+      // The society builds and submits; the federation reviews and declines,
+      // and puts up the batch of an application it approved itself.
+      const direct = pool.applicationIds.some((id) => applicationOf(state, id).route === 'FEDERATION');
+      const byApex = event.to === 'UNDER_APEX_REVIEW' || event.to === 'DECLINED' || (direct && event.to === 'SUBMITTED');
       const actor = requireActor(state, event.recordedBy, byApex ? 'REVIEW_POOL' : 'MANAGE_POOL', pool.societyId);
       if (event.to === 'READY') {
         const readiness = poolReadiness(pool.applicationIds.length, state.policy);
@@ -851,13 +893,6 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('DUPLICATE_ID', `tranche ${event.trancheId} already exists`);
       }
       const officer = requireActor(state, event.recordedBy, 'REVIEW_POOL');
-      const limit = state.policy.apexSanctionLimit;
-      if (limit !== undefined && event.sanctionedAmount > limit && officer.role !== 'GENERAL_MANAGER') {
-        throw new WorldError(
-          'NOT_PERMITTED',
-          `${officer.name} cannot sanction ${formatPaise(event.sanctionedAmount)}: above the ${formatPaise(limit)} limit, the General Manager sanctions`,
-        );
-      }
       const pool = poolOf(state, event.poolId);
       if (event.sanctionedAmount > pool.requestedAmount) {
         throw new WorldError('OVER_LIMIT', 'a sanction cannot exceed what the batch requested');
@@ -1155,8 +1190,15 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         receipts: [...entry.receipts, receipt],
       };
       const member = memberOf(state, loan.memberId);
+      const paid: WorldState = { ...state, loans: { ...state.loans, [loan.id]: updated } };
+      // An advance meeting an instalment frees what was sent on against it.
+      const funder = trancheOf(state, loan.trancheId);
+      const settled =
+        event.source === 'ADVANCE' && funder.advanceSent
+          ? replaceTranche(paid, { ...funder, advanceSent: Math.max(0, funder.advanceSent - event.amount) })
+          : paid;
       const next = post(
-        { ...state, loans: { ...state.loans, [loan.id]: updated } },
+        settled,
         loan.societyId,
         { on: event.on, narration: `Receipt ${event.receiptNo} from ${member.name}`, sourceType: 'PAYMENT', sourceId: event.paymentId },
         (header) =>
@@ -1193,8 +1235,11 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('OVER_LIMIT', 'a remittance cannot pay the federation more than is due');
       }
 
+      // What already reached the federation as an advance meets this first.
+      const fromAdvance = Math.min(entry.advancePaid ?? 0, event.interestPaid + event.principalPaid);
       let updated: TrancheState = {
         ...entry,
+        ...(fromAdvance > 0 ? { advancePaid: (entry.advancePaid ?? 0) - fromAdvance } : {}),
         remittances: [
           ...entry.remittances,
           {
@@ -1207,6 +1252,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
             interestPaid: event.interestPaid,
             principalPaid: event.principalPaid,
             due,
+            ...(fromAdvance > 0 ? { fromAdvance } : {}),
           },
         ],
       };
@@ -1229,10 +1275,32 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
               interestPaid: event.interestPaid,
               principalPaid: event.principalPaid,
               accrualBasis: state.policy.accrualEnabled,
+              fromAdvance,
             }),
         );
       }
       return settleClosure(next, entry.tranche.id);
+    }
+
+    case 'ADVANCE_REMITTED': {
+      requireNotAfterClock(state, event.on, 'an advance to the federation');
+      const entry = trancheOf(state, event.trancheId);
+      requireActor(state, event.recordedBy, 'RECORD_REMITTANCE', entry.tranche.societyId);
+      const available = advanceToRemit(state, entry.tranche.id);
+      if (event.amount > available) {
+        throw new WorldError('OVER_LIMIT', `only ${formatPaise(available)} of members' advances is left to send on`);
+      }
+      const next = replaceTranche(state, {
+        ...entry,
+        advancePaid: (entry.advancePaid ?? 0) + event.amount,
+        advanceSent: (entry.advanceSent ?? 0) + event.amount,
+      });
+      return post(
+        next,
+        entry.tranche.societyId,
+        { on: event.on, narration: `Members' advance paid to the federation on ${entry.tranche.sanctionRef}`, sourceType: 'ADVANCE_REMITTANCE', sourceId: event.advanceId },
+        (header) => advanceRemittanceEntry(header, event.amount),
+      );
     }
 
     case 'PERIOD_CLOSED': {

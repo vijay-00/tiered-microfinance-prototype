@@ -5,7 +5,7 @@ import type { ID, ISODate, Role, User } from '@/domain/types';
 import { applyEvent, createWorld, replay, type WorldEvent, type WorldState } from '@/domain/world';
 import { DEFAULT_SCENARIO, scenario, type ScenarioId } from '@/data/scenarios';
 import { cleanStart } from '@/data/seed';
-import { catchUpEvents } from './commands';
+import { catchUpEvents, clockEvents } from './commands';
 import {
   clearPersisted,
   loadPersisted,
@@ -195,7 +195,7 @@ export function createAppStore(
     },
 
     advanceClock(to) {
-      return get().dispatch({ type: 'CLOCK_ADVANCED', to });
+      return get().dispatchMany(clockEvents(get().world, to));
     },
 
     switchUser(userId) {

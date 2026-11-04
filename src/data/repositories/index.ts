@@ -91,13 +91,14 @@ import {
   type MemberLoanView,
   type SocietySummary,
 } from '@/domain/views';
-import { can } from '@/domain/permissions';
 import type { AppStore } from '@/store/appStore';
 import type { WorldEvent } from '@/domain/world';
 import {
   applicationEvent,
   appraisalEvent,
+  advanceEvent,
   decisionEvent,
+  directPoolEvents,
   fieldVisitEvent,
   drawAndDisburseEvents,
   dueTodayEvents,
@@ -108,6 +109,7 @@ import {
   savePoolEvents,
   type AppraiseInput,
   type DecideInput,
+  type PayAdvanceInput,
   type FieldVisitInput,
   type DrawAndDisburseInput,
   type RecordPaymentInput,
@@ -193,7 +195,8 @@ export interface Repositories {
     getDetail(applicationId: ID): Promise<ApplicationDetail>;
     submit(input: SubmitApplicationInput): Promise<CommandResult<{ applicationId: ID }>>;
     appraise(input: AppraiseInput): Promise<CommandResult>;
-    decide(input: DecideInput): Promise<CommandResult>;
+    /** When the federation approves an application addressed to it, says which batch it opened. */
+    decide(input: DecideInput): Promise<CommandResult<{ poolId?: ID }>>;
   };
   pools: {
     list(societyId: ID): Promise<PoolRow[]>;
@@ -232,6 +235,8 @@ export interface Repositories {
   };
   remittances: {
     record(input: RecordRemittanceInput): Promise<CommandResult<{ remittanceId: ID }>>;
+    /** Sends members' advances on to the federation ahead of the remittance date. */
+    payAdvance(input: PayAdvanceInput): Promise<CommandResult>;
   };
 }
 
@@ -323,18 +328,15 @@ export function createRepositories(store: AppStore, latency: Latency = DEFAULT_L
           return { events: [event], result: { applicationId: event.applicationId } };
         }),
       appraise: (input) => command(() => ({ events: [appraisalEvent(world(), input, actor())], result: {} })),
-      // A member who asked for the federation has already been through the
-      // society by now: on approval the secretary's yes sends it up on its own.
+      // The federation's own yes opens its batch of one, ready for it to set
+      // the terms. Every other batch waits for the secretary to submit it.
       decide: (input) =>
         command(() => {
           const events = [decisionEvent(world(), input, actor())];
           const application = world().applications.find((a) => a.id === input.applicationId);
-          const user = world().users.find((u) => u.id === actor());
-          if (input.outcome === 'APPROVED' && application?.route === 'FEDERATION' && user && can(user.role, 'MANAGE_POOL')) {
-            const up = savePoolEvents(world(), { societyId: application.societyId, applicationIds: [application.id] }, actor(), true);
-            events.push(...up.events);
-          }
-          return { events, result: {} };
+          if (input.outcome !== 'APPROVED' || application?.route !== 'FEDERATION') return { events, result: {} as { poolId?: ID } };
+          const direct = directPoolEvents(world(), application.societyId, application.id, actor());
+          return { events: [...events, ...direct.events], result: { poolId: direct.poolId } };
         }),
     },
     pools: {
@@ -398,6 +400,7 @@ export function createRepositories(store: AppStore, latency: Latency = DEFAULT_L
         }),
     },
     remittances: {
+      payAdvance: (input) => command(() => ({ events: [advanceEvent(world(), input, actor())], result: {} })),
       async record(input) {
         await wait(latency);
         const event = remittanceEvent(world(), input, actor());

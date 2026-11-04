@@ -1,6 +1,6 @@
 import { addMonthsISO, compareISO, daysBetween, startOfMonth } from './dates';
 import { generateSchedule, MONTHS_PER_YEAR } from './interest';
-import { approvalAuthority, poolReadiness, type ApprovalAuthority, type Readiness } from './machines';
+import { approvalAuthority, needsFieldVisit, poolReadiness, type ApprovalAuthority, type Readiness } from './machines';
 import { formatPaise, mulRate, sum } from './money';
 import { trancheSummaries, type TrancheSummary } from './servicing';
 import type { Bps, ID, ISODate, Loan, LoanApplication, LoanPurpose, Member, Paise, Pool, Society, Tranche } from './types';
@@ -123,7 +123,9 @@ export function memberProfile(state: WorldState, memberId: ID): MemberProfile {
         : headroom < state.policy.minTicket
           ? { ok: false, reason: 'Borrowing is already at the limit per member.' }
           : { ok: true };
-  return { member, exposure, headroom, loans, applications, canApply };
+  // Addressed to the federation, the society meets it once it is a loan.
+  const shown = applications.filter((a) => a.route !== 'FEDERATION' || a.status === 'DISBURSED');
+  return { member, exposure, headroom, loans, applications: shown, canApply };
 }
 
 // ---------------------------------------------------------------------------
@@ -208,6 +210,8 @@ export function applicationQueue(state: WorldState, societyId: ID): ApplicationQ
   const queue = Object.fromEntries(STAGE_ORDER.map((s) => [s, [] as ApplicationRow[]])) as ApplicationQueue;
   for (const application of state.applications) {
     if (application.societyId !== societyId) continue;
+    // Addressed to the federation: the society meets it once it is a loan.
+    if (application.route === 'FEDERATION' && application.status !== 'DISBURSED') continue;
     const row = applicationRow(state, application);
     queue[row.stage].push(row);
   }
@@ -346,6 +350,8 @@ export interface PoolRow {
 export function poolList(state: WorldState, societyId: ID): PoolRow[] {
   return state.pools
     .filter((p) => p.societyId === societyId)
+    // The federation's own review of a direct request is not the society's yet.
+    .filter((p) => !((p.status === 'SUBMITTED' || p.status === 'UNDER_APEX_REVIEW' || p.status === 'DECLINED') && isDirect(state, p)))
     .map((pool) => ({
       pool,
       members: pool.applicationIds.length,
@@ -370,6 +376,7 @@ export function poolBuilder(state: WorldState, societyId: ID, poolId?: ID): Pool
       (a) =>
         a.societyId === societyId &&
         a.status === 'APPROVED' &&
+        a.route !== 'FEDERATION' &&
         (a.poolId === undefined || (pool !== undefined && a.poolId === pool.id)),
     )
     .map((a) => applicationRow(state, a))
@@ -534,6 +541,10 @@ export interface FundingRequest {
   readonly direct: boolean;
 }
 
+export function isDirect(state: WorldState, pool: Pool): boolean {
+  return state.applications.some((a) => pool.applicationIds.includes(a.id) && a.route === 'FEDERATION');
+}
+
 /** Pools submitted to the federation and not yet decided, oldest first. */
 export function fundingRequests(state: WorldState): FundingRequest[] {
   return state.pools
@@ -543,16 +554,18 @@ export function fundingRequests(state: WorldState): FundingRequest[] {
       society: societyOf(state, pool.societyId),
       members: pool.applicationIds.length,
       waitingDays: pool.submittedOn ? Math.max(0, daysBetween(pool.submittedOn, state.clock)) : 0,
-      direct: state.applications.some((a) => pool.applicationIds.includes(a.id) && a.route === 'FEDERATION'),
+      direct: isDirect(state, pool),
     }))
     .sort((a, b) => b.waitingDays - a.waitingDays);
 }
 
-/** Applications a member addressed to the federation, still climbing through the society. */
+/** Applications a member addressed to the federation, for it to appraise and decide. */
 export interface DirectApplication {
   readonly application: LoanApplication;
   readonly memberName: string;
   readonly society: Society;
+  /** The field officer has still to visit. */
+  readonly awaitingVisit: boolean;
 }
 
 export function directApplications(state: WorldState): DirectApplication[] {
@@ -562,6 +575,7 @@ export function directApplications(state: WorldState): DirectApplication[] {
       application,
       memberName: state.members.find((m) => m.id === application.memberId)?.name ?? application.memberId,
       society: societyOf(state, application.societyId),
+      awaitingVisit: needsFieldVisit(application.purpose, state.policy) && !application.fieldVisit,
     }));
 }
 

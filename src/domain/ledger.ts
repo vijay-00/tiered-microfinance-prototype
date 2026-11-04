@@ -12,6 +12,7 @@ export const ACCOUNTS = {
   CASH: 1000,
   LOANS_RECEIVABLE: 1100,
   INTEREST_RECEIVABLE: 1150,
+  ADVANCE_TO_FEDERATION: 1200,
   FEDERATION_PAYABLE: 2000,
   INTEREST_PAYABLE: 2050,
   UNAPPLIED_RECEIPTS: 2100,
@@ -43,6 +44,7 @@ export const CHART_OF_ACCOUNTS: readonly Account[] = Object.freeze([
   { code: ACCOUNTS.CASH, name: 'Cash and Bank', type: 'ASSET', normal: 'DR' },
   { code: ACCOUNTS.LOANS_RECEIVABLE, name: 'Member Loans Receivable', type: 'ASSET', normal: 'DR' },
   { code: ACCOUNTS.INTEREST_RECEIVABLE, name: 'Interest Receivable from Members', type: 'ASSET', normal: 'DR' },
+  { code: ACCOUNTS.ADVANCE_TO_FEDERATION, name: 'Advance Paid to Federation', type: 'ASSET', normal: 'DR' },
   { code: ACCOUNTS.FEDERATION_PAYABLE, name: 'Federation Loan Payable', type: 'LIABILITY', normal: 'CR' },
   { code: ACCOUNTS.INTEREST_PAYABLE, name: 'Interest Payable to Federation', type: 'LIABILITY', normal: 'CR' },
   { code: ACCOUNTS.UNAPPLIED_RECEIPTS, name: 'Unapplied Member Receipts', type: 'LIABILITY', normal: 'CR' },
@@ -172,14 +174,20 @@ export function receiptEntry(
 
 export function remittanceEntry(
   header: EntryHeader,
-  remittance: { interestPaid: Paise; principalPaid: Paise; accrualBasis: boolean },
+  remittance: { interestPaid: Paise; principalPaid: Paise; accrualBasis: boolean; fromAdvance?: Paise },
 ): JournalEntry {
-  const { interestPaid, principalPaid, accrualBasis } = remittance;
+  const { interestPaid, principalPaid, accrualBasis, fromAdvance = 0 } = remittance;
   return makeEntry(header, [
     debit(ACCOUNTS.FEDERATION_PAYABLE, principalPaid),
     debit(accrualBasis ? ACCOUNTS.INTEREST_PAYABLE : ACCOUNTS.INTEREST_EXPENSE, interestPaid),
-    credit(ACCOUNTS.CASH, interestPaid + principalPaid),
+    credit(ACCOUNTS.ADVANCE_TO_FEDERATION, fromAdvance),
+    credit(ACCOUNTS.CASH, interestPaid + principalPaid - fromAdvance),
   ]);
+}
+
+/** Members' advance sent on to the federation ahead of its date: held there against the next remittance. */
+export function advanceRemittanceEntry(header: EntryHeader, amount: Paise): JournalEntry {
+  return makeEntry(header, [debit(ACCOUNTS.ADVANCE_TO_FEDERATION, amount), credit(ACCOUNTS.CASH, amount)]);
 }
 
 /** Period-end accrual of retail interest due but not yet received. */

@@ -6,6 +6,7 @@ import {
   applyEvent,
   nextDueDate,
   nextRemittanceDate,
+  positionOf,
   remittanceDueFor,
   societyOf,
   type WorldEvent,
@@ -84,6 +85,16 @@ export function paymentEvent(world: WorldState, input: RecordPaymentInput, recor
   return { type: 'PAYMENT_RECEIVED', on: world.clock, ...numbers!, ...input, recordedBy };
 }
 
+export interface PayAdvanceInput {
+  trancheId: ID;
+  amount: Paise;
+}
+
+export function advanceEvent(world: WorldState, input: PayAdvanceInput, recordedBy: ID): WorldEvent {
+  const count = world.journals[world.tranches[input.trancheId]!.tranche.societyId]!.filter((e) => e.sourceType === 'ADVANCE_REMITTANCE').length;
+  return { type: 'ADVANCE_REMITTED', on: world.clock, advanceId: `adv_${pad(count + 1)}`, ...input, recordedBy };
+}
+
 export interface RecordRemittanceInput {
   trancheId: ID;
   dueOn: ISODate;
@@ -116,6 +127,38 @@ export function dueTodayEvents(world: WorldState, societyId: ID, recordedBy: ID)
     electPrepayment: false,
     recordedBy,
   }));
+}
+
+/**
+ * The clock moved to `to`. Money a member paid ahead meets each instalment on
+ * the day it falls due, so paying early never turns into paying late.
+ */
+export function clockEvents(world: WorldState, to: ISODate): WorldEvent[] {
+  const events: WorldEvent[] = [];
+  let state = world;
+  const emit = (event: WorldEvent) => {
+    state = applyEvent(state, event);
+    events.push(event);
+  };
+  const holders = Object.values(world.loans).filter(
+    (l) => l.loan.status === 'ACTIVE' && positionOf(world, l.loan.id).unappliedReceipts > 0,
+  );
+  const days = [...new Set(holders.flatMap((l) => l.schedule.map((r) => r.dueOn)))]
+    .filter((day) => compareISO(day, world.clock) > 0 && compareISO(day, to) <= 0)
+    .sort(compareISO);
+  for (const day of days) {
+    emit({ type: 'CLOCK_ADVANCED', to: day });
+    for (const { loan } of holders) {
+      const position = positionOf(state, loan.id);
+      const amount = Math.min(position.unappliedReceipts, position.totalDueNow);
+      const secretary = state.users.find((u) => u.role === 'SECRETARY' && u.societyId === loan.societyId)?.id;
+      if (amount > 0 && secretary) {
+        emit(paymentEvent(state, { loanId: loan.id, amount, mode: 'CASH', source: 'ADVANCE', electPrepayment: false }, secretary));
+      }
+    }
+  }
+  if (days.at(-1) !== to) events.push({ type: 'CLOCK_ADVANCED', to });
+  return events;
 }
 
 /**
@@ -295,6 +338,20 @@ export function savePoolEvents(
       ];
   if (submit) events.push({ type: 'POOL_STATUS_CHANGED', on, poolId, to: 'SUBMITTED', recordedBy });
   return { poolId, events };
+}
+
+/** The batch of one the federation opens for an application it approved itself, already under its review. */
+export function directPoolEvents(world: WorldState, societyId: ID, applicationId: ID, recordedBy: ID): { poolId: ID; events: WorldEvent[] } {
+  const on = world.clock;
+  const poolId = nextPoolId(world);
+  return {
+    poolId,
+    events: [
+      { type: 'POOL_CREATED', on, poolId, reference: nextPoolReference(world, societyId), applicationIds: [applicationId], directFor: societyId, recordedBy },
+      { type: 'POOL_STATUS_CHANGED', on, poolId, to: 'SUBMITTED', recordedBy },
+      { type: 'POOL_STATUS_CHANGED', on, poolId, to: 'UNDER_APEX_REVIEW', recordedBy },
+    ],
+  };
 }
 
 export interface RescopeInput {

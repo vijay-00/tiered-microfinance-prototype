@@ -155,29 +155,30 @@ export function MemberHomePage() {
   );
 }
 
-const STEP_LABEL: Record<ApplicationStepKey, string> = {
+const stepLabel = (decider: string): Record<ApplicationStepKey, string> => ({
   APPLIED: 'Applied',
   VISITED: 'Field officer visited',
-  APPRAISED: 'Appraised by the society',
-  DECIDED: 'Approved by the society',
+  APPRAISED: `Appraised by the ${decider}`,
+  DECIDED: `Approved by the ${decider}`,
   SENT: 'Sent for funding',
   FUNDED: 'Funding approved',
   PAID_OUT: 'Paid out to you',
-};
+});
 
-const NEXT_LABEL: Record<ApplicationStepKey, string> = {
+const nextLabel = (decider: string): Record<ApplicationStepKey, string> => ({
   APPLIED: 'You applied',
   VISITED: 'The field officer visits you',
-  APPRAISED: 'The society appraises it',
-  DECIDED: 'The society decides',
+  APPRAISED: `The ${decider} appraises it`,
+  DECIDED: `The ${decider} decides`,
   SENT: 'The society sends it, with others, for funding',
   FUNDED: 'Funding is approved',
   PAID_OUT: 'The money is paid out to you',
-};
+});
 
 function Tracker({ application: a, fresh }: { application: MemberApplicationView; fresh: boolean }) {
   const rejected = a.outcome === 'REJECTED';
   const current = a.steps.findIndex((s) => !s.on);
+  const decider = a.route === 'FEDERATION' ? 'federation' : 'society';
   return (
     <section className="g-card g-blur" aria-label="Your application">
       <div className="g-cardhead flex-wrap">
@@ -190,7 +191,7 @@ function Tracker({ application: a, fresh }: { application: MemberApplicationView
         {rejected ? (
           <Pill tone="bad" icon={<X aria-hidden />}>Not approved</Pill>
         ) : fresh ? (
-          <Pill tone="good" icon={<Check aria-hidden />}>Sent to the society</Pill>
+          <Pill tone="good" icon={<Check aria-hidden />}>Sent to the {decider}</Pill>
         ) : (
           <Pill tone="warn" icon={<Clock aria-hidden />}>In progress</Pill>
         )}
@@ -205,14 +206,14 @@ function Tracker({ application: a, fresh }: { application: MemberApplicationView
             {a.steps.map((s, i) => (
               <li key={s.key} className={cn(s.on ? 'done' : i === current ? 'now' : undefined)} aria-current={i === current ? 'step' : undefined}>
                 <i aria-hidden>{s.on ? <Check /> : i + 1}</i>
-                <b>{STEP_LABEL[s.key]}</b>
+                <b>{stepLabel(decider)[s.key]}</b>
                 <span>{s.on ? formatDate(s.on) : i === current ? 'Next' : ''}</span>
               </li>
             ))}
           </ol>
           {current >= 0 ? (
             <p className="g-sub">
-              Next: {NEXT_LABEL[a.steps[current]!.key].toLowerCase()}.
+              Next: {nextLabel(decider)[a.steps[current]!.key].toLowerCase()}.
               {a.approvedAmount !== undefined ? (
                 <>
                   {' '}

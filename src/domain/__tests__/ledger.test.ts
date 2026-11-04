@@ -49,9 +49,9 @@ const linesOf = (entry: JournalEntry) =>
   Object.fromEntries(entry.lines.map((l) => [l.accountCode, l.dr > 0 ? l.dr : -l.cr]));
 
 describe('the chart of accounts', () => {
-  it('has eleven accounts with unique codes', () => {
-    expect(CHART_OF_ACCOUNTS).toHaveLength(11);
-    expect(new Set(CHART_OF_ACCOUNTS.map((a) => a.code)).size).toBe(11);
+  it('has twelve accounts with unique codes', () => {
+    expect(CHART_OF_ACCOUNTS).toHaveLength(12);
+    expect(new Set(CHART_OF_ACCOUNTS.map((a) => a.code)).size).toBe(12);
   });
 
   it('puts every account on the side its type implies', () => {

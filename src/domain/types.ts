@@ -135,8 +135,6 @@ export const policySchema = z.object({
   minTicket: paiseSchema.nonnegative(),
   maxTicket: paiseSchema.nonnegative(),
   officerApprovalLimit: paiseSchema.nonnegative(),
-  /** Above this the General Manager sanctions, not the apex officer. Absent: no such limit. */
-  apexSanctionLimit: paiseSchema.nonnegative().optional(),
   /** A field officer must visit before the society appraises, and the officer no longer decides. */
   fieldVisitRequired: z.boolean().optional(),
   graceDays: z.number().int().min(0),
@@ -306,6 +304,7 @@ export const journalSourceTypes = [
   'OPENING',
   'PAYMENT',
   'REMITTANCE',
+  'ADVANCE_REMITTANCE',
   'DISBURSEMENT',
   'DRAWDOWN',
   'ACCRUAL',

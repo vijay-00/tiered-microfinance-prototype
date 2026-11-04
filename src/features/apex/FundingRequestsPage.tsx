@@ -2,9 +2,11 @@ import { Check, ChevronRight, Clock, Download, Eye, Landmark, Send, TriangleAler
 import { Link } from 'react-router-dom';
 import type { FundingDesk } from '@/domain/federation';
 import { downloadCsv, rupeesCell, toCsv } from '@/lib/csv';
+import { can } from '@/domain/permissions';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
+import { selectCurrentUser } from '@/store/selectors';
 import { Avatar, Loading, Money, PageHead, Pill, WaitTicks } from './glass';
 
 const short = (name: string) => name.replace(/ Credit Society$/, '');
@@ -38,6 +40,7 @@ export function FundingRequestsPage() {
 
 function Desk({ data }: { data: FundingDesk }) {
   const { stats } = data;
+  const mayDecide = can(useAppStore(selectCurrentUser).role, 'REVIEW_POOL');
   return (
     <>
       <div className="g-sum">
@@ -143,13 +146,13 @@ function Desk({ data }: { data: FundingDesk }) {
       </section>
 
       {data.climbing.length > 0 ? (
-        <section className="g-card g-blur flush" aria-label="Direct applications on their way">
+        <section className="g-card g-blur flush" aria-label="Direct applications">
           <div className="g-listhead">
-            <b>Direct applications on their way</b>
+            <b>Direct applications</b>
             <em>{data.climbing.length}</em>
-            <span className="rt">Addressed to the federation, still with the society</span>
+            <span className="rt">Members who applied to the federation</span>
           </div>
-          {data.climbing.map(({ application, memberName, society }) => (
+          {data.climbing.map(({ application, memberName, society, awaitingVisit }) => (
             <div key={application.id} className="g-row">
               <div className="t">
                 <b>{memberName}</b>
@@ -161,8 +164,11 @@ function Desk({ data }: { data: FundingDesk }) {
                 <b className="num">
                   <Money paise={application.requestedAmount} />
                 </b>
-                <span>{application.status === 'SUBMITTED' ? 'Field visit and appraisal to come' : 'With the secretary to decide'}</span>
+                <span>{awaitingVisit ? 'Waiting for the field visit' : application.status === 'SUBMITTED' ? 'Ready to appraise' : 'Ready to decide'}</span>
               </div>
+              <Link to={`/apex/direct/${application.id}`} className={mayDecide && !awaitingVisit ? 'g-btn pri sm' : 'g-btn sm'}>
+                {!mayDecide || awaitingVisit ? 'View' : application.status === 'SUBMITTED' ? 'Appraise' : 'Decide'} <ChevronRight aria-hidden />
+              </Link>
             </div>
           ))}
         </section>

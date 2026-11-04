@@ -45,6 +45,7 @@ export const SCREENS: readonly Screen[] = [
   { path: '/apex', tier: 'apex', phase: 2, title: 'Exposure', summary: 'Exposure by society, against each credit limit, and what awaits review.' },
   { path: '/apex/requests', tier: 'apex', phase: 4, title: 'Funding requests', summary: 'Batches submitted by societies, awaiting a decision.' },
   { path: '/apex/requests/:poolId', tier: 'apex', phase: 4, title: 'Review and sanction', summary: 'Batch composition, the society track record, the terms editor, and sanction or decline.' },
+  { path: '/apex/direct/:applicationId', tier: 'apex', phase: 6, title: 'Direct application', summary: 'An application a member addressed to the federation, for it to appraise and decide.' },
   { path: '/apex/societies', tier: 'apex', phase: 4, title: 'Societies', summary: 'Credit limit, utilisation and repayment record for each society.' },
   { path: '/apex/societies/:societyId', tier: 'apex', phase: 4, title: 'Society detail', summary: 'Tranche history, remittance punctuality and current exposure.' },
   // Field

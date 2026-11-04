@@ -46,6 +46,7 @@ export const SOURCE_LABEL: Record<JournalEntry['sourceType'], string> = {
   OPENING: 'Opening',
   PAYMENT: 'Receipt',
   REMITTANCE: 'Remittance',
+  ADVANCE_REMITTANCE: 'Advance to federation',
   DISBURSEMENT: 'Disbursement',
   DRAWDOWN: 'Drawdown',
   ACCRUAL: 'Accrual',

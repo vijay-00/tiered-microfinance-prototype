@@ -112,7 +112,7 @@ export function MemberApplyPage() {
                   <button type="button" role="radio" aria-checked={route === 'FEDERATION'} className="g-route" onClick={() => setRoute('FEDERATION')}>
                     <Landmark aria-hidden />
                     <b>The federation</b>
-                    <small>{federation.name}. Your society still checks it, then it goes up on its own.</small>
+                    <small>{federation.name}. The federation decides, and your society pays it out and collects the EMIs.</small>
                   </button>
                 </div>
               </div>

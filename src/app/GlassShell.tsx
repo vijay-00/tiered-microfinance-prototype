@@ -4,7 +4,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { CrumbSlot } from '@/components/Breadcrumb';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { needsFieldVisit } from '@/domain/machines';
-import { stageOf } from '@/domain/origination';
+import { directApplications, stageOf } from '@/domain/origination';
 import type { WorldState } from '@/domain/world';
 import { Avatar } from '@/features/apex/glass';
 import { useAppStore } from '@/store/context';
@@ -36,6 +36,7 @@ function crumbsFor(pathname: string, tier: Tier, world: WorldState): Crumb[] {
       const society = world.societies.find((s) => s.id === id);
       return [{ label: 'Societies', to: '/apex/societies' }, { label: society?.name ?? id }];
     }
+    if (section === 'direct') return [{ label: 'Funding requests', to: '/apex/requests' }, { label: id ?? 'Direct application' }];
     return [{ label: 'Exposure' }];
   }
   // The longest nav path that prefixes this one names the section.
@@ -52,11 +53,16 @@ function crumbsFor(pathname: string, tier: Tier, world: WorldState): Crumb[] {
 
 function useWaiting(tier: Tier): Record<string, number> {
   const societyId = useAppStore(selectCurrentUser).societyId;
-  const requests = useAppStore((s) => s.world.pools.filter((p) => p.status === 'SUBMITTED' || p.status === 'UNDER_APEX_REVIEW').length);
+  const requests = useAppStore(
+    (s) =>
+      s.world.pools.filter((p) => p.status === 'SUBMITTED' || p.status === 'UNDER_APEX_REVIEW').length +
+      directApplications(s.world).filter((d) => !d.awaitingVisit).length,
+  );
   const applications = useAppStore(
     (s) =>
       s.world.applications.filter(
-        (a) => a.societyId === societyId && (stageOf(a) === 'NEEDS_APPRAISAL' || stageOf(a) === 'AWAITING_DECISION'),
+        (a) =>
+          a.societyId === societyId && a.route !== 'FEDERATION' && (stageOf(a) === 'NEEDS_APPRAISAL' || stageOf(a) === 'AWAITING_DECISION'),
       ).length,
   );
   // A sanction not yet drawn: the society's next step after the federation says yes.

@@ -1,6 +1,6 @@
 import { Landmark } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { Facts } from '@/components/Facts';
 import { LoadingTiles } from '@/components/LoadingTiles';
@@ -31,7 +31,7 @@ import { formatDate } from '@/lib/format';
 import { percent, PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
-import { selectCurrentUser } from '@/store/selectors';
+import { selectCurrentUser, selectRoleInfo } from '@/store/selectors';
 
 export function ApplicationDetailPage() {
   const { applicationId = '' } = useParams();
@@ -39,9 +39,12 @@ export function ApplicationDetailPage() {
   const policy = useAppStore((s) => s.world.policy);
   const users = useAppStore((s) => s.world.users);
   const version = useAppStore((s) => s.world.eventCount);
-  const exists = useAppStore(
-    (s) => s.world.applications.find((a) => a.id === applicationId)?.societyId === user.societyId,
-  );
+  const apex = useAppStore(selectRoleInfo).tier === 'apex';
+  // The federation sees what was addressed to it, and only that.
+  const exists = useAppStore((s) => {
+    const found = s.world.applications.find((a) => a.id === applicationId);
+    return apex ? found?.route === 'FEDERATION' : found?.societyId === user.societyId;
+  });
   const repositories = useRepositories();
   const { data, error } = useQuery(`application:${applicationId}:${version}`, () =>
     exists ? repositories.applications.getDetail(applicationId) : Promise.reject(new Error('missing')),
@@ -53,9 +56,9 @@ export function ApplicationDetailPage() {
         title="Application not found"
         description={
           <>
-            There is no application {applicationId} in this society.{' '}
-            <Link to="/applications" className="text-primary underline">
-              Back to applications
+            There is no application {applicationId} {apex ? 'addressed to the federation' : 'in this society'}.{' '}
+            <Link to={apex ? '/apex/requests' : '/applications'} className="text-primary underline">
+              {apex ? 'Back to funding requests' : 'Back to applications'}
             </Link>
             .
           </>
@@ -69,9 +72,16 @@ export function ApplicationDetailPage() {
   const { row, member } = data;
   const application = row.application;
   const visitNeeded = needsFieldVisit(application.purpose, policy);
+  // What a member addressed to the federation is the federation's to decide.
+  const toFederation = application.route === 'FEDERATION';
+  const mayAppraise = can(user.role, toFederation ? 'REVIEW_POOL' : 'APPRAISE_APPLICATION');
+  const mayDecide = can(user.role, toFederation ? 'REVIEW_POOL' : 'DECIDE_APPLICATION');
+  const decider = toFederation ? 'The apex officer' : 'The secretary';
   return (
     <>
-      <Breadcrumb items={[{ label: 'Applications', to: '/applications' }, { label: application.id }]} />
+      <Breadcrumb
+        items={[apex ? { label: 'Funding requests', to: '/apex/requests' } : { label: 'Applications', to: '/applications' }, { label: application.id }]}
+      />
       <PageHeader
         title={row.memberName}
         description={`${application.id} · applied ${formatDate(application.appliedOn)} · ${PURPOSE_LABEL[application.purpose]}`}
@@ -87,7 +97,9 @@ export function ApplicationDetailPage() {
           { label: 'Internal score', value: member.internalScore },
           {
             label: 'Member',
-            value: (
+            value: apex ? (
+              member.membershipNo
+            ) : (
               <Link to={`/members/${member.id}`} className="hover:underline">
                 {member.membershipNo}
               </Link>
@@ -131,22 +143,22 @@ export function ApplicationDetailPage() {
       {row.stage === 'NEEDS_APPRAISAL' ? (
         visitNeeded && !application.fieldVisit ? (
           <Notice>Waiting for the field officer to visit the member.</Notice>
-        ) : can(user.role, 'APPRAISE_APPLICATION') ? (
+        ) : mayAppraise ? (
           <AppraisalForm detail={data} />
         ) : (
-          <Notice>The secretary appraises the application next.</Notice>
+          <Notice>{decider} appraises the application next.</Notice>
         )
       ) : (
         <div className="space-y-5">
           <AppraisalSummary detail={data} />
           {row.stage === 'AWAITING_DECISION' ? (
-            can(user.role, 'DECIDE_APPLICATION') ? (
+            mayDecide ? (
               <DecisionForm detail={data} user={user} />
             ) : (
-              <Notice>The secretary decides it next.</Notice>
+              <Notice>{decider} decides it next.</Notice>
             )
           ) : (
-            <DecisionSummary detail={data} />
+            <DecisionSummary detail={data} apex={apex} />
           )}
         </div>
       )}
@@ -353,6 +365,7 @@ const TENURE_CHOICES = Array.from(
 
 function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User }) {
   const repositories = useRepositories();
+  const navigate = useNavigate();
   const policy = useAppStore((s) => s.world.policy);
   const clock = useAppStore((s) => s.world.clock);
   const application = detail.row.application;
@@ -383,7 +396,7 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
   const reasonError = !approving && !reason.trim() ? 'Say why, for the member and the file.' : undefined;
   const atStake = approving ? (amount ?? 0) : application.requestedAmount;
   const authority = approvalAuthority(atStake, policy);
-  const blocked = authority === 'SECRETARY' && user.role !== 'SECRETARY';
+  const blocked = application.route !== 'FEDERATION' && authority === 'SECRETARY' && user.role !== 'SECRETARY';
   const quote =
     approving && amount !== undefined && !amountError ? quoteLoan(amount, tenure, policy.retailRateBps, clock) : undefined;
   const capacity =
@@ -403,6 +416,8 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
     });
     setPending(false);
     if (!result.ok) setError(result.error);
+    // Approved, the federation goes straight on to set the terms and sanction.
+    else if (result.poolId) navigate(`/apex/requests/${result.poolId}`);
   }
 
   return (
@@ -513,7 +528,7 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
   );
 }
 
-function DecisionSummary({ detail }: { detail: ApplicationDetail }) {
+function DecisionSummary({ detail, apex }: { detail: ApplicationDetail; apex: boolean }) {
   const application = detail.row.application;
   const decision = application.decision;
   if (!decision) return null;
@@ -543,7 +558,7 @@ function DecisionSummary({ detail }: { detail: ApplicationDetail }) {
         {detail.pool ? (
           <p className="flex flex-wrap items-center gap-2 text-sm">
             In batch{' '}
-            <Link to={`/pools/${detail.pool.id}`} className="font-medium hover:underline">
+            <Link to={apex ? `/apex/requests/${detail.pool.id}` : `/pools/${detail.pool.id}`} className="font-medium hover:underline">
               {detail.pool.reference}
             </Link>
             <PoolStatusBadge status={detail.pool.status} />
@@ -559,9 +574,13 @@ function DecisionSummary({ detail }: { detail: ApplicationDetail }) {
         {detail.row.loanId ? (
           <p className="text-sm">
             Disbursed as{' '}
-            <Link to={`/loans/${detail.row.loanId}`} className="font-medium hover:underline">
-              {detail.row.loanId}
-            </Link>
+            {apex ? (
+              detail.row.loanId
+            ) : (
+              <Link to={`/loans/${detail.row.loanId}`} className="font-medium hover:underline">
+                {detail.row.loanId}
+              </Link>
+            )}
             .
           </p>
         ) : null}

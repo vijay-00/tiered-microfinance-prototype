@@ -247,12 +247,11 @@ export function cleanStart(
 
   const clean: WorldBase = {
     ...base,
-    // The demo runs the full ladder: a field visit before appraisal, and a
-    // limit above which the General Manager sanctions. The seed's own history
-    // predates both, so they are switched on here and not in the policy. So
+    // The demo runs the field visit before appraisal, which the seed's own
+    // history predates, so it is switched on here and not in the policy. So
     // is the demo's larger loan, Rs 50,00,000, with a credit limit that lets
     // all five members borrow that much.
-    policy: { ...base.policy, fieldVisitRequired: true, apexSanctionLimit: 10_000_000, maxTicket: 500_000_000 },
+    policy: { ...base.policy, fieldVisitRequired: true, maxTicket: 500_000_000 },
     societies: [{ ...society, creditLimit: 2_500_000_000 }],
     users: [...staff, ...memberLogins],
     members,

@@ -181,7 +181,7 @@ export interface FundingDecision {
 
 export interface FundingDesk {
   readonly requests: readonly FundingRequest[];
-  /** Addressed to the federation, still climbing through the society. */
+  /** Addressed to the federation, for it to appraise and decide. */
   readonly climbing: readonly DirectApplication[];
   /** Newest first. */
   readonly decided: readonly FundingDecision[];
@@ -290,6 +290,8 @@ export interface FederationSocietyDetail {
   /** Principal repaid on every tranche drawn. */
   readonly repaid: Paise;
   readonly firstDrawOn: ISODate | undefined;
+  /** Members' advances received ahead of the remittance date, not yet set against one. */
+  readonly advanceHeld: Paise;
   readonly next: { readonly dueOn: ISODate; readonly amount: Paise; readonly sanctionRef: string; readonly inDays: number } | undefined;
   /** Newest first. */
   readonly remittances: readonly FederationRemittance[];
@@ -319,6 +321,7 @@ export function federationSocietyDetail(state: WorldState, societyId: ID): Feder
     secretary: state.users.find((u) => u.societyId === societyId && u.role === 'SECRETARY'),
     repaid: drawnAll - sum(tranches.map(trancheOutstanding)),
     firstDrawOn: tranches.flatMap((t) => t.tranche.drawdowns.map((d) => d.on)).sort(compareISO)[0],
+    advanceHeld: sum(Object.values(state.tranches).filter((t) => t.tranche.societyId === societyId).map((t) => t.advancePaid ?? 0)),
     next,
     remittances: tranches
       .flatMap((t) =>

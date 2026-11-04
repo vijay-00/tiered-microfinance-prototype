@@ -27,7 +27,7 @@ export const ROLES: readonly RoleInfo[] = [
   { role: 'SECRETARY', label: 'Society Secretary', tier: 'society', home: '/dashboard', readOnly: false },
   { role: 'LOAN_OFFICER', label: 'Field Officer', tier: 'field', home: '/visits', readOnly: false },
   { role: 'APEX_OFFICER', label: 'Apex Officer', tier: 'apex', home: '/apex', readOnly: false },
-  { role: 'GENERAL_MANAGER', label: 'General Manager', tier: 'apex', home: '/apex', readOnly: false },
+  { role: 'GENERAL_MANAGER', label: 'General Manager', tier: 'apex', home: '/apex', readOnly: true },
   { role: 'REGISTRAR', label: 'Assistant Registrar', tier: 'apex', home: '/apex', readOnly: true },
   { role: 'MEMBER', label: 'Member', tier: 'member', home: '/me', readOnly: false },
   { role: 'AUDITOR', label: 'Auditor', tier: 'society', home: '/dashboard', readOnly: true },

@@ -62,7 +62,6 @@ describe('origination, through the screens', () => {
     await user.click(await screen.findByRole('button', { name: 'Begin review' }));
     const terms = await screen.findByRole('region', { name: 'Terms' });
     await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000$/ }));
-    await user.click(within(await screen.findByRole('dialog', { name: 'Sanction recorded' })).getByRole('button', { name: 'Close' }));
     expect(await screen.findByRole('heading', { name: 'Sanctioned as PACF/SAN/2026-27/022' })).toBeInTheDocument();
     expect(journalOf(store.getState().world, 'soc_1')).toHaveLength(journalBefore);
 
@@ -120,10 +119,8 @@ describe('the federation', () => {
     expect(within(dialog).getByRole('button', { name: 'Decline the batch' })).toBeDisabled();
     await user.type(within(dialog).getByLabelText('Remarks for the society'), 'Two members are already late elsewhere.');
     await user.click(within(dialog).getByRole('button', { name: 'Decline the batch' }));
-    const recorded = await screen.findByRole('dialog', { name: 'Decline recorded' });
-    expect(recorded).toHaveTextContent('Two members are already late elsewhere.');
-    await user.click(within(recorded).getByRole('button', { name: 'Close' }));
     expect(await screen.findByRole('heading', { name: 'Declined' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /recorded/ })).not.toBeInTheDocument();
     const released = store.getState().world.applications.filter((a) => a.societyId === 'soc_2' && a.status === 'APPROVED');
     expect(released).toHaveLength(10);
   });

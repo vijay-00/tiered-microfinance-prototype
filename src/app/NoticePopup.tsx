@@ -1,16 +1,17 @@
-import { BadgeCheck, Banknote, CircleX, FileText, Landmark, MapPin, ShieldCheck, Smartphone } from 'lucide-react';
+import { BadgeCheck, Banknote, CircleX, FileText, Landmark, MapPin, Smartphone } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { formatBps, formatPaise } from '@/domain/money';
-import { noticesFor, type ApplicationNotice, type EscalationNotice, type Notice, type PaymentNotice, type PoolNotice } from '@/domain/views';
+import { noticesFor, type ApplicationNotice, type Notice, type PaymentNotice, type PoolNotice } from '@/domain/views';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useAppStore } from '@/store/context';
 
 /**
- * Pop-ups about applications members made themselves: the secretary hears of a
- * new proposal, the member of the decision and the payout. And about the
- * federation's decision on a pool, for every role it concerns. One at a time;
+ * Pop-ups about applications members made themselves: whoever decides hears of
+ * a new proposal, the secretary or the federation by where the member applied,
+ * and the member of the decision and the payout. And about the federation's
+ * decision on a pool, for those who act on it next. One at a time;
  * acting on it or closing it marks it seen. What was already so in the seed is
  * history, not news, so it never pops up.
  */
@@ -27,7 +28,6 @@ interface Copy {
 
 function copyFor(n: Notice): Copy {
   if (n.kind === 'PAYMENT') return paymentCopy(n);
-  if (n.kind === 'NEEDS_GM') return escalationCopy(n);
   return 'poolId' in n ? poolCopy(n) : applicationCopy(n);
 }
 
@@ -40,18 +40,6 @@ function paymentCopy(n: PaymentNotice): Copy {
     later: 'Close',
     icon: Smartphone,
     tone: 'good',
-  };
-}
-
-function escalationCopy(n: EscalationNotice): Copy {
-  return {
-    title: 'A batch needs your sanction',
-    body: `${n.societyName}’s ${n.poolReference} asks for ${formatPaise(n.amount)}, above the apex officer’s ${formatPaise(n.limit)} limit, so the decision is yours.`,
-    action: 'Open the request',
-    to: `/apex/requests/${n.escalatedPoolId}`,
-    later: 'Later',
-    icon: ShieldCheck,
-    tone: 'accent',
   };
 }
 
@@ -71,13 +59,10 @@ function poolCopy(n: PoolNotice): Copy {
       };
     }
     return {
-      title: n.audience === 'APEX' ? 'Decline recorded' : 'The federation declined a batch',
-      body:
-        n.audience === 'APEX'
-          ? `You declined ${n.societyName}’s ${n.poolReference}, asking ${formatPaise(n.requested)}${why}`
-          : `The federation declined ${n.poolReference}, which asked for ${formatPaise(n.requested)}${why}`,
-      action: n.audience === 'APEX' ? 'Back to funding requests' : 'Open the batch',
-      to: n.audience === 'APEX' ? '/apex/requests' : `/pools/${n.poolId}`,
+      title: 'The federation declined a batch',
+      body: `The federation declined ${n.poolReference}, which asked for ${formatPaise(n.requested)}${why}`,
+      action: 'Open the batch',
+      to: `/pools/${n.poolId}`,
       later: 'Close',
       icon: CircleX,
       tone: 'bad',
@@ -100,17 +85,6 @@ function poolCopy(n: PoolNotice): Copy {
       tone: 'good',
     };
   }
-  if (n.audience === 'APEX') {
-    return {
-      title: 'Sanction recorded',
-      body: `You sanctioned ${n.societyName}’s ${n.poolReference}: ${terms}, as ${t.sanctionRef}. The society can now draw it down and pay out its members.`,
-      action: 'Back to funding requests',
-      to: '/apex/requests',
-      later: 'Close',
-      icon: BadgeCheck,
-      tone: 'good',
-    };
-  }
   return {
     title: 'Funding sanctioned',
     body: inFull
@@ -127,6 +101,8 @@ function poolCopy(n: PoolNotice): Copy {
 
 function applicationCopy(n: ApplicationNotice): Copy {
   const loan = `a ${formatPaise(n.amount)} ${PURPOSE_LABEL[n.purpose]} over ${n.tenureMonths} months`;
+  const toFederation = n.route === 'FEDERATION';
+  const decider = toFederation ? 'federation' : 'society';
   switch (n.kind) {
     case 'VISIT_DUE':
       return {
@@ -143,7 +119,7 @@ function applicationCopy(n: ApplicationNotice): Copy {
         title: 'Field visit done',
         body: `The field officer has visited ${n.memberName} about ${loan}. It is ready for your appraisal.`,
         action: 'Open the proposal',
-        to: `/applications/${n.applicationId}`,
+        to: toFederation ? `/apex/direct/${n.applicationId}` : `/applications/${n.applicationId}`,
         later: 'Later',
         icon: MapPin,
         tone: 'accent',
@@ -151,10 +127,12 @@ function applicationCopy(n: ApplicationNotice): Copy {
     case 'DIRECT':
       return {
         title: 'A member applied to the federation',
-        body: `${n.memberName} asked the federation for ${loan}. It climbs through the society first, and reaches you on its own once the society approves it.`,
-        action: 'See funding requests',
-        to: '/apex/requests',
-        later: 'Close',
+        body: n.awaitingVisit
+          ? `${n.memberName} asked the federation for ${loan}. The field officer visits first, then it is yours to appraise and decide.`
+          : `${n.memberName} asked the federation for ${loan}. It is waiting for your appraisal.`,
+        action: 'Open the proposal',
+        to: `/apex/direct/${n.applicationId}`,
+        later: 'Later',
         icon: Landmark,
         tone: 'accent',
       };
@@ -171,7 +149,9 @@ function applicationCopy(n: ApplicationNotice): Copy {
     case 'APPROVED':
       return {
         title: 'Your loan is approved',
-        body: `The society approved ${loan}. It now goes for funding along with other members’ loans, and is paid out to you once funding is approved.`,
+        body: toFederation
+          ? `The federation approved ${loan}. Your society pays it out to you once the funding is sanctioned.`
+          : `The society approved ${loan}. It now goes for funding along with other members’ loans, and is paid out to you once funding is approved.`,
         action: 'See where it stands',
         to: '/me',
         later: 'Close',
@@ -181,7 +161,7 @@ function applicationCopy(n: ApplicationNotice): Copy {
     case 'REJECTED':
       return {
         title: 'Your application was not approved',
-        body: `The society did not approve your application for ${formatPaise(n.amount)}${n.reason ? `: ${n.reason}` : '.'} You can apply again.`,
+        body: `The ${decider} did not approve your application for ${formatPaise(n.amount)}${n.reason ? `: ${n.reason}` : '.'} You can apply again.`,
         action: 'Apply again',
         to: '/me/apply',
         later: 'Close',

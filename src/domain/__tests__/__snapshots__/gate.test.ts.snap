@@ -33,6 +33,11 @@ exports[`determinism > matches the committed trial balance snapshot 1`] = `
       "dr": 0,
     },
     {
+      "code": 1200,
+      "cr": 0,
+      "dr": 0,
+    },
+    {
       "code": 2000,
       "cr": 88000000,
       "dr": 88000000,

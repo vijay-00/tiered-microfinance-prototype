@@ -38,6 +38,10 @@ export function RecordRemittanceDialog({ preview, sanctionRef }: { preview: Remi
   const valid = !interestError && !principalError;
   const total = (interest ?? 0) + (principal ?? 0);
   const carried = due.totalDue - total;
+  // Money already with the federation meets it first.
+  const fromAdvance = Math.min(preview.advancePaid, total);
+  const payNow = total - fromAdvance;
+  const cashAfter = preview.cashAvailable - payNow;
 
   async function confirm() {
     if (!valid) return;
@@ -86,9 +90,15 @@ export function RecordRemittanceDialog({ preview, sanctionRef }: { preview: Remi
           ) : null}
 
           <dl className="space-y-1 rounded-md bg-muted/60 p-3 text-sm">
+            {fromAdvance > 0 ? (
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Already paid in advance</dt>
+                <dd><MoneyText paise={fromAdvance} /></dd>
+              </div>
+            ) : null}
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Paying now</dt>
-              <dd className="font-semibold"><MoneyText paise={total} /></dd>
+              <dd className="font-semibold"><MoneyText paise={payNow} /></dd>
             </div>
             {carried > 0 ? (
               <div className="flex justify-between text-bad">
@@ -98,12 +108,12 @@ export function RecordRemittanceDialog({ preview, sanctionRef }: { preview: Remi
             ) : null}
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Cash left afterwards</dt>
-              <dd className={preview.cashAvailable - total < 0 ? 'text-bad' : undefined}>
-                <MoneyText paise={preview.cashAvailable - total} />
+              <dd className={cashAfter < 0 ? 'text-bad' : undefined}>
+                <MoneyText paise={cashAfter} />
               </dd>
             </div>
           </dl>
-          {preview.cashAvailable - total < 0 ? (
+          {cashAfter < 0 ? (
             <p role="alert" className="text-sm text-bad">
               This takes the society's cash below zero, a liquidity breach. It is not prevented, but the dashboard will flag it.
             </p>
@@ -120,7 +130,7 @@ export function RecordRemittanceDialog({ preview, sanctionRef }: { preview: Remi
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
           <Button onClick={() => void confirm()} disabled={!valid || pending || total === 0}>
-            {pending ? 'Recording…' : <>Remit <MoneyText paise={total} /></>}
+            {pending ? 'Recording…' : payNow > 0 ? <>Remit <MoneyText paise={payNow} /></> : 'Settle from the advance'}
           </Button>
         </DialogFooter>
       </DialogContent>

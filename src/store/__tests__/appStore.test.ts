@@ -219,7 +219,7 @@ describe('the demo member’s first loan', () => {
         { type: 'POOL_CREATED', on, poolId: 'pool_90', reference: 'ANN/POOL/TEST/01', applicationIds: ['app_900'], recordedBy: 'usr_secretary' },
         { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'SUBMITTED', recordedBy: 'usr_secretary' },
         { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'UNDER_APEX_REVIEW', recordedBy: 'usr_apex' },
-        { type: 'TRANCHE_SANCTIONED', on, trancheId: 'trn_90', poolId: 'pool_90', sanctionRef: 'PACF/SAN/TEST/01', sanctionedAmount: 50_000_000, wholesaleRateBps: 950, tenureMonths: 24, remarks: '', recordedBy: 'usr_gm' },
+        { type: 'TRANCHE_SANCTIONED', on, trancheId: 'trn_90', poolId: 'pool_90', sanctionRef: 'PACF/SAN/TEST/01', sanctionedAmount: 50_000_000, wholesaleRateBps: 950, tenureMonths: 24, remarks: '', recordedBy: 'usr_apex' },
         { type: 'TRANCHE_DRAWN', on, trancheId: 'trn_90', amount: 50_000_000, recordedBy: 'usr_secretary' },
         { type: 'LOAN_DISBURSED', on, loanId: 'loan_900', applicationId: 'app_900', trancheId: 'trn_90', firstDueOn: '2026-12-01', recordedBy: 'usr_secretary' },
       ]),

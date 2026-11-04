@@ -54,6 +54,7 @@ const BUILT: Record<string, () => ReactElement> = {
   '/apex': () => <ApexDashboardPage />,
   '/apex/requests': () => <FundingRequestsPage />,
   '/apex/requests/:poolId': () => <PoolReviewPage />,
+  '/apex/direct/:applicationId': () => <ApplicationDetailPage />,
   '/apex/societies': () => <SocietiesPage />,
   '/apex/societies/:societyId': () => <SocietyDetailPage />,
   '/visits': () => <VisitsPage />,

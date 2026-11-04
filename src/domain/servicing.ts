@@ -24,6 +24,7 @@ import {
   memberOf,
   nextRemittanceDate,
   poolOf,
+  advanceToRemit,
   positionOf,
   societyOf,
   trancheOf,
@@ -248,6 +249,8 @@ export function previewPayment(
 export type ScheduleStatus = 'PAID' | 'PARTLY_PAID' | 'DUE_TODAY' | 'OVERDUE' | 'UPCOMING';
 
 export interface ScheduleLine {
+  /** Of what is shown as paid, the part only held in advance until this instalment falls due. */
+  readonly inAdvance: Paise;
   readonly row: ScheduleRow;
   readonly status: ScheduleStatus;
   readonly paid: Paise;
@@ -255,18 +258,26 @@ export interface ScheduleLine {
   readonly daysLate: number;
 }
 
-function scheduleLines(state: WorldState, position: LoanPosition): ScheduleLine[] {
+export function scheduleLines(state: WorldState, position: LoanPosition): ScheduleLine[] {
+  // Money paid before an instalment falls due is held, not yet applied. To the
+  // member it is paid, so the instalments it will meet read as paid.
+  let held = position.unappliedReceipts;
   return position.rows.map(({ row, interestUnpaid, principalUnpaid }) => {
-    const unpaid = interestUnpaid + principalUnpaid;
+    const owed = interestUnpaid + principalUnpaid;
+    const upcoming = compareISO(row.dueOn, state.clock) > 0;
+    const earmarked = Math.min(held, owed);
+    held -= earmarked;
+    const inAdvance = upcoming ? earmarked : 0;
+    const unpaid = owed - inAdvance;
     const paid = row.instalment - unpaid;
     const daysLate = Math.max(0, daysBetween(row.dueOn, state.clock));
     let status: ScheduleStatus;
     if (unpaid === 0) status = 'PAID';
-    else if (compareISO(row.dueOn, state.clock) > 0) status = 'UPCOMING';
+    else if (upcoming) status = inAdvance > 0 ? 'PARTLY_PAID' : 'UPCOMING';
     else if (paid > 0) status = 'PARTLY_PAID';
     else if (row.dueOn === state.clock) status = 'DUE_TODAY';
     else status = 'OVERDUE';
-    return { row, status, paid, unpaid, daysLate: unpaid === 0 ? 0 : daysLate };
+    return { row, status, paid, unpaid, inAdvance, daysLate: unpaid === 0 ? 0 : daysLate };
   });
 }
 
@@ -386,7 +397,8 @@ export function memberLoanDetail(state: WorldState, loanId: ID, memberId: ID): M
     daysPastDue: position.daysPastDue,
     rescheduled: entry.schedule !== entry.originalSchedule,
     schedule: scheduleLines(state, position),
-    payments: [...entry.receipts].reverse().map((r) => ({
+    // An advance meeting an instalment is the same money, not a second payment.
+    payments: entry.receipts.filter((r) => r.source !== 'ADVANCE').reverse().map((r) => ({
       id: r.id,
       receiptNo: r.receiptNo,
       receivedOn: r.receivedOn,
@@ -470,6 +482,12 @@ export interface RemittancePreview {
   readonly fromReserves: Paise;
   readonly cashAvailable: Paise;
   readonly cashAfter: Paise;
+  /** What is left to pay after the advance already sent. */
+  readonly payNow: Paise;
+  /** Already with the federation, meeting this remittance first. */
+  readonly advancePaid: Paise;
+  /** Members' advances the society can send on now. */
+  readonly advanceAvailable: Paise;
   readonly liquidityBreach: boolean;
 }
 
@@ -491,6 +509,8 @@ export function remittancePreview(state: WorldState, trancheId: ID): RemittanceP
   );
   const toFederation = sum(receipts.map((r) => r.reconciliation.federation.remittanceShare));
   const cashAvailable = balanceOf(journalOf(state, entry.tranche.societyId), ACCOUNTS.CASH);
+  const advancePaid = entry.advancePaid ?? 0;
+  const payNow = Math.max(0, due.totalDue - advancePaid);
   return {
     trancheId,
     dueOn,
@@ -503,10 +523,13 @@ export function remittancePreview(state: WorldState, trancheId: ID): RemittanceP
       interest: sum(receipts.map((r) => interestPortion(r.allocation))),
       margin: sum(receipts.map((r) => r.reconciliation.society.netInterestIncome)),
     },
-    fromReserves: Math.max(0, due.totalDue - toFederation),
+    fromReserves: Math.min(payNow, Math.max(0, due.totalDue - toFederation)),
     cashAvailable,
-    cashAfter: cashAvailable - due.totalDue,
-    liquidityBreach: cashAvailable - due.totalDue < 0,
+    cashAfter: cashAvailable - payNow,
+    liquidityBreach: cashAvailable - payNow < 0,
+    payNow,
+    advancePaid,
+    advanceAvailable: advanceToRemit(state, trancheId),
   };
 }
 

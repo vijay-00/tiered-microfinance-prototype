@@ -41,7 +41,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
     steps: [
       {
         title: 'The member applies',
-        body: 'Veerappan Pandian, a member, applies directly. Choose where it goes, the society or the federation, pick Mortgage Loan, type an amount, say 40000, and the monthly instalment appears as you type. Attach the documents (Use sample files is quickest) and Send application.',
+        body: 'Veerappan Pandian, a member, applies directly. Choose where it goes, the society or the federation, pick Mortgage Loan, type an amount, say 40000, and the monthly instalment appears as you type. Attach the documents (Use sample files is quickest) and Send application. Choose the federation and the pop-up goes to the apex officer, who appraises and approves it: the society only pays it out and collects the EMIs.',
         go: { scenario: 'A', userId: 'usr_member', path: '/me/apply' },
       },
       {
@@ -61,12 +61,12 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'Into a batch, up to the federation',
-        body: 'Approved applications go up in a batch of one to twenty: choose New batch, tick the application and Submit to the federation. An application the member addressed to the federation skips this step: it goes up on its own the moment it is approved.',
+        body: 'Approved applications wait here until the secretary sends them, in a batch of one to twenty: choose New batch, tick the application and Submit to the federation. Nothing reaches the federation until the secretary submits it, even a batch of one.',
         go: { userId: 'usr_secretary', path: '/pools' },
       },
       {
         title: 'The federation sanctions',
-        body: 'The apex officer opens the batch, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it. Above ₹1,00,000 the General Manager sanctions instead: switch to that role to do it. The Assistant Registrar can look at everything here and change nothing.',
+        body: 'The apex officer opens the batch, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it. The General Manager and the Assistant Registrar can look at everything here and change nothing: they watch the data.',
         go: { userId: 'usr_apex', path: '/apex/requests' },
       },
       {
@@ -81,7 +81,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The society remits',
-        body: 'When the instalment falls due, open the sanction and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
+        body: 'When the instalment falls due, open the sanction and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread. If members paid early, Pay advance to the federation sends that money now and the next remittance falls by that much.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {

@@ -17,6 +17,7 @@ import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
 import { selectCurrentUser } from '@/store/selectors';
 import { DisbursePanel } from './DisbursePanel';
+import { PayAdvanceDialog } from './PayAdvanceDialog';
 import { RecordRemittanceDialog } from './RecordRemittanceDialog';
 
 export function TrancheDetailPage() {
@@ -261,6 +262,18 @@ function NextRemittance(props: {
             <dt>Owed to the federation</dt>
             <dd><MoneyText paise={due.totalDue} /></dd>
           </div>
+          {preview.advancePaid > 0 ? (
+            <>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Already paid in advance</dt>
+                <dd><MoneyText paise={preview.advancePaid} /></dd>
+              </div>
+              <div className="flex justify-between gap-3 font-semibold">
+                <dt>Still to pay</dt>
+                <dd><MoneyText paise={preview.payNow} /></dd>
+              </div>
+            </>
+          ) : null}
         </dl>
 
         <div className="space-y-2 text-sm">
@@ -300,6 +313,19 @@ function NextRemittance(props: {
             </span>{' '}
             after paying in full.
           </p>
+          {preview.advanceAvailable > 0 ? (
+            <div className="space-y-2 rounded-md bg-muted/60 p-3">
+              <p>
+                Members have paid <MoneyText paise={preview.advanceAvailable} /> in advance. Pay it to the federation now, and
+                the next remittance falls by that much.
+              </p>
+              {props.canRemit ? (
+                <PayAdvanceDialog preview={preview} sanctionRef={props.sanctionRef} />
+              ) : (
+                <p className="text-xs text-muted-foreground">Only the society's secretary can pay it.</p>
+              )}
+            </div>
+          ) : null}
           <div className="pt-1">
             {!preview.canRecord ? (
               <p className="text-xs text-muted-foreground">It can be recorded from {formatDate(preview.dueOn)}.</p>

@@ -104,6 +104,12 @@ function Detail({ data }: { data: FederationSocietyDetail }) {
               <>
                 <Money paise={data.repaid} className="g-strong" /> repaid of the <Money paise={row.drawn} /> drawn since{' '}
                 {formatDate(data.firstDrawOn)} · <Money paise={row.interestYear} className="g-strong" /> interest paid this year
+                {data.advanceHeld > 0 ? (
+                  <>
+                    {' '}
+                    · <Money paise={data.advanceHeld} className="g-strong" /> received in advance
+                  </>
+                ) : null}
               </>
             ) : (
               'Nothing drawn yet'

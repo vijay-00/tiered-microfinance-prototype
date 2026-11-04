@@ -81,11 +81,9 @@ describe('from a member’s application to the federation’s remittance', () =>
     await user.click(await screen.findByRole('button', { name: 'Begin review' }));
     const terms = await screen.findByRole('region', { name: 'Terms' });
     await user.click(within(terms).getByRole('button', { name: /^Sanction ₹7,50,000$/ }));
-    // A pop-up confirms the sanction to the apex officer, with the same amount.
-    const recorded = await screen.findByRole('dialog', { name: 'Sanction recorded' });
-    expect(recorded).toHaveTextContent('₹7,50,000, in full, at 9.5% a year for 24 months, as PACF/SAN/2026-27/022');
-    await user.click(within(recorded).getByRole('button', { name: 'Close' }));
+    // No pop-up: the page says it, and the apex officer has nothing more to do.
     expect(await screen.findByRole('heading', { name: 'Sanctioned as PACF/SAN/2026-27/022' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     // A pop-up tells the member the funding is approved; it waits to be paid out.
     await viewAs(user, 'Member');
@@ -228,7 +226,7 @@ describe('the roles the demo offers', () => {
 });
 
 describe('pop-ups when the federation decides a batch', () => {
-  it('tells the society, the members in it and the apex officer, each with the same amounts', async () => {
+  it('tells the society and the members in it, and not the apex officer', async () => {
     const { user, store } = renderApp('/dashboard');
     const on = store.getState().world.clock;
     // Grama Valarchi's pool is under review; the apex officer sanctions 80% of it.
@@ -241,10 +239,10 @@ describe('pop-ups when the federation decides a batch', () => {
       }),
     ).toEqual({ ok: true });
 
+    // The apex officer who decided it is not told what they did.
     await viewAs(user, 'Apex Officer');
-    const apex = await screen.findByRole('dialog', { name: 'Sanction recorded' });
-    expect(apex).toHaveTextContent('₹6,00,000, 80% of the ₹7,50,000 asked for');
-    await user.click(within(apex).getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     // The society's secretary is Grama Valarchi's, not the demo's default society.
     act(() => store.getState().switchUser('usr_secretary_2'));
