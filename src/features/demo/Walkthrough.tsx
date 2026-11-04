@@ -51,7 +51,7 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
       },
       {
         title: 'The field officer visits',
-        body: 'Construction and mortgage loans need a field visit; jewel and FD loans skip this step. The loan officer gets a pop-up: a new proposal. Start the visit, Capture location for the geo-tag, add a photo or document, and Complete visit. The appraisal stays closed until this is done.',
+        body: 'The field officer gets a pop-up: a new proposal. Start the visit, Capture location for the geo-tag, add a photo or document, and Complete visit. The appraisal stays closed until this is done.',
         go: { userId: 'usr_officer', path: '/visits' },
       },
       {

@@ -41,6 +41,7 @@ describe('the demo, every rung of the ladder', () => {
     await viewAs(user, 'Member');
     await user.click(within(sidebar()).getByRole('link', { name: 'Apply for a loan' }));
     await user.click(await screen.findByRole('radio', { name: /^The federation/ }));
+    expect(within(screen.getByLabelText('Loan type')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Construction Loan · 11.5% a year', 'Mortgage Loan · 11.5% a year']);
     await user.selectOptions(screen.getByLabelText('Loan type'), 'MORTGAGE');
     expect(screen.getByText('A field officer visits you for this loan.')).toBeInTheDocument();
     await user.type(screen.getByLabelText('How much do you need? (₹)'), '150000');
@@ -69,7 +70,7 @@ describe('the demo, every rung of the ladder', () => {
     expect(screen.queryByRole('button', { name: 'Record appraisal' })).not.toBeInTheDocument();
 
     // The field officer is told, goes, captures the geo-tag and adds a photo.
-    await viewAs(user, 'Loan Officer');
+    await viewAs(user, 'Field Officer');
     await waitFor(() => expect(router.state.location.pathname).toBe('/visits'));
     const proposal = await screen.findByRole('dialog', { name: 'New loan proposal' });
     await user.click(within(proposal).getByRole('button', { name: 'Start the visit' }));
@@ -158,12 +159,12 @@ describe('the demo, every rung of the ladder', () => {
 });
 
 describe('the ladder’s rules, in the reducer', () => {
-  const start = (purpose: LoanPurpose = 'MORTGAGE') => {
+  const start = (purpose: LoanPurpose = 'MORTGAGE', requestedAmount = 4_000_000) => {
     const { store } = renderApp('/', undefined, DEMO);
     const on = store.getState().world.clock;
     const apply: WorldEvent = {
       type: 'APPLICATION_SUBMITTED', on, applicationId: 'app_900', memberId: 'mem_001',
-      requestedAmount: 4_000_000, requestedTenureMonths: 12, purpose, recordedBy: 'usr_member',
+      requestedAmount, requestedTenureMonths: 24, purpose, recordedBy: 'usr_member',
     };
     return { store, on, world: applyEvent(store.getState().world, apply) };
   };
@@ -197,6 +198,26 @@ describe('the ladder’s rules, in the reducer', () => {
     expect(fieldVisits(world, 'soc_1').due).toHaveLength(1);
     expect(noticesFor(world, 'usr_officer').map((n) => n.kind)).toEqual(['VISIT_DUE']);
     expect(noticesFor(world, 'usr_secretary')).toHaveLength(0);
+  });
+
+  it('takes a loan of the full Rs 50,00,000 from application to payout, and no more', () => {
+    const MAX = 500_000_000;
+    const { world, on } = start('CONSTRUCTION', MAX);
+    expect(world.policy.maxTicket).toBe(MAX);
+    const steps: WorldEvent[] = [
+      visit(on, 'usr_officer'),
+      { type: 'APPLICATION_APPRAISED', on, applicationId: 'app_900', monthlyIncome: 800_000_000, existingObligations: 0, recommendedAmount: MAX, notes: '', recordedBy: 'usr_secretary' },
+      { type: 'APPLICATION_DECIDED', on, applicationId: 'app_900', outcome: 'APPROVED', sanctionedAmount: MAX, tenureMonths: 24, recordedBy: 'usr_secretary' },
+      { type: 'POOL_CREATED', on, poolId: 'pool_90', reference: 'ANN/BATCH/TEST/01', applicationIds: ['app_900'], recordedBy: 'usr_secretary' },
+      { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'SUBMITTED', recordedBy: 'usr_secretary' },
+      { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'UNDER_APEX_REVIEW', recordedBy: 'usr_apex' },
+      { type: 'TRANCHE_SANCTIONED', on, trancheId: 'trn_90', poolId: 'pool_90', sanctionRef: 'PACF/SAN/TEST/01', sanctionedAmount: MAX, wholesaleRateBps: 950, tenureMonths: 24, remarks: '', recordedBy: 'usr_gm' },
+      { type: 'TRANCHE_DRAWN', on, trancheId: 'trn_90', amount: MAX, recordedBy: 'usr_secretary' },
+      { type: 'LOAN_DISBURSED', on, loanId: 'loan_900', applicationId: 'app_900', trancheId: 'trn_90', firstDueOn: '2027-01-01', recordedBy: 'usr_secretary' },
+    ];
+    const paidOut = steps.reduce(applyEvent, world);
+    expect(paidOut.loans.loan_900!.loan.principal).toBe(MAX);
+    expect(() => start('CONSTRUCTION', MAX + 100)).toThrow(/a loan must be between ₹5,000 and ₹50,00,000/);
   });
 
   it('keeps the field officer to the visit, and the visit to the field officer', () => {

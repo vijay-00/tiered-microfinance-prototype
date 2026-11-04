@@ -45,8 +45,11 @@ export const loanPurposes = [
 export const loanPurposeSchema = z.enum(loanPurposes);
 export type LoanPurpose = z.infer<typeof loanPurposeSchema>;
 
-/** The loans a society gives today. The earlier purposes stay valid for the seed's history. */
-export const loanTypes = ['CONSTRUCTION', 'MORTGAGE', 'JEWEL', 'FD'] as const satisfies readonly LoanPurpose[];
+/**
+ * The loans a society gives today. Jewel and FD are paused, not gone: add them
+ * back here to offer them. The earlier purposes stay valid for the seed's history.
+ */
+export const loanTypes = ['CONSTRUCTION', 'MORTGAGE'] as const satisfies readonly LoanPurpose[];
 
 export const applicationStatuses = [
   'DRAFT',

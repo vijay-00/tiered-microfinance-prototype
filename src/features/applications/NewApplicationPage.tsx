@@ -153,7 +153,7 @@ export function NewApplicationPage() {
                     <NativeSelect id={id} value={purpose} onChange={(e) => setPurpose(e.target.value as LoanPurpose)}>
                       {loanTypes.map((p) => (
                         <option key={p} value={p}>
-                          {PURPOSE_LABEL[p]}
+                          {PURPOSE_LABEL[p]} · {formatBps(policy.retailRateBps)} a year
                         </option>
                       ))}
                     </NativeSelect>

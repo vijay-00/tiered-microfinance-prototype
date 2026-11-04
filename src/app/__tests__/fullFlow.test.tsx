@@ -40,7 +40,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     // Nothing on the member's screen speaks of wholesale pricing.
     expect(screen.getByRole('main')).not.toHaveTextContent(/9\.5%|wholesale|margin|federation/i);
 
-    // The secretary appraises it and approves it: there is no loan officer.
+    // The secretary appraises it and approves it; the field officer only visits.
     // A pop-up tells the secretary of the new proposal, and opens it.
     await viewAs(user, 'Society Secretary');
     const proposal = await screen.findByRole('dialog', { name: 'New loan proposal' });
@@ -223,7 +223,7 @@ describe('the roles the demo offers', () => {
     const options = within(within(demoBar()).getByRole('combobox'))
       .getAllByRole('option')
       .map((o) => o.textContent);
-    expect(options).toEqual(['Society Secretary', 'Loan Officer', 'Apex Officer', 'General Manager', 'Assistant Registrar', 'Member', 'Auditor']);
+    expect(options).toEqual(['Society Secretary', 'Field Officer', 'Apex Officer', 'General Manager', 'Assistant Registrar', 'Member', 'Auditor']);
   });
 });
 

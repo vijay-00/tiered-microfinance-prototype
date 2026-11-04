@@ -25,7 +25,7 @@ export interface RoleInfo {
 
 export const ROLES: readonly RoleInfo[] = [
   { role: 'SECRETARY', label: 'Society Secretary', tier: 'society', home: '/dashboard', readOnly: false },
-  { role: 'LOAN_OFFICER', label: 'Loan Officer', tier: 'field', home: '/visits', readOnly: false },
+  { role: 'LOAN_OFFICER', label: 'Field Officer', tier: 'field', home: '/visits', readOnly: false },
   { role: 'APEX_OFFICER', label: 'Apex Officer', tier: 'apex', home: '/apex', readOnly: false },
   { role: 'GENERAL_MANAGER', label: 'General Manager', tier: 'apex', home: '/apex', readOnly: false },
   { role: 'REGISTRAR', label: 'Assistant Registrar', tier: 'apex', home: '/apex', readOnly: true },

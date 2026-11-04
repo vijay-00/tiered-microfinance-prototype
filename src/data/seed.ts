@@ -249,9 +249,11 @@ export function cleanStart(
     ...base,
     // The demo runs the full ladder: a field visit before appraisal, and a
     // limit above which the General Manager sanctions. The seed's own history
-    // predates both, so they are switched on here and not in the policy.
-    policy: { ...base.policy, fieldVisitRequired: true, apexSanctionLimit: 10_000_000 }, // Rs 1,00,000
-    societies: [society],
+    // predates both, so they are switched on here and not in the policy. So
+    // is the demo's larger loan, Rs 50,00,000, with a credit limit that lets
+    // all five members borrow that much.
+    policy: { ...base.policy, fieldVisitRequired: true, apexSanctionLimit: 10_000_000, maxTicket: 500_000_000 },
+    societies: [{ ...society, creditLimit: 2_500_000_000 }],
     users: [...staff, ...memberLogins],
     members,
     applications: [],

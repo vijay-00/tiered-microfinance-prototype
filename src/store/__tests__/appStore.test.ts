@@ -201,7 +201,7 @@ describe('the demo’s clean start', () => {
 });
 
 describe('the demo member’s first loan', () => {
-  it('can be for the full Rs 5,00,000, and falls due on the same day each month', () => {
+  it('falls due on the same day each month, with the broken period on the first instalment', () => {
     const store = createAppStore({ demo: DEMO });
     const { world, dispatch } = store.getState();
     const login = world.users.find((u) => u.role === 'MEMBER')!;
