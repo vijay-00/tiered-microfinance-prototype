@@ -6,7 +6,7 @@ import type { Role } from '@/domain/types';
  * permission table, so a hand-made event is refused too.
  */
 
-export type Tier = 'society' | 'apex' | 'member';
+export type Tier = 'society' | 'apex' | 'field' | 'member';
 
 export interface RoleInfo {
   readonly role: Role;
@@ -25,8 +25,10 @@ export interface RoleInfo {
 
 export const ROLES: readonly RoleInfo[] = [
   { role: 'SECRETARY', label: 'Society Secretary', tier: 'society', home: '/dashboard', readOnly: false },
-  { role: 'LOAN_OFFICER', label: 'Loan Officer', tier: 'society', home: '/dashboard', readOnly: false, hidden: true },
+  { role: 'LOAN_OFFICER', label: 'Loan Officer', tier: 'field', home: '/visits', readOnly: false },
   { role: 'APEX_OFFICER', label: 'Apex Officer', tier: 'apex', home: '/apex', readOnly: false },
+  { role: 'GENERAL_MANAGER', label: 'General Manager', tier: 'apex', home: '/apex', readOnly: false },
+  { role: 'REGISTRAR', label: 'Assistant Registrar', tier: 'apex', home: '/apex', readOnly: true },
   { role: 'MEMBER', label: 'Member', tier: 'member', home: '/me', readOnly: false },
   { role: 'AUDITOR', label: 'Auditor', tier: 'society', home: '/dashboard', readOnly: true },
 ];

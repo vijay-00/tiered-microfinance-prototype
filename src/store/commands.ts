@@ -1,6 +1,6 @@
 import { compareISO, financialYear } from '@/domain/dates';
 import { collectionsQueue } from '@/domain/servicing';
-import type { ID, ISODate, LoanPurpose, Paise, PaymentMode } from '@/domain/types';
+import type { ApplicationRoute, AttachedDocument, ID, ISODate, LoanPurpose, Paise, PaymentMode } from '@/domain/types';
 import type { ReceiptSource } from '@/domain/reconciliation';
 import {
   applyEvent,
@@ -74,6 +74,7 @@ export interface RecordPaymentInput {
   mode: PaymentMode;
   source: ReceiptSource;
   electPrepayment: boolean;
+  upiRef?: string;
 }
 
 export function paymentEvent(world: WorldState, input: RecordPaymentInput, recordedBy: ID): WorldEvent {
@@ -212,6 +213,22 @@ export interface SubmitApplicationInput {
   requestedAmount: Paise;
   requestedTenureMonths: number;
   purpose: LoanPurpose;
+  route?: ApplicationRoute;
+  documents?: AttachedDocument[];
+}
+
+export interface FieldVisitInput {
+  applicationId: ID;
+  lat: number;
+  lng: number;
+  accuracyMetres: number;
+  locationSource: 'GPS' | 'DEMO';
+  notes: string;
+  documents: AttachedDocument[];
+}
+
+export function fieldVisitEvent(world: WorldState, input: FieldVisitInput, recordedBy: ID): WorldEvent {
+  return { type: 'FIELD_VISIT_RECORDED', on: world.clock, ...input, recordedBy };
 }
 
 export function applicationEvent(world: WorldState, input: SubmitApplicationInput, recordedBy: ID): WorldEvent {

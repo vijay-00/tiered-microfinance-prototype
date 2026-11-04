@@ -187,6 +187,8 @@ const USERS: readonly User[] = [
   { id: 'usr_secretary_2', name: 'Anitha Ramesh', role: 'SECRETARY', title: 'Secretary', societyId: 'soc_2' },
   { id: 'usr_secretary_3', name: 'Velmurugan Pandian', role: 'SECRETARY', title: 'Secretary', societyId: 'soc_3' },
   { id: 'usr_apex', name: 'Dr. Sudha Ramanathan', role: 'APEX_OFFICER', title: 'Credit Manager' },
+  { id: 'usr_gm', name: 'Arul Vasudevan', role: 'GENERAL_MANAGER', title: 'General Manager' },
+  { id: 'usr_registrar', name: 'Kavitha Elangovan', role: 'REGISTRAR', title: 'Assistant Registrar' },
   { id: 'usr_auditor', name: 'R. N. Subramanian', role: 'AUDITOR', title: 'Statutory Auditor', societyId: 'soc_1' },
 ];
 

@@ -14,6 +14,8 @@ import { SocietyDashboardPage } from '@/features/dashboard/SocietyDashboardPage'
 import { GeneralLedgerPage } from '@/features/ledger/GeneralLedgerPage';
 import { StatementsPage } from '@/features/ledger/StatementsPage';
 import { LoanDetailPage } from '@/features/loans/LoanDetailPage';
+import { VisitDetailPage } from '@/features/visits/VisitDetailPage';
+import { VisitsPage } from '@/features/visits/VisitsPage';
 import { MemberHomePage } from '@/features/member/MemberHomePage';
 import { MemberApplyPage } from '@/features/member/MemberApplyPage';
 import { MemberLoanPage } from '@/features/member/MemberLoanPage';
@@ -54,6 +56,8 @@ const BUILT: Record<string, () => ReactElement> = {
   '/apex/requests/:poolId': () => <PoolReviewPage />,
   '/apex/societies': () => <SocietiesPage />,
   '/apex/societies/:societyId': () => <SocietyDetailPage />,
+  '/visits': () => <VisitsPage />,
+  '/visits/:applicationId': () => <VisitDetailPage />,
   '/me': () => <MemberHomePage />,
   '/me/apply': () => <MemberApplyPage />,
   '/me/loans/:loanId': () => <MemberLoanPage />,

@@ -10,8 +10,8 @@ import { AppProviders } from '@/store/context';
  * Mounts the whole app on a fresh store, with repository latency at zero.
  * `prepare` runs against the store before the first render.
  */
-export function renderApp(path = '/', prepare?: (store: AppStore) => void) {
-  const store = createAppStore();
+export function renderApp(path = '/', prepare?: (store: AppStore) => void, options?: Parameters<typeof createAppStore>[0]) {
+  const store = createAppStore(options);
   prepare?.(store);
   const repositories = createRepositories(store, { min: 0, max: 0 });
   const router = createMemoryRouter(routes, { initialEntries: [path], future: ROUTER_FUTURE });

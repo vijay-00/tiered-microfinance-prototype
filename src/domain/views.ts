@@ -1,9 +1,10 @@
 import { compareISO } from './dates';
 import { ACCOUNTS, type AccountCode } from './ledger';
+import { needsFieldVisit } from './machines';
 import { sum } from './money';
 import type { RemittanceDue } from './reconciliation';
 import { accountBalances, incomeStatement } from './statements';
-import type { Bps, ID, ISODate, LoanPurpose, LoanStatus, Paise, Society, User } from './types';
+import type { ApplicationRoute, AttachedDocument, Bps, FieldVisit, ID, ISODate, LoanPurpose, LoanStatus, Paise, Society, User } from './types';
 import {
   journalOf,
   nextRemittanceDate,
@@ -208,7 +209,7 @@ export function memberLoans(state: WorldState, memberId: ID): MemberLoanView[] {
  * out, with the date it happened. Like the member's loans, it names no
  * wholesale rate and no margin.
  */
-export type ApplicationStepKey = 'APPLIED' | 'APPRAISED' | 'DECIDED' | 'SENT' | 'FUNDED' | 'PAID_OUT';
+export type ApplicationStepKey = 'APPLIED' | 'VISITED' | 'APPRAISED' | 'DECIDED' | 'SENT' | 'FUNDED' | 'PAID_OUT';
 
 export interface MemberApplicationView {
   readonly applicationId: ID;
@@ -216,6 +217,7 @@ export interface MemberApplicationView {
   readonly requestedTenureMonths: number;
   readonly purpose: LoanPurpose;
   readonly appliedOn: ISODate;
+  readonly route: ApplicationRoute;
   readonly outcome: 'IN_PROGRESS' | 'REJECTED' | 'PAID_OUT';
   /** The amount the society approved, once it has. */
   readonly approvedAmount: Paise | undefined;
@@ -239,12 +241,14 @@ export function memberApplications(state: WorldState, memberId: ID): MemberAppli
         requestedTenureMonths: application.requestedTenureMonths,
         purpose: application.purpose,
         appliedOn: application.appliedOn,
+        route: application.route ?? 'SOCIETY',
         outcome: rejected ? 'REJECTED' : loan ? 'PAID_OUT' : 'IN_PROGRESS',
         approvedAmount: application.decision?.outcome === 'APPROVED' ? application.decision.sanctionedAmount : undefined,
         reason: rejected ? application.decision?.reason : undefined,
         loanId: loan?.id,
         steps: [
           { key: 'APPLIED', on: application.appliedOn },
+          ...(needsFieldVisit(application.purpose, state.policy) ? [{ key: 'VISITED' as const, on: application.fieldVisit?.on }] : []),
           { key: 'APPRAISED', on: application.appraisal?.on },
           { key: 'DECIDED', on: application.decision?.on },
           { key: 'SENT', on: pool?.submittedOn },
@@ -263,11 +267,11 @@ export function memberApplications(state: WorldState, memberId: ID): MemberAppli
  * members whose loans are in it, and the apex officer who made it. Each has a
  * key, so once seen it is not shown again.
  */
-export type Notice = ApplicationNotice | PoolNotice;
+export type Notice = ApplicationNotice | PoolNotice | PaymentNotice | EscalationNotice;
 
 export interface ApplicationNotice {
   readonly key: string;
-  readonly kind: 'PROPOSAL' | 'APPROVED' | 'REJECTED' | 'PAID_OUT';
+  readonly kind: 'PROPOSAL' | 'VISIT_DUE' | 'VISITED' | 'DIRECT' | 'APPROVED' | 'REJECTED' | 'PAID_OUT';
   readonly applicationId: ID;
   readonly memberName: string;
   readonly amount: Paise;
@@ -275,6 +279,27 @@ export interface ApplicationNotice {
   readonly tenureMonths: number;
   readonly reason: string | undefined;
   readonly loanId: ID | undefined;
+}
+
+/** A member paid by UPI: the society hears at once. */
+export interface PaymentNotice {
+  readonly key: string;
+  readonly kind: 'PAYMENT';
+  readonly memberName: string;
+  readonly amount: Paise;
+  readonly receiptNo: string;
+  readonly loanId: ID;
+}
+
+/** A batch above the apex officer's limit, waiting for the General Manager. */
+export interface EscalationNotice {
+  readonly key: string;
+  readonly kind: 'NEEDS_GM';
+  readonly escalatedPoolId: ID;
+  readonly poolReference: string;
+  readonly societyName: string;
+  readonly amount: Paise;
+  readonly limit: Paise;
 }
 
 export interface PoolNotice {
@@ -365,8 +390,21 @@ export function noticesFor(state: WorldState, userId: ID): Notice[] {
       reason: a.decision?.reason,
       loanId: undefined,
     };
-    if (user.role === 'SECRETARY' && user.societyId === a.societyId && a.status === 'SUBMITTED') {
-      notices.push({ ...base, key: `proposal:${a.id}`, kind: 'PROPOSAL' });
+    const ownSociety = user.societyId === a.societyId;
+    const visits = needsFieldVisit(a.purpose, state.policy);
+    if (a.status === 'SUBMITTED') {
+      if (user.role === 'LOAN_OFFICER' && ownSociety && visits && !a.fieldVisit) {
+        notices.push({ ...base, key: `visit-due:${a.id}`, kind: 'VISIT_DUE' });
+      }
+      if (user.role === 'SECRETARY' && ownSociety && !visits) {
+        notices.push({ ...base, key: `proposal:${a.id}`, kind: 'PROPOSAL' });
+      }
+      if (user.role === 'SECRETARY' && ownSociety && visits && a.fieldVisit) {
+        notices.push({ ...base, key: `visited:${a.id}`, kind: 'VISITED' });
+      }
+    }
+    if (user.role === 'APEX_OFFICER' && a.route === 'FEDERATION') {
+      notices.push({ ...base, key: `direct:${a.id}:${user.id}`, kind: 'DIRECT' });
     }
     if (user.role === 'MEMBER' && user.memberId === a.memberId && a.decision) {
       notices.push({ ...base, key: `decision:${a.id}`, kind: a.decision.outcome === 'APPROVED' ? 'APPROVED' : 'REJECTED' });
@@ -374,5 +412,90 @@ export function noticesFor(state: WorldState, userId: ID): Notice[] {
       if (loan) paidOut.push({ ...base, key: `paid:${a.id}`, kind: 'PAID_OUT', amount: loan.principal, loanId: loan.id });
     }
   }
-  return [...notices, ...poolNotices(state, user), ...paidOut];
+  return [...notices, ...escalations(state, user), ...poolNotices(state, user), ...paidOut, ...payments(state, user)];
+}
+
+function escalations(state: WorldState, user: User): EscalationNotice[] {
+  const limit = state.policy.apexSanctionLimit;
+  if (limit === undefined || user.role !== 'GENERAL_MANAGER') return [];
+  return state.pools
+    .filter((p) => (p.status === 'SUBMITTED' || p.status === 'UNDER_APEX_REVIEW') && p.requestedAmount > limit)
+    .map((p) => ({
+      key: `needs-gm:${p.id}`,
+      kind: 'NEEDS_GM' as const,
+      escalatedPoolId: p.id,
+      poolReference: p.reference,
+      societyName: state.societies.find((s) => s.id === p.societyId)?.name ?? p.societyId,
+      amount: p.requestedAmount,
+      limit,
+    }));
+}
+
+function payments(state: WorldState, user: User): PaymentNotice[] {
+  if (user.role !== 'SECRETARY') return [];
+  return Object.values(state.loans)
+    .filter((l) => l.loan.societyId === user.societyId)
+    .flatMap((l) =>
+      l.receipts
+        .filter((r) => (r as { upiRef?: string }).upiRef)
+        .map((r) => ({
+          key: `upi:${(r as { id: ID }).id}`,
+          kind: 'PAYMENT' as const,
+          memberName: state.members.find((m) => m.id === l.loan.memberId)?.name ?? l.loan.memberId,
+          amount: r.amount,
+          receiptNo: (r as { receiptNo: string }).receiptNo,
+          loanId: l.loan.id,
+        })),
+    );
+}
+
+/** What the field officer has to do, and has done. */
+export interface VisitRow {
+  readonly applicationId: ID;
+  readonly memberName: string;
+  readonly village: string;
+  readonly phone: string;
+  readonly occupation: string;
+  readonly amount: Paise;
+  readonly purpose: LoanPurpose;
+  readonly tenureMonths: number;
+  readonly appliedOn: ISODate;
+  readonly route: ApplicationRoute;
+  readonly documents: readonly AttachedDocument[];
+  readonly visit: FieldVisit | undefined;
+}
+
+function visitRow(state: WorldState, id: ID): VisitRow | undefined {
+  const a = state.applications.find((x) => x.id === id);
+  const member = a && state.members.find((m) => m.id === a.memberId);
+  if (!a || !member) return undefined;
+  return {
+    applicationId: a.id,
+    memberName: member.name,
+    village: member.village,
+    phone: member.phone,
+    occupation: member.occupation,
+    amount: a.requestedAmount,
+    purpose: a.purpose,
+    tenureMonths: a.requestedTenureMonths,
+    appliedOn: a.appliedOn,
+    route: a.route ?? 'SOCIETY',
+    documents: a.documents ?? [],
+    visit: a.fieldVisit,
+  };
+}
+
+export function fieldVisits(state: WorldState, societyId: ID): { due: VisitRow[]; done: VisitRow[] } {
+  const rows = state.applications.filter((a) => a.societyId === societyId);
+  const of = (list: typeof rows) => list.map((a) => visitRow(state, a.id)!).filter(Boolean);
+  return {
+    due: of(rows.filter((a) => a.status === 'SUBMITTED' && !a.fieldVisit && needsFieldVisit(a.purpose, state.policy))),
+    done: of(rows.filter((a) => a.fieldVisit)).reverse(),
+  };
+}
+
+export function fieldVisit(state: WorldState, applicationId: ID): VisitRow {
+  const row = visitRow(state, applicationId);
+  if (!row) throw new Error(`no application ${applicationId}`);
+  return row;
 }

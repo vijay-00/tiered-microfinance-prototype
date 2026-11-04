@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { Facts } from '@/components/Facts';
@@ -13,6 +14,7 @@ import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
 import { selectCurrentUser } from '@/store/selectors';
+import { MemberPayDialog } from './MemberPayDialog';
 
 /**
  * A member's own loan. It shows the retail rate and how each payment was
@@ -27,6 +29,7 @@ export function MemberLoanPage() {
     repositories.member.getLoan(loanId, user.memberId!),
   );
 
+  const [paying, setPaying] = useState(false);
   const crumb = (
     <Breadcrumb items={[{ label: 'My loans', to: '/me' }, { label: loanId }]} />
   );
@@ -46,7 +49,16 @@ export function MemberLoanPage() {
       <PageHeader
         title={<>Your loan of <MoneyText paise={data.principal} /></>}
         description={`Loan ${data.loanId}, disbursed ${formatDate(data.disbursedOn)}`}
-        actions={<LoanStatusBadge status={data.status} />}
+        actions={
+          <>
+            <LoanStatusBadge status={data.status} />
+            {data.status === 'ACTIVE' ? (
+              <button type="button" className="g-btn pri sm" onClick={() => setPaying(true)}>
+                Pay now
+              </button>
+            ) : null}
+          </>
+        }
       />
       <Facts
         className="mb-5 rounded-lg border bg-card p-4"
@@ -68,6 +80,7 @@ export function MemberLoanPage() {
           },
         ]}
       />
+      {paying ? <MemberPayDialog loanId={data.loanId} dueNow={data.dueNow} nextInstalment={undefined} emi={data.emi} onClose={() => setPaying(false)} /> : null}
       {data.rescheduled ? (
         <p className="mb-5 rounded-md bg-accent px-4 py-2 text-sm text-accent-foreground">
           You prepaid part of this loan, so it was rescheduled: your instalment is unchanged and the loan ends sooner.

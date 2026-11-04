@@ -135,7 +135,7 @@ export function MemberProfilePage() {
               <tr>
                 <TH>Application</TH>
                 <TH>Applied</TH>
-                <TH>Purpose</TH>
+                <TH>Loan type</TH>
                 <TH numeric>Amount</TH>
                 <TH numeric>Tenure</TH>
                 <TH>Stage</TH>

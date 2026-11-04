@@ -10,7 +10,7 @@ import { Field, Input, NativeSelect } from '@/components/ui/form';
 import { formatBps, formatPaise, parseRupees } from '@/domain/money';
 import { quoteLoan } from '@/domain/origination';
 import { can } from '@/domain/permissions';
-import { loanPurposes, type LoanPurpose } from '@/domain/types';
+import { loanTypes, type LoanPurpose } from '@/domain/types';
 import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
@@ -38,7 +38,7 @@ export function NewApplicationPage() {
   const [memberId, setMemberId] = useState(params.get('member') ?? '');
   const [amountText, setAmountText] = useState('');
   const [tenure, setTenure] = useState(12);
-  const [purpose, setPurpose] = useState<LoanPurpose>('TRADE');
+  const [purpose, setPurpose] = useState<LoanPurpose>('CONSTRUCTION');
   const [touched, setTouched] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -148,10 +148,10 @@ export function NewApplicationPage() {
                     </NativeSelect>
                   )}
                 </Field>
-                <Field label="Purpose">
+                <Field label="Loan type">
                   {({ id }) => (
                     <NativeSelect id={id} value={purpose} onChange={(e) => setPurpose(e.target.value as LoanPurpose)}>
-                      {loanPurposes.map((p) => (
+                      {loanTypes.map((p) => (
                         <option key={p} value={p}>
                           {PURPOSE_LABEL[p]}
                         </option>

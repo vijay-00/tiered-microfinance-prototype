@@ -1,5 +1,6 @@
 import { compareISO } from './dates';
 import type {
+  LoanPurpose,
   ApplicationStatus,
   ISODate,
   LoanStatus,
@@ -137,6 +138,14 @@ export function poolReadiness(
 }
 
 export type ApprovalAuthority = 'LOAN_OFFICER' | 'SECRETARY';
+
+/**
+ * Only loans secured on a building need the field officer to go and see it:
+ * construction and mortgage. Jewel and FD loans go straight to appraisal.
+ */
+export function needsFieldVisit(purpose: LoanPurpose, policy: Pick<Policy, 'fieldVisitRequired'>): boolean {
+  return Boolean(policy.fieldVisitRequired) && (purpose === 'CONSTRUCTION' || purpose === 'MORTGAGE');
+}
 
 /** At or under the officer's limit the Loan Officer may decide; above it, the Secretary. */
 export function approvalAuthority(

@@ -9,6 +9,7 @@ import {
   Landmark,
   Layers,
   LayoutDashboard,
+  MapPin,
   Scale,
   Settings,
   Users,
@@ -68,6 +69,7 @@ export const NAV: Record<Tier, NavGroup[]> = {
       ],
     },
   ],
+  field: [{ items: [{ to: '/visits', label: 'Field visits', icon: MapPin }] }],
   member: [
     {
       items: [

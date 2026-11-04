@@ -1,9 +1,9 @@
-import { BadgeCheck, Banknote, CircleX, FileText, Landmark } from 'lucide-react';
+import { BadgeCheck, Banknote, CircleX, FileText, Landmark, MapPin, ShieldCheck, Smartphone } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { formatBps, formatPaise } from '@/domain/money';
-import { noticesFor, type ApplicationNotice, type Notice, type PoolNotice } from '@/domain/views';
+import { noticesFor, type ApplicationNotice, type EscalationNotice, type Notice, type PaymentNotice, type PoolNotice } from '@/domain/views';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useAppStore } from '@/store/context';
 
@@ -26,7 +26,33 @@ interface Copy {
 }
 
 function copyFor(n: Notice): Copy {
+  if (n.kind === 'PAYMENT') return paymentCopy(n);
+  if (n.kind === 'NEEDS_GM') return escalationCopy(n);
   return 'poolId' in n ? poolCopy(n) : applicationCopy(n);
+}
+
+function paymentCopy(n: PaymentNotice): Copy {
+  return {
+    title: 'Payment received by UPI',
+    body: `${n.memberName} paid ${formatPaise(n.amount)}. Receipt ${n.receiptNo} is posted to the ledger and the loan is updated.`,
+    action: 'Open the loan',
+    to: `/loans/${n.loanId}`,
+    later: 'Close',
+    icon: Smartphone,
+    tone: 'good',
+  };
+}
+
+function escalationCopy(n: EscalationNotice): Copy {
+  return {
+    title: 'A batch needs your sanction',
+    body: `${n.societyName}’s ${n.poolReference} asks for ${formatPaise(n.amount)}, above the apex officer’s ${formatPaise(n.limit)} limit, so the decision is yours.`,
+    action: 'Open the request',
+    to: `/apex/requests/${n.escalatedPoolId}`,
+    later: 'Later',
+    icon: ShieldCheck,
+    tone: 'accent',
+  };
 }
 
 function poolCopy(n: PoolNotice): Copy {
@@ -100,8 +126,38 @@ function poolCopy(n: PoolNotice): Copy {
 }
 
 function applicationCopy(n: ApplicationNotice): Copy {
-  const loan = `${formatPaise(n.amount)} for ${PURPOSE_LABEL[n.purpose].toLowerCase()} over ${n.tenureMonths} months`;
+  const loan = `a ${formatPaise(n.amount)} ${PURPOSE_LABEL[n.purpose]} over ${n.tenureMonths} months`;
   switch (n.kind) {
+    case 'VISIT_DUE':
+      return {
+        title: 'New loan proposal',
+        body: `${n.memberName} has applied for ${loan}. Visit the member, capture the location and upload any documents.`,
+        action: 'Start the visit',
+        to: `/visits/${n.applicationId}`,
+        later: 'Later',
+        icon: MapPin,
+        tone: 'accent',
+      };
+    case 'VISITED':
+      return {
+        title: 'Field visit done',
+        body: `The field officer has visited ${n.memberName} about ${loan}. It is ready for your appraisal.`,
+        action: 'Open the proposal',
+        to: `/applications/${n.applicationId}`,
+        later: 'Later',
+        icon: MapPin,
+        tone: 'accent',
+      };
+    case 'DIRECT':
+      return {
+        title: 'A member applied to the federation',
+        body: `${n.memberName} asked the federation for ${loan}. It climbs through the society first, and reaches you on its own once the society approves it.`,
+        action: 'See funding requests',
+        to: '/apex/requests',
+        later: 'Close',
+        icon: Landmark,
+        tone: 'accent',
+      };
     case 'PROPOSAL':
       return {
         title: 'New loan proposal',

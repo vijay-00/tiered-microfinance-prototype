@@ -1,17 +1,22 @@
-import { Check, Info } from 'lucide-react';
+import { Check, Info, Landmark, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { DocumentSlots } from '@/components/Documents';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { Field, Input, NativeSelect } from '@/components/ui/form';
 import { formatBps, formatPaise, parseRupees } from '@/domain/money';
+import { needsFieldVisit } from '@/domain/machines';
 import { quoteLoan } from '@/domain/origination';
-import { loanPurposes, type LoanPurpose } from '@/domain/types';
+import { loanTypes, type ApplicationRoute, type AttachedDocument, type LoanPurpose } from '@/domain/types';
 import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
 import { Money, PageHead } from '@/features/apex/glass';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
 import { selectCurrentUser } from '@/store/selectors';
+
+/** What a member attaches when applying. Mock files: only the name and size are kept. */
+const REQUIRED_DOCUMENTS = ['Aadhaar card', 'PAN card', 'Bank passbook', 'Income proof', 'Passport photo'];
 
 const TENURES = [6, 9, 12, 15, 18, 24, 30, 36].filter((m) => m >= MIN_TENURE_MONTHS && m <= MAX_TENURE_MONTHS);
 
@@ -35,7 +40,10 @@ export function MemberApplyPage() {
 
   const [amountText, setAmountText] = useState('');
   const [tenure, setTenure] = useState(12);
-  const [purpose, setPurpose] = useState<LoanPurpose>('TRADE');
+  const [purpose, setPurpose] = useState<LoanPurpose>('CONSTRUCTION');
+  const [route, setRoute] = useState<ApplicationRoute>('SOCIETY');
+  const [documents, setDocuments] = useState<AttachedDocument[]>([]);
+  const federation = useAppStore((s) => s.world.federation);
   const [touched, setTouched] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -51,13 +59,15 @@ export function MemberApplyPage() {
         ? `Between ${formatPaise(policy.minTicket)} and ${formatPaise(policy.maxTicket)}.`
         : undefined;
   const quote = amount !== undefined && !amountError ? quoteLoan(amount, tenure, policy.retailRateBps, clock) : undefined;
+  const documentsMissing = documents.length < REQUIRED_DOCUMENTS.length;
+  const visitNeeded = needsFieldVisit(purpose, policy);
 
   async function submit() {
     setTouched(true);
-    if (amountError || amount === undefined) return;
+    if (amountError || amount === undefined || documentsMissing) return;
     setPending(true);
     setError(undefined);
-    const result = await repositories.applications.submit({ memberId, requestedAmount: amount, requestedTenureMonths: tenure, purpose });
+    const result = await repositories.applications.submit({ memberId, requestedAmount: amount, requestedTenureMonths: tenure, purpose, route, documents });
     setPending(false);
     if (result.ok) navigate('/me', { state: { applied: result.applicationId } });
     else setError(result.error);
@@ -91,6 +101,21 @@ export function MemberApplyPage() {
                 void submit();
               }}
             >
+              <div className="g-field">
+                <span className="g-lbl">Apply to</span>
+                <div className="g-routes" role="radiogroup" aria-label="Apply to">
+                  <button type="button" role="radio" aria-checked={route === 'SOCIETY'} className="g-route" onClick={() => setRoute('SOCIETY')}>
+                    <Users aria-hidden />
+                    <b>My society</b>
+                    <small>{society?.name}. Goes for funding in a batch with other members.</small>
+                  </button>
+                  <button type="button" role="radio" aria-checked={route === 'FEDERATION'} className="g-route" onClick={() => setRoute('FEDERATION')}>
+                    <Landmark aria-hidden />
+                    <b>The federation</b>
+                    <small>{federation.name}. Your society still checks it, then it goes up on its own.</small>
+                  </button>
+                </div>
+              </div>
               <Field
                 label="How much do you need? (₹)"
                 error={touched || amountText ? amountError : undefined}
@@ -120,10 +145,10 @@ export function MemberApplyPage() {
                     </NativeSelect>
                   )}
                 </Field>
-                <Field label="What is it for?">
+                <Field label="Loan type" hint={visitNeeded ? 'A field officer visits you for this loan.' : 'No field visit needed for this loan.'}>
                   {({ id }) => (
                     <NativeSelect id={id} value={purpose} onChange={(e) => setPurpose(e.target.value as LoanPurpose)}>
-                      {loanPurposes.map((p) => (
+                      {loanTypes.map((p) => (
                         <option key={p} value={p}>
                           {PURPOSE_LABEL[p]}
                         </option>
@@ -132,13 +157,22 @@ export function MemberApplyPage() {
                   )}
                 </Field>
               </div>
+              <div className="g-field">
+                <span className="g-lbl">Documents</span>
+                <DocumentSlots slots={REQUIRED_DOCUMENTS} value={documents} onChange={setDocuments} invalid={touched && documentsMissing} />
+                {touched && documentsMissing ? (
+                  <p role="alert" className="g-error m-0">
+                    Attach every document to send the application.
+                  </p>
+                ) : null}
+              </div>
               {error ? (
                 <p role="alert" className="g-error m-0">
                   {error}
                 </p>
               ) : null}
               <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--g-line2)' }}>
-                <span className="g-sub m-0">The society will appraise it.</span>
+                <span className="g-sub m-0">{visitNeeded ? 'The field officer will visit you next.' : 'The society will appraise it next.'}</span>
                 <button type="submit" className="g-btn pri" disabled={pending}>
                   <Check aria-hidden /> {pending ? 'Sending…' : 'Send application'}
                 </button>

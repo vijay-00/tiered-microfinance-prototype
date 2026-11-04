@@ -453,3 +453,50 @@ select.ui-select { padding-right: 28px; background-position: right 8px center; }
   select.ui-control option::checkmark, select.ui-select option::checkmark { order: 1; margin-left: auto; color: #0f766e; }
   select.ui-control option:disabled, select.ui-select option:disabled { color: #8a979d; cursor: default; }
 }
+
+/* Route choice on an application. */
+.g-routes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.g-route { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.7); border: 1.5px solid var(--g-line2); color: var(--g-ink); cursor: pointer; }
+.g-route svg { width: 18px; height: 18px; color: var(--g-muted); }
+.g-route b { font-weight: 700; font-size: 14px; }
+.g-route small { font-size: 12px; line-height: 1.4; color: var(--g-muted); }
+.g-route[aria-checked='true'] { border-color: var(--g-accent); background: var(--g-accent-soft); box-shadow: 0 0 0 3px var(--g-accent-soft); }
+.g-route[aria-checked='true'] svg { color: var(--g-accent); }
+.g-route:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 2px; }
+
+/* Documents. */
+.g-docs { display: flex; flex-direction: column; gap: 8px; }
+.g-docs-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--g-muted); }
+.g-doc { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--g-line2); }
+.g-doc.on { background: var(--g-good-soft); border-color: transparent; }
+.g-doc.miss { border-color: var(--g-bad); }
+.g-doc-icon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: rgba(255, 255, 255, 0.85); color: var(--g-muted); }
+.g-doc.on .g-doc-icon { color: var(--g-good); }
+.g-doc-icon svg { width: 15px; height: 15px; }
+.g-doc-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.g-doc-name b { font-size: 13px; font-weight: 600; }
+.g-doc-name small { font-size: 12px; color: var(--g-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-docs label.g-btn { cursor: pointer; }
+
+/* Geo-tag. */
+.g-geo { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 10px; border-radius: 16px; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--g-line2); }
+.g-geo-map { position: relative; flex: none; width: 132px; height: 96px; border-radius: 12px; overflow: hidden; background-color: #e3efe9; background-image: linear-gradient(rgba(15, 118, 110, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 118, 110, 0.1) 1px, transparent 1px); background-size: 18px 18px; }
+.g-geo-road { position: absolute; background: rgba(255, 255, 255, 0.95); box-shadow: 0 0 0 1px rgba(15, 40, 50, 0.08); }
+.g-geo-road.a { left: -10%; right: -10%; top: 62%; height: 7px; transform: rotate(-9deg); }
+.g-geo-road.b { top: -10%; bottom: -10%; left: 30%; width: 6px; transform: rotate(12deg); }
+.g-geo-pulse { position: absolute; left: 50%; top: 50%; width: 42px; height: 42px; margin: -21px 0 0 -21px; border-radius: 50%; background: rgba(15, 118, 110, 0.18); }
+.g-geo-pin { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -24px 0 0 -13px; color: var(--g-accent); fill: #fff; }
+.g-geo-info { flex: 1; min-width: 190px; display: flex; flex-direction: column; gap: 4px; }
+.g-geo-info b { font-weight: 700; }
+
+/* UPI payment. */
+[role='dialog'].g-pay { max-width: 400px; }
+.g-pay-amount { text-align: center; font-size: 34px; font-weight: 800; letter-spacing: -0.03em; margin: 14px 0 6px; }
+.g-pay-tick { display: grid; place-items: center; width: 68px; height: 68px; margin: 4px auto 0; border-radius: 50%; background: var(--g-good); color: #fff; animation: g-pop 0.32s cubic-bezier(0.2, 1.4, 0.4, 1); }
+.g-pay-tick svg { width: 36px; height: 36px; stroke-width: 3; }
+.g-pay-spin { display: block; width: 56px; height: 56px; margin: 6px auto 0; border-radius: 50%; border: 5px solid var(--g-accent-soft); border-top-color: var(--g-accent); animation: g-spin 0.9s linear infinite; }
+.g-pay-note { margin: 14px 0 0 !important; text-align: center; font-size: 11px !important; color: var(--g-muted); }
+@keyframes g-spin { to { transform: rotate(360deg); } }
+@keyframes g-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (max-width: 640px) { .g-routes { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .g-pay-tick { animation: none; } }

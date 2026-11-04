@@ -37,9 +37,16 @@ export const loanPurposes = [
   'EDUCATION',
   'HOUSING',
   'CONSUMPTION',
+  'CONSTRUCTION',
+  'MORTGAGE',
+  'JEWEL',
+  'FD',
 ] as const;
 export const loanPurposeSchema = z.enum(loanPurposes);
 export type LoanPurpose = z.infer<typeof loanPurposeSchema>;
+
+/** The loans a society gives today. The earlier purposes stay valid for the seed's history. */
+export const loanTypes = ['CONSTRUCTION', 'MORTGAGE', 'JEWEL', 'FD'] as const satisfies readonly LoanPurpose[];
 
 export const applicationStatuses = [
   'DRAFT',
@@ -125,6 +132,10 @@ export const policySchema = z.object({
   minTicket: paiseSchema.nonnegative(),
   maxTicket: paiseSchema.nonnegative(),
   officerApprovalLimit: paiseSchema.nonnegative(),
+  /** Above this the General Manager sanctions, not the apex officer. Absent: no such limit. */
+  apexSanctionLimit: paiseSchema.nonnegative().optional(),
+  /** A field officer must visit before the society appraises, and the officer no longer decides. */
+  fieldVisitRequired: z.boolean().optional(),
   graceDays: z.number().int().min(0),
   reconciliationPolicy: reconciliationPolicySchema,
   accrualEnabled: z.boolean(),
@@ -322,7 +333,7 @@ export type JournalEntry = z.infer<typeof journalEntrySchema>;
 // Organisation, people and origination
 // ---------------------------------------------------------------------------
 
-export const roles = ['MEMBER', 'LOAN_OFFICER', 'SECRETARY', 'APEX_OFFICER', 'AUDITOR'] as const;
+export const roles = ['MEMBER', 'LOAN_OFFICER', 'SECRETARY', 'APEX_OFFICER', 'GENERAL_MANAGER', 'REGISTRAR', 'AUDITOR'] as const;
 export const roleSchema = z.enum(roles);
 export type Role = z.infer<typeof roleSchema>;
 
@@ -376,6 +387,32 @@ export const memberSchema = z.object({
 });
 export type Member = z.infer<typeof memberSchema>;
 
+/** A document on file. Only its name and size: a demo keeps no file contents. */
+export const attachedDocumentSchema = z.object({
+  label: z.string().min(1),
+  fileName: z.string().min(1),
+  size: z.number().int().nonnegative(),
+});
+export type AttachedDocument = z.infer<typeof attachedDocumentSchema>;
+
+/** Where a member points an application. Either way it climbs every rung through the society. */
+export const applicationRoutes = ['SOCIETY', 'FEDERATION'] as const;
+export const applicationRouteSchema = z.enum(applicationRoutes);
+export type ApplicationRoute = z.infer<typeof applicationRouteSchema>;
+
+export const fieldVisitSchema = z.object({
+  officerId: idSchema,
+  on: isoDateSchema,
+  lat: z.number(),
+  lng: z.number(),
+  accuracyMetres: z.number().nonnegative(),
+  /** The device's own GPS, or the demo's stand-in near the member's village. */
+  locationSource: z.enum(['GPS', 'DEMO']),
+  notes: z.string(),
+  documents: z.array(attachedDocumentSchema),
+});
+export type FieldVisit = z.infer<typeof fieldVisitSchema>;
+
 export const loanApplicationSchema = z.object({
   id: idSchema,
   memberId: idSchema,
@@ -411,6 +448,9 @@ export const loanApplicationSchema = z.object({
   poolId: idSchema.optional(),
   /** Made by the member themselves, rather than taken by the officer or the secretary. */
   selfApplied: z.boolean().optional(),
+  route: applicationRouteSchema.optional(),
+  documents: z.array(attachedDocumentSchema).optional(),
+  fieldVisit: fieldVisitSchema.optional(),
 });
 export type LoanApplication = z.infer<typeof loanApplicationSchema>;
 

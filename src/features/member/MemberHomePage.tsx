@@ -1,4 +1,5 @@
-import { Check, ChevronRight, CircleAlert, Clock, FilePlus2, X } from 'lucide-react';
+import { Check, ChevronRight, CircleAlert, Clock, FilePlus2, Landmark, Smartphone, X } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { formatBps } from '@/domain/money';
@@ -10,6 +11,7 @@ import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
 import { selectCurrentUser } from '@/store/selectors';
+import { MemberPayDialog } from './MemberPayDialog';
 
 /**
  * The member's own view. It shows the retail rate and nothing else about
@@ -25,6 +27,8 @@ export function MemberHomePage() {
   const { data: applications } = useQuery(`member-applications:${memberId}:${version}`, () =>
     repositories.member.getApplications(memberId),
   );
+  const [paying, setPaying] = useState<string>();
+  const payingLoan = data?.find((l) => l.loanId === paying);
   const justApplied = (useLocation().state as { applied?: string } | null)?.applied;
   // In progress, or turned down in the last while; once paid out, an application is a loan below.
   const tracked = (applications ?? []).filter((a) => a.outcome !== 'PAID_OUT').slice(0, 2);
@@ -121,22 +125,39 @@ export function MemberHomePage() {
                   </div>
                 ) : null}
               </dl>
-              <div className="g-foot mt-auto">
+              <div className="g-foot mt-auto flex-wrap">
                 <span>Paid out {formatDate(loan.disbursedOn)}</span>
-                <Link to={`/me/loans/${loan.loanId}`} className="g-btn sm">
-                  Your schedule and payments <ChevronRight aria-hidden />
-                </Link>
+                <span className="flex flex-wrap gap-2">
+                  <Link to={`/me/loans/${loan.loanId}`} className="g-btn sm">
+                    Your schedule and payments <ChevronRight aria-hidden />
+                  </Link>
+                  {loan.status === 'ACTIVE' ? (
+                    <button type="button" className="g-btn pri sm" onClick={() => setPaying(loan.loanId)}>
+                      <Smartphone aria-hidden /> Pay now
+                    </button>
+                  ) : null}
+                </span>
               </div>
             </section>
           ))}
         </div>
       )}
+      {payingLoan ? (
+        <MemberPayDialog
+          loanId={payingLoan.loanId}
+          dueNow={payingLoan.dueNow}
+          nextInstalment={payingLoan.nextInstalment?.amount}
+          emi={payingLoan.emi}
+          onClose={() => setPaying(undefined)}
+        />
+      ) : null}
     </>
   );
 }
 
 const STEP_LABEL: Record<ApplicationStepKey, string> = {
   APPLIED: 'Applied',
+  VISITED: 'Field officer visited',
   APPRAISED: 'Appraised by the society',
   DECIDED: 'Approved by the society',
   SENT: 'Sent for funding',
@@ -146,6 +167,7 @@ const STEP_LABEL: Record<ApplicationStepKey, string> = {
 
 const NEXT_LABEL: Record<ApplicationStepKey, string> = {
   APPLIED: 'You applied',
+  VISITED: 'The field officer visits you',
   APPRAISED: 'The society appraises it',
   DECIDED: 'The society decides',
   SENT: 'The society sends it, with others, for funding',
@@ -160,8 +182,11 @@ function Tracker({ application: a, fresh }: { application: MemberApplicationView
     <section className="g-card g-blur" aria-label="Your application">
       <div className="g-cardhead flex-wrap">
         <span className="g-lbl">
-          Your application · <Money paise={a.requestedAmount} /> for {PURPOSE_LABEL[a.purpose].toLowerCase()} over {a.requestedTenureMonths} months
+          Your application · <Money paise={a.requestedAmount} /> {PURPOSE_LABEL[a.purpose]} over {a.requestedTenureMonths} months
         </span>
+        {a.route === 'FEDERATION' ? (
+          <Pill tone="accent" icon={<Landmark aria-hidden />}>To the federation</Pill>
+        ) : null}
         {rejected ? (
           <Pill tone="bad" icon={<X aria-hidden />}>Not approved</Pill>
         ) : fresh ? (

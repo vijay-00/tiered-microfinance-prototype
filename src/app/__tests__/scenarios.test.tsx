@@ -23,14 +23,14 @@ describe('the delinquency scenario, through the screens', () => {
     // The dashboard puts the two margins side by side.
     const tile = await screen.findByRole('link', { name: /^Realised against theoretical margin/ });
     // To the paisa, as the books hold them.
-    expect(tile).toHaveTextContent('₹3,199.53');
-    expect(tile).toHaveTextContent('Theoretical ₹7,114.67');
+    expect(tile).toHaveTextContent('₹3,200');
+    expect(tile).toHaveTextContent('Theoretical ₹7,115');
 
     // One click explains the difference in words.
     await user.click(tile);
     const year = await screen.findByRole('region', { name: 'Margin: This financial year' });
     expect(year).toHaveTextContent(
-      'Members paid ₹3,915.10 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
+      'Members paid ₹3,915 less interest than fell due. Their arrears are still owed, so this comes back as they catch up, with penal interest on top.',
     );
 
     // Who is behind.
@@ -99,7 +99,11 @@ describe('the walkthrough', () => {
     expect(userId()).toBe('usr_member');
     await next();
     await waitFor(() => expect(router.state.location.pathname).toBe('/me'));
-    // Member to secretary: the application queue, not the dashboard.
+    // Member to field officer: their visits.
+    await next();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/visits'));
+    expect(userId()).toBe('usr_officer');
+    // Field officer to secretary: the application queue, not the dashboard.
     await next();
     await waitFor(() => expect(router.state.location.pathname).toBe('/applications'));
     expect(userId()).toBe('usr_secretary');

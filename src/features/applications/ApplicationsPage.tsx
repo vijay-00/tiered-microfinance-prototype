@@ -80,7 +80,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
         <tr>
           <TH>Applicant</TH>
           <TH>Applied</TH>
-          <TH>Purpose</TH>
+          <TH>Loan type</TH>
           <TH numeric>Amount</TH>
           <TH numeric>Tenure</TH>
           <TH numeric>EMI</TH>

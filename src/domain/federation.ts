@@ -2,9 +2,11 @@ import { addMonthsISO, compareISO, daysBetween, financialYearStart, startOfMonth
 import { generateSchedule, MONTHS_PER_YEAR } from './interest';
 import { mulRate, sum } from './money';
 import {
+  directApplications,
   fundingRequests,
   proRataRescope,
   societyTrackRecord,
+  type DirectApplication,
   type FundingRequest,
   type SocietyTrackRecord,
 } from './origination';
@@ -179,6 +181,8 @@ export interface FundingDecision {
 
 export interface FundingDesk {
   readonly requests: readonly FundingRequest[];
+  /** Addressed to the federation, still climbing through the society. */
+  readonly climbing: readonly DirectApplication[];
   /** Newest first. */
   readonly decided: readonly FundingDecision[];
   readonly stats: {
@@ -213,6 +217,7 @@ export function fundingDesk(state: WorldState): FundingDesk {
   const timed = decided.filter((d) => d.took !== undefined);
   return {
     requests,
+    climbing: directApplications(state),
     decided,
     stats: {
       requested: sum(requests.map((r) => r.pool.requestedAmount)),

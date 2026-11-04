@@ -121,7 +121,7 @@ export function parseSeed(raw: {
       problems.push(`member login ${u.id} is not linked to a member`);
     }
     if (u.role === 'APEX_OFFICER' && u.societyId) problems.push(`apex officer ${u.id} cannot belong to a society`);
-    if (u.role !== 'APEX_OFFICER' && !u.societyId) problems.push(`user ${u.id} needs a society`);
+    if (!['APEX_OFFICER', 'GENERAL_MANAGER', 'REGISTRAR'].includes(u.role) && !u.societyId) problems.push(`user ${u.id} needs a society`);
   }
   for (const a of applications) {
     if (memberSociety.get(a.memberId) !== a.societyId) {
@@ -247,6 +247,10 @@ export function cleanStart(
 
   const clean: WorldBase = {
     ...base,
+    // The demo runs the full ladder: a field visit before appraisal, and a
+    // limit above which the General Manager sanctions. The seed's own history
+    // predates both, so they are switched on here and not in the policy.
+    policy: { ...base.policy, fieldVisitRequired: true, apexSanctionLimit: 10_000_000 }, // Rs 1,00,000
     societies: [society],
     users: [...staff, ...memberLogins],
     members,

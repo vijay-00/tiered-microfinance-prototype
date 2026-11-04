@@ -47,6 +47,9 @@ export const SCREENS: readonly Screen[] = [
   { path: '/apex/requests/:poolId', tier: 'apex', phase: 4, title: 'Review and sanction', summary: 'Batch composition, the society track record, the terms editor, and sanction or decline.' },
   { path: '/apex/societies', tier: 'apex', phase: 4, title: 'Societies', summary: 'Credit limit, utilisation and repayment record for each society.' },
   { path: '/apex/societies/:societyId', tier: 'apex', phase: 4, title: 'Society detail', summary: 'Tranche history, remittance punctuality and current exposure.' },
+  // Field
+  { path: '/visits', tier: 'field', phase: 6, title: 'Field visits', summary: 'Applications waiting for the officer to visit the member, and visits already made.' },
+  { path: '/visits/:applicationId', tier: 'field', phase: 6, title: 'Field visit', summary: 'Capture the geo-tag, upload documents and record the visit.' },
   // Member
   { path: '/me', tier: 'member', phase: 2, title: 'My loans', summary: 'What you owe, what you have paid, and your next instalment.' },
   { path: '/me/apply', tier: 'member', phase: 6, title: 'Apply for a loan', summary: 'The member applies for themselves and sees the instalment as they type; the application joins the society queue.' },

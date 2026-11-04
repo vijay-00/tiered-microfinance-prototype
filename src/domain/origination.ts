@@ -530,6 +530,8 @@ export interface FundingRequest {
   readonly society: Society;
   readonly members: number;
   readonly waitingDays: number;
+  /** A member asked for the federation directly, so it came up on its own. */
+  readonly direct: boolean;
 }
 
 /** Pools submitted to the federation and not yet decided, oldest first. */
@@ -541,8 +543,26 @@ export function fundingRequests(state: WorldState): FundingRequest[] {
       society: societyOf(state, pool.societyId),
       members: pool.applicationIds.length,
       waitingDays: pool.submittedOn ? Math.max(0, daysBetween(pool.submittedOn, state.clock)) : 0,
+      direct: state.applications.some((a) => pool.applicationIds.includes(a.id) && a.route === 'FEDERATION'),
     }))
     .sort((a, b) => b.waitingDays - a.waitingDays);
+}
+
+/** Applications a member addressed to the federation, still climbing through the society. */
+export interface DirectApplication {
+  readonly application: LoanApplication;
+  readonly memberName: string;
+  readonly society: Society;
+}
+
+export function directApplications(state: WorldState): DirectApplication[] {
+  return state.applications
+    .filter((a) => a.route === 'FEDERATION' && !a.poolId && (a.status === 'SUBMITTED' || a.status === 'UNDER_APPRAISAL'))
+    .map((application) => ({
+      application,
+      memberName: state.members.find((m) => m.id === application.memberId)?.name ?? application.memberId,
+      society: societyOf(state, application.societyId),
+    }));
 }
 
 export interface PoolReview {

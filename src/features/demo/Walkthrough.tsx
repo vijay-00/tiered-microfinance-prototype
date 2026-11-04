@@ -41,47 +41,47 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
     steps: [
       {
         title: 'The member applies',
-        body: 'Veerappan Pandian, a member, applies directly. Type an amount, say 40000, and the monthly instalment appears as you type, in whole rupees. Choose Send application.',
+        body: 'Veerappan Pandian, a member, applies directly. Choose where it goes, the society or the federation, pick Mortgage Loan, type an amount, say 40000, and the monthly instalment appears as you type. Attach the documents (Use sample files is quickest) and Send application.',
         go: { scenario: 'A', userId: 'usr_member', path: '/me/apply' },
       },
       {
         title: 'The member can follow it',
-        body: 'The member’s home screen now tracks the application, step by step, from applying to being paid out. It shows the retail rate and nothing of the federation’s pricing.',
+        body: 'The member’s home screen now tracks the application, step by step, from applying to being paid out.',
         go: { userId: 'usr_member', path: '/me' },
       },
       {
+        title: 'The field officer visits',
+        body: 'Construction and mortgage loans need a field visit; jewel and FD loans skip this step. The loan officer gets a pop-up: a new proposal. Start the visit, Capture location for the geo-tag, add a photo or document, and Complete visit. The appraisal stays closed until this is done.',
+        go: { userId: 'usr_officer', path: '/visits' },
+      },
+      {
         title: 'The secretary appraises and approves',
-        body: 'Open Veerappan Pandian’s application in the queue. Enter the monthly income, 40000, to see the repayment burden against the 50% cap, and Record appraisal. Then Approve it.',
+        body: 'The secretary hears the visit is done, and sees the member’s documents and the visit’s geo-tag on the application. Enter the monthly income, 40000, to see the repayment burden against the 50% cap, Record appraisal, and Approve it.',
         go: { userId: 'usr_secretary', path: '/applications' },
       },
       {
-        title: 'The secretary batches and submits',
-        body: 'Approved applications go to the federation in a batch of one to twenty. Choose Start a batch, tick Veerappan Pandian’s application and any others you want to send, and Submit to the federation. The batch shows its wholesale cost and the society’s 2% spread as you pick.',
+        title: 'Into a batch, up to the federation',
+        body: 'Approved applications go up in a batch of one to twenty: choose New batch, tick the application and Submit to the federation. An application the member addressed to the federation skips this step: it goes up on its own the moment it is approved.',
         go: { userId: 'usr_secretary', path: '/pools' },
       },
       {
         title: 'The federation sanctions',
-        body: 'The apex officer opens the society’s new batch, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it at 9.5%.',
+        body: 'The apex officer opens the batch, checks the society’s track record and the purpose mix, chooses Begin review, and sanctions it. Above ₹1,00,000 the General Manager sanctions instead: switch to that role to do it. The Assistant Registrar can look at everything here and change nothing.',
         go: { userId: 'usr_apex', path: '/apex/requests' },
       },
       {
         title: 'The society draws down and pays out',
-        body: 'Open the new sanction and choose Draw down and disburse. One drawdown, and a disbursement for each member in the batch, post to the ledger. Each loan’s instalments fall due on the 1st, the first carrying interest for the days before its first full month.',
+        body: 'Open the new sanction and choose Draw down and disburse. One drawdown, and a disbursement for each member in the batch, post to the ledger, and each loan gets its schedule.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {
-        title: 'The loan is paid out',
-        body: 'The application has become a loan: what is still to repay, the instalment and the date of the first one.',
+        title: 'The member pays by UPI',
+        body: 'Choose Pay now, take the next instalment or type any amount, and approve it. Payment successful: the receipt is real to the app, and the secretary gets a pop-up. Open Collections, the ledger or any dashboard to see it land.',
         go: { userId: 'usr_member', path: '/me' },
       },
       {
-        title: 'A month on, members repay',
-        body: 'Use Next due date in the demo bar until the new loans’ first instalments are due today, on the 1st, then Record all due today. Each payment is split into what goes on to the federation and what the society keeps.',
-        go: { userId: 'usr_secretary', path: '/collections' },
-      },
-      {
         title: 'The society remits',
-        body: 'Open the sanction and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
+        body: 'When the instalment falls due, open the sanction and Record remittance. The federation’s interest at 9.5% and the principal members repaid go up; the society keeps the 2% spread.',
         go: { userId: 'usr_secretary', path: '/tranches' },
       },
       {

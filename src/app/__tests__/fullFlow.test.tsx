@@ -28,6 +28,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     await waitFor(() => expect(router.state.location.pathname).toBe('/me'));
     await user.click(within(sidebar()).getByRole('link', { name: 'Apply for a loan' }));
     await user.type(await screen.findByLabelText('How much do you need? (₹)'), '40000');
+    await user.click(screen.getByRole('button', { name: 'Use sample files' }));
     const quote = screen.getByRole('region', { name: 'What you would pay' });
     expect(quote).toHaveTextContent(/₹[\d,]+ a month/);
     await user.click(screen.getByRole('button', { name: 'Send application' }));
@@ -43,7 +44,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     // A pop-up tells the secretary of the new proposal, and opens it.
     await viewAs(user, 'Society Secretary');
     const proposal = await screen.findByRole('dialog', { name: 'New loan proposal' });
-    expect(proposal).toHaveTextContent('Veerappan Pandian has applied for ₹40,000 for trade over 12 months.');
+    expect(proposal).toHaveTextContent('Veerappan Pandian has applied for a ₹40,000 Construction Loan over 12 months.');
     await user.click(within(proposal).getByRole('button', { name: 'Open the proposal' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/applications/app_070'));
     await user.type(await screen.findByLabelText('Monthly income (₹)'), '40000');
@@ -56,7 +57,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     // A pop-up tells the member it is approved; it is waiting to go for funding.
     await viewAs(user, 'Member');
     const approved = await screen.findByRole('dialog', { name: 'Your loan is approved' });
-    expect(approved).toHaveTextContent('The society approved ₹40,000 for trade over 12 months.');
+    expect(approved).toHaveTextContent('The society approved a ₹40,000 Construction Loan over 12 months.');
     await user.click(within(approved).getByRole('button', { name: 'See where it stands' }));
     expect(await tracker()).toHaveTextContent('Approved for ₹40,000.');
     expect(await tracker()).toHaveTextContent('Next: the society sends it, with others, for funding.');
@@ -176,6 +177,7 @@ describe('pop-ups about a member’s application', () => {
     await viewAs(user, 'Member');
     await user.click(await within(await screen.findByRole('navigation', { name: 'Main' })).findByRole('link', { name: 'Apply for a loan' }));
     await user.type(await screen.findByLabelText('How much do you need? (₹)'), '25000');
+    await user.click(screen.getByRole('button', { name: 'Use sample files' }));
     await user.click(screen.getByRole('button', { name: 'Send application' }));
     await screen.findByRole('region', { name: 'Your application' });
 
@@ -216,12 +218,12 @@ describe('pop-ups about a member’s application', () => {
 });
 
 describe('the roles the demo offers', () => {
-  it('has no loan officer: a member applies for themselves, or the society applies for them', async () => {
+  it('offers every rung of the ladder, from the member to the registrar', async () => {
     renderApp('/dashboard');
     const options = within(within(demoBar()).getByRole('combobox'))
       .getAllByRole('option')
       .map((o) => o.textContent);
-    expect(options).toEqual(['Society Secretary', 'Apex Officer', 'Member', 'Auditor']);
+    expect(options).toEqual(['Society Secretary', 'Loan Officer', 'Apex Officer', 'General Manager', 'Assistant Registrar', 'Member', 'Auditor']);
   });
 });
 

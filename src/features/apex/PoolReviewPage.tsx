@@ -350,7 +350,7 @@ function Composition({ review }: { review: PoolReview }) {
             <thead>
               <tr>
                 <th scope="col">Member</th>
-                <th scope="col">Purpose</th>
+                <th scope="col">Loan type</th>
                 <th scope="col" className="r">Amount</th>
                 <th scope="col" className="r">Tenure</th>
                 <th scope="col" className="r">EMI</th>
@@ -419,6 +419,7 @@ function parseRate(text: string): number | undefined {
 
 function Terms(props: { review: PoolReview; name: string; onAmount: (paise: number | undefined) => void }) {
   const { review, name } = props;
+  const user = useAppStore(selectCurrentUser);
   const repositories = useRepositories();
   const world = useAppStore((s) => s.world);
   const policy = world.policy;
@@ -459,7 +460,9 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
     !Number.isInteger(months) || months < pool.requestedTenureMonths || months > MAX_TENURE_MONTHS
       ? `Between ${pool.requestedTenureMonths} months, the longest loan, and ${MAX_TENURE_MONTHS}.`
       : undefined;
-  const valid = !amountError && !rateError && !tenureError;
+  const limit = policy.apexSanctionLimit;
+  const needsGm = limit !== undefined && amount !== undefined && amount > limit && user.role !== 'GENERAL_MANAGER';
+  const valid = !amountError && !rateError && !tenureError && !needsGm;
   const shortBy = amount !== undefined && !amountError ? pool.requestedAmount - amount : 0;
 
   // Worked out as the terms change, the way the society's own previews are.
@@ -543,6 +546,16 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
             </p>
           ) : null}
         </div>
+
+        {needsGm ? (
+          <div className="g-callout warn">
+            <TriangleAlert aria-hidden />
+            <div>
+              <b>Above your {formatPaise(limit!)} limit</b>
+              <div>The General Manager sanctions this one, and has been told. You can still decline it.</div>
+            </div>
+          </div>
+        ) : null}
 
         {shortBy > 0 ? (
           <div className="g-callout warn">

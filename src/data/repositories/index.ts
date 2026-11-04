@@ -80,20 +80,25 @@ import {
 import type { ID, ISODate, Paise } from '@/domain/types';
 import {
   apexExposure,
+  fieldVisit,
+  fieldVisits,
   memberApplications,
   memberLoans,
   societySummary,
   type ExposureRow,
   type MemberApplicationView,
+  type VisitRow,
   type MemberLoanView,
   type SocietySummary,
 } from '@/domain/views';
+import { can } from '@/domain/permissions';
 import type { AppStore } from '@/store/appStore';
 import type { WorldEvent } from '@/domain/world';
 import {
   applicationEvent,
   appraisalEvent,
   decisionEvent,
+  fieldVisitEvent,
   drawAndDisburseEvents,
   dueTodayEvents,
   paymentEvent,
@@ -103,6 +108,7 @@ import {
   savePoolEvents,
   type AppraiseInput,
   type DecideInput,
+  type FieldVisitInput,
   type DrawAndDisburseInput,
   type RecordPaymentInput,
   type RecordRemittanceInput,
@@ -197,6 +203,11 @@ export interface Repositories {
     save(input: SavePoolInput, submit: boolean): Promise<CommandResult<{ poolId: ID }>>;
     /** Fits an under-sanctioned pool to its sanction, before any drawdown. */
     rescope(input: RescopeInput): Promise<CommandResult>;
+  };
+  visits: {
+    list(societyId: ID): Promise<{ due: VisitRow[]; done: VisitRow[] }>;
+    get(applicationId: ID): Promise<VisitRow>;
+    record(input: FieldVisitInput): Promise<CommandResult>;
   };
   member: {
     getLoans(memberId: ID): Promise<MemberLoanView[]>;
@@ -312,7 +323,19 @@ export function createRepositories(store: AppStore, latency: Latency = DEFAULT_L
           return { events: [event], result: { applicationId: event.applicationId } };
         }),
       appraise: (input) => command(() => ({ events: [appraisalEvent(world(), input, actor())], result: {} })),
-      decide: (input) => command(() => ({ events: [decisionEvent(world(), input, actor())], result: {} })),
+      // A member who asked for the federation has already been through the
+      // society by now: on approval the secretary's yes sends it up on its own.
+      decide: (input) =>
+        command(() => {
+          const events = [decisionEvent(world(), input, actor())];
+          const application = world().applications.find((a) => a.id === input.applicationId);
+          const user = world().users.find((u) => u.id === actor());
+          if (input.outcome === 'APPROVED' && application?.route === 'FEDERATION' && user && can(user.role, 'MANAGE_POOL')) {
+            const up = savePoolEvents(world(), { societyId: application.societyId, applicationIds: [application.id] }, actor(), true);
+            events.push(...up.events);
+          }
+          return { events, result: {} };
+        }),
     },
     pools: {
       list: (societyId) => respond(() => poolList(world(), societyId)),
@@ -324,6 +347,11 @@ export function createRepositories(store: AppStore, latency: Latency = DEFAULT_L
           return { events, result: { poolId } };
         }),
       rescope: (input) => command(() => ({ events: [rescopeEvent(world(), input, actor())], result: {} })),
+    },
+    visits: {
+      list: (societyId) => respond(() => fieldVisits(world(), societyId)),
+      get: (applicationId) => respond(() => fieldVisit(world(), applicationId)),
+      record: (input) => command(() => ({ events: [fieldVisitEvent(world(), input, actor())], result: {} })),
     },
     member: {
       getLoans: (memberId) => respond(() => memberLoans(world(), memberId)),

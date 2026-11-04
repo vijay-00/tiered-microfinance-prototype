@@ -3,6 +3,7 @@ import { forwardRef, Fragment, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { CrumbSlot } from '@/components/Breadcrumb';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { needsFieldVisit } from '@/domain/machines';
 import { stageOf } from '@/domain/origination';
 import type { WorldState } from '@/domain/world';
 import { Avatar } from '@/features/apex/glass';
@@ -64,9 +65,14 @@ function useWaiting(tier: Tier): Record<string, number> {
       Object.values(s.world.tranches).filter((t) => t.tranche.societyId === societyId && t.tranche.status === 'SANCTIONED')
         .length,
   );
-  return tier === 'apex'
-    ? { '/apex/requests': requests }
-    : { '/applications': applications, '/tranches': toDraw };
+  const visits = useAppStore(
+    (s) =>
+      s.world.applications.filter(
+        (a) => a.societyId === societyId && a.status === 'SUBMITTED' && !a.fieldVisit && needsFieldVisit(a.purpose, s.world.policy),
+      ).length,
+  );
+  if (tier === 'field') return { '/visits': visits };
+  return tier === 'apex' ? { '/apex/requests': requests } : { '/applications': applications, '/tranches': toDraw };
 }
 
 function GlassSidebar({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {

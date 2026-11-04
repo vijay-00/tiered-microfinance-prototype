@@ -49,6 +49,18 @@
     "title": "Credit Manager"
   },
   {
+    "id": "usr_gm",
+    "name": "Arul Vasudevan",
+    "role": "GENERAL_MANAGER",
+    "title": "General Manager"
+  },
+  {
+    "id": "usr_registrar",
+    "name": "Kavitha Elangovan",
+    "role": "REGISTRAR",
+    "title": "Assistant Registrar"
+  },
+  {
     "id": "usr_auditor",
     "name": "R. N. Subramanian",
     "role": "AUDITOR",

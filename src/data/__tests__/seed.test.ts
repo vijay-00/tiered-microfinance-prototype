@@ -52,10 +52,12 @@ describe('the demo’s clean start', () => {
     expect(world.tranches).toEqual({});
   });
 
-  it('has the secretary, the auditor and the apex officer, and nobody in a hidden role', () => {
+  it('has the staff of the society and the federation, and nobody in a hidden role', () => {
     expect(world.users.filter((u) => u.role !== 'MEMBER').map((u) => u.role).sort()).toEqual([
       'APEX_OFFICER',
       'AUDITOR',
+      'GENERAL_MANAGER',
+      'REGISTRAR',
       'SECRETARY',
     ]);
   });
@@ -75,7 +77,7 @@ describe('the committed seed', () => {
 
   it('validates and has the shape the TDD describes', () => {
     expect(seed.base.societies).toHaveLength(3);
-    expect(seed.base.users).toHaveLength(8);
+    expect(seed.base.users).toHaveLength(10);
     expect(seed.base.pools).toHaveLength(5);
     expect(seed.events.filter((e) => e.type === 'LOAN_DISBURSED')).toHaveLength(38);
   });

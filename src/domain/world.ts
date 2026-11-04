@@ -28,6 +28,7 @@ import {
   poolMachine,
   poolReadiness,
   trancheMachine,
+  needsFieldVisit,
 } from './machines';
 import { formatPaise, sum } from './money';
 import { ACTION_VERBS, APEX_ACTIONS, can, type Action } from './permissions';
@@ -56,6 +57,8 @@ import {
   type ID,
   type ISODate,
   type JournalEntry,
+  applicationRouteSchema,
+  attachedDocumentSchema,
   type LoanApplication,
   type Member,
   type Paise,
@@ -102,6 +105,20 @@ export const worldEventSchema = z.discriminatedUnion('type', [
     requestedAmount: paiseSchema.positive(),
     requestedTenureMonths: z.number().int().positive(),
     purpose: loanPurposeSchema,
+    route: applicationRouteSchema.optional(),
+    documents: z.array(attachedDocumentSchema).optional(),
+    recordedBy: idSchema,
+  }),
+  z.object({
+    type: z.literal('FIELD_VISIT_RECORDED'),
+    on,
+    applicationId: idSchema,
+    lat: z.number(),
+    lng: z.number(),
+    accuracyMetres: z.number().nonnegative(),
+    locationSource: z.enum(['GPS', 'DEMO']),
+    notes: z.string(),
+    documents: z.array(attachedDocumentSchema),
     recordedBy: idSchema,
   }),
   z.object({
@@ -208,7 +225,9 @@ export const worldEventSchema = z.discriminatedUnion('type', [
     receiptNo: z.string().min(1),
     source: z.enum(['CASH', 'ADVANCE']),
     electPrepayment: z.boolean(),
-    /** The user who recorded it: a loan officer or secretary of the loan's society. */
+    /** The UPI reference, on a payment a member made themselves. */
+    upiRef: z.string().optional(),
+    /** The user who recorded it: a loan officer or secretary of the loan's society, or the member paying by UPI. */
     recordedBy: idSchema,
   }),
   z.object({
@@ -238,6 +257,7 @@ export interface ReceiptEntry extends WorldReceipt {
   readonly mode: PaymentMode;
   readonly receiptNo: string;
   readonly electPrepayment: boolean;
+  readonly upiRef?: string;
   readonly recordedBy: ID;
 }
 
@@ -380,6 +400,20 @@ function requireActor(state: WorldState, userId: ID, action: Action, societyId?:
     throw new WorldError('NOT_PERMITTED', `${user.name} cannot ${ACTION_VERBS[action]} for another society`);
   }
   return user;
+}
+
+/**
+ * Where a field visit is required, the officer's part is the visit: the society
+ * appraises and decides, and only once the visit is on file.
+ */
+function requireVisited(state: WorldState, application: LoanApplication, actor: User): void {
+  if (!state.policy.fieldVisitRequired) return;
+  if (actor.role === 'LOAN_OFFICER') {
+    throw new WorldError('NOT_PERMITTED', `${actor.name} visits members in the field; the secretary appraises and decides`);
+  }
+  if (needsFieldVisit(application.purpose, state.policy) && !application.fieldVisit) {
+    throw new WorldError('INVALID_STATE', 'the field officer must visit the member before the appraisal');
+  }
 }
 
 /** An application still on its way to becoming a loan. */
@@ -624,15 +658,45 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
             appliedOn: event.on,
             status: 'SUBMITTED',
             ...(actor.role === 'MEMBER' ? { selfApplied: true } : {}),
+            ...(event.route ? { route: event.route } : {}),
+            ...(event.documents ? { documents: event.documents } : {}),
           },
         ],
       };
     }
 
+    case 'FIELD_VISIT_RECORDED': {
+      requireNotAfterClock(state, event.on, 'a field visit');
+      const application = applicationOf(state, event.applicationId);
+      const officer = requireActor(state, event.recordedBy, 'RECORD_FIELD_VISIT', application.societyId);
+      if (!needsFieldVisit(application.purpose, state.policy)) {
+        throw new WorldError('INVALID_STATE', 'only construction and mortgage loans need a field visit');
+      }
+      if (application.status !== 'SUBMITTED') {
+        throw new WorldError('INVALID_STATE', 'a field visit comes before the appraisal');
+      }
+      if (application.fieldVisit) {
+        throw new WorldError('INVALID_STATE', `application ${application.id} has already been visited`);
+      }
+      return replaceApplication(state, {
+        ...application,
+        fieldVisit: {
+          officerId: officer.id,
+          on: event.on,
+          lat: event.lat,
+          lng: event.lng,
+          accuracyMetres: event.accuracyMetres,
+          locationSource: event.locationSource,
+          notes: event.notes,
+          documents: event.documents,
+        },
+      });
+    }
+
     case 'APPLICATION_APPRAISED': {
       requireNotAfterClock(state, event.on, 'an appraisal');
       const application = applicationOf(state, event.applicationId);
-      requireActor(state, event.recordedBy, 'APPRAISE_APPLICATION', application.societyId);
+      requireVisited(state, application, requireActor(state, event.recordedBy, 'APPRAISE_APPLICATION', application.societyId));
       if (event.recommendedAmount > application.requestedAmount) {
         throw new WorldError('OVER_LIMIT', 'an appraisal cannot recommend more than was requested');
       }
@@ -655,6 +719,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       requireNotAfterClock(state, event.on, 'a decision');
       const application = applicationOf(state, event.applicationId);
       const actor = requireActor(state, event.recordedBy, 'DECIDE_APPLICATION', application.societyId);
+      requireVisited(state, application, actor);
       const atStake = event.outcome === 'APPROVED' ? event.sanctionedAmount : application.requestedAmount;
       if (approvalAuthority(atStake, state.policy) === 'SECRETARY' && actor.role !== 'SECRETARY') {
         throw new WorldError(
@@ -786,6 +851,13 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('DUPLICATE_ID', `tranche ${event.trancheId} already exists`);
       }
       const officer = requireActor(state, event.recordedBy, 'REVIEW_POOL');
+      const limit = state.policy.apexSanctionLimit;
+      if (limit !== undefined && event.sanctionedAmount > limit && officer.role !== 'GENERAL_MANAGER') {
+        throw new WorldError(
+          'NOT_PERMITTED',
+          `${officer.name} cannot sanction ${formatPaise(event.sanctionedAmount)}: above the ${formatPaise(limit)} limit, the General Manager sanctions`,
+        );
+      }
       const pool = poolOf(state, event.poolId);
       if (event.sanctionedAmount > pool.requestedAmount) {
         throw new WorldError('OVER_LIMIT', 'a sanction cannot exceed what the batch requested');
@@ -1034,7 +1106,10 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
 
     case 'PAYMENT_RECEIVED': {
       const entry = loanOf(state, event.loanId);
-      requireActor(state, event.recordedBy, 'RECORD_PAYMENT', entry.loan.societyId);
+      const payer = requireActor(state, event.recordedBy, 'RECORD_PAYMENT', entry.loan.societyId);
+      if (payer.role === 'MEMBER' && (payer.memberId !== entry.loan.memberId || event.mode !== 'UPI')) {
+        throw new WorldError('NOT_PERMITTED', `${payer.name} can pay only their own loan, by UPI`);
+      }
       const isTaken = Object.values(state.loans).some((l) => l.receipts.some((r) => r.id === event.paymentId));
       if (isTaken) throw new WorldError('DUPLICATE_ID', `payment ${event.paymentId} already exists`);
       const tranche = trancheOf(state, entry.loan.trancheId).tranche;
@@ -1064,6 +1139,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         mode: event.mode,
         receiptNo: event.receiptNo,
         electPrepayment: event.electPrepayment,
+        ...(event.upiRef ? { upiRef: event.upiRef } : {}),
         recordedBy: event.recordedBy,
       };
       let loan = entry.loan;

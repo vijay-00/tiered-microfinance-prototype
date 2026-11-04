@@ -232,7 +232,7 @@ describe('money events', () => {
     expect(() => applyEvent(world, remit('2026-11-15'))).not.toThrow();
   });
 
-  it('lets only a loan officer or secretary of the loan’s own society record a payment', () => {
+  it('lets the loan’s own society record a payment, and a member pay their own by UPI', () => {
     const world = applyEvent(seedWorld(), { type: 'CLOCK_ADVANCED', to: '2026-11-15' });
     const pay = (recordedBy: string): WorldEvent => ({
       type: 'PAYMENT_RECEIVED',
@@ -247,7 +247,10 @@ describe('money events', () => {
       recordedBy,
     });
     expectError(() => applyEvent(world, pay('usr_auditor')), WorldError, /cannot record a payment as a Statutory Auditor/);
-    expectError(() => applyEvent(world, pay('usr_member')), WorldError, /cannot record a payment/);
+    // A member only ever pays their own loan, and by UPI, never records cash.
+    expectError(() => applyEvent(world, pay('usr_member')), WorldError, /can pay only their own loan, by UPI/);
+    expect(() => applyEvent(world, { ...pay('usr_member'), mode: 'UPI', upiRef: '123456789012' } as WorldEvent)).not.toThrow();
+    expectError(() => applyEvent(world, { ...pay('usr_member'), loanId: 'loan_002', mode: 'UPI' } as WorldEvent), WorldError, /can pay only their own loan/);
     expectError(() => applyEvent(world, pay('usr_officer_2')), WorldError, /for another society/);
     expect(applyEvent(world, pay('usr_officer')).loans.loan_001!.receipts.at(-1)!.recordedBy).toBe('usr_officer');
     expect(() => applyEvent(world, pay('usr_secretary'))).not.toThrow();

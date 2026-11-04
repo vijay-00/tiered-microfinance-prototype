@@ -10,6 +10,10 @@ export const PURPOSE_LABEL: Record<LoanPurpose, string> = {
   EDUCATION: 'Education',
   HOUSING: 'Housing',
   CONSUMPTION: 'Consumption',
+  CONSTRUCTION: 'Construction Loan',
+  MORTGAGE: 'Mortgage Loan',
+  JEWEL: 'Jewel Loan',
+  FD: 'FD Loan',
 };
 
 export const STAGE_LABEL: Record<ApplicationStage, string> = {

@@ -234,9 +234,9 @@ export function PurposeChart({ purposes }: { purposes: FederationTrends['purpose
   const top = Math.max(1, ...purposes.map((p) => p.outstanding));
   const total = purposes.reduce((a, p) => a + p.outstanding, 0);
   return (
-    <section className="g-card g-blur g-s3 g-col" aria-label="Member loans by purpose">
+    <section className="g-card g-blur g-s3 g-col" aria-label="Member loans by type">
       <div className="g-cardhead">
-        <span className="g-lbl">Loans by purpose</span>
+        <span className="g-lbl">Loans by type</span>
       </div>
       <ul className="m-0 mt-3 list-none p-0">
         {purposes.map((p) => (

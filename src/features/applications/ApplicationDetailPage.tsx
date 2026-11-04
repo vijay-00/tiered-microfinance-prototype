@@ -1,3 +1,4 @@
+import { Landmark } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Breadcrumb } from '@/components/Breadcrumb';
@@ -18,7 +19,11 @@ import {
   type ApplicationDetail,
   type RepaymentCapacity,
 } from '@/domain/origination';
+import { needsFieldVisit } from '@/domain/machines';
 import { can } from '@/domain/permissions';
+import { DocumentList } from '@/components/Documents';
+import { Pill } from '@/features/apex/glass';
+import { VisitSummary } from '@/features/visits/VisitSummary';
 import type { User } from '@/domain/types';
 import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
 import { cn } from '@/lib/cn';
@@ -31,6 +36,8 @@ import { selectCurrentUser } from '@/store/selectors';
 export function ApplicationDetailPage() {
   const { applicationId = '' } = useParams();
   const user = useAppStore(selectCurrentUser);
+  const policy = useAppStore((s) => s.world.policy);
+  const users = useAppStore((s) => s.world.users);
   const version = useAppStore((s) => s.world.eventCount);
   const exists = useAppStore(
     (s) => s.world.applications.find((a) => a.id === applicationId)?.societyId === user.societyId,
@@ -61,6 +68,7 @@ export function ApplicationDetailPage() {
 
   const { row, member } = data;
   const application = row.application;
+  const visitNeeded = needsFieldVisit(application.purpose, policy);
   return (
     <>
       <Breadcrumb items={[{ label: 'Applications', to: '/applications' }, { label: application.id }]} />
@@ -88,8 +96,42 @@ export function ApplicationDetailPage() {
         ]}
       />
 
+      <div className="g-dash mb-5 items-start">
+        <section className="g-card g-blur flex flex-col gap-3 g-s6" aria-label="Documents">
+          <div className="g-cardhead">
+            <span className="g-strong">Documents</span>
+            {application.route === 'FEDERATION' ? (
+              <Pill tone="accent" icon={<Landmark aria-hidden />}>
+                Addressed to the federation
+              </Pill>
+            ) : null}
+          </div>
+          <DocumentList documents={application.documents ?? []} empty="None attached: taken in person." />
+        </section>
+        <div className="g-s6">
+          {application.fieldVisit ? (
+            <VisitSummary
+              visit={application.fieldVisit}
+              officerName={users.find((u) => u.id === application.fieldVisit?.officerId)?.name ?? 'Field officer'}
+            />
+          ) : visitNeeded ? (
+            <section className="g-card g-blur flex flex-col gap-2" aria-label="Field visit">
+              <span className="g-strong">Field visit</span>
+              <p className="g-sub m-0">Not yet made. The appraisal opens once the field officer has visited.</p>
+            </section>
+          ) : policy.fieldVisitRequired ? (
+            <section className="g-card g-blur flex flex-col gap-2" aria-label="Field visit">
+              <span className="g-strong">Field visit</span>
+              <p className="g-sub m-0">Not needed for a {PURPOSE_LABEL[application.purpose]}.</p>
+            </section>
+          ) : null}
+        </div>
+      </div>
+
       {row.stage === 'NEEDS_APPRAISAL' ? (
-        can(user.role, 'APPRAISE_APPLICATION') ? (
+        visitNeeded && !application.fieldVisit ? (
+          <Notice>Waiting for the field officer to visit the member.</Notice>
+        ) : can(user.role, 'APPRAISE_APPLICATION') ? (
           <AppraisalForm detail={data} />
         ) : (
           <Notice>The secretary appraises the application next.</Notice>

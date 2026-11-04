@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Clock, Download, Eye, Send, TriangleAlert, X } from 'lucide-react';
+import { Check, ChevronRight, Clock, Download, Eye, Landmark, Send, TriangleAlert, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { FundingDesk } from '@/domain/federation';
 import { downloadCsv, rupeesCell, toCsv } from '@/lib/csv';
@@ -94,7 +94,7 @@ function Desk({ data }: { data: FundingDesk }) {
                 </tr>
               </thead>
               <tbody>
-                {data.requests.map(({ pool, society, members, waitingDays }) => (
+                {data.requests.map(({ pool, society, members, waitingDays, direct }) => (
                   <tr key={pool.id} style={{ height: 80 }}>
                     <td>
                       <div className="g-who">
@@ -104,6 +104,11 @@ function Desk({ data }: { data: FundingDesk }) {
                           <Link to={`/apex/requests/${pool.id}`} className="g-ref hover:underline">
                             {pool.reference}
                           </Link>
+                          {direct ? (
+                            <Pill tone="accent" icon={<Landmark aria-hidden />}>
+                              Member’s direct request
+                            </Pill>
+                          ) : null}
                         </div>
                       </div>
                     </td>
@@ -136,6 +141,32 @@ function Desk({ data }: { data: FundingDesk }) {
           </div>
         )}
       </section>
+
+      {data.climbing.length > 0 ? (
+        <section className="g-card g-blur flush" aria-label="Direct applications on their way">
+          <div className="g-listhead">
+            <b>Direct applications on their way</b>
+            <em>{data.climbing.length}</em>
+            <span className="rt">Addressed to the federation, still with the society</span>
+          </div>
+          {data.climbing.map(({ application, memberName, society }) => (
+            <div key={application.id} className="g-row">
+              <div className="t">
+                <b>{memberName}</b>
+                <span>
+                  {short(society.name)} · applied {formatDate(application.appliedOn)}
+                </span>
+              </div>
+              <div className="v">
+                <b className="num">
+                  <Money paise={application.requestedAmount} />
+                </b>
+                <span>{application.status === 'SUBMITTED' ? 'Field visit and appraisal to come' : 'With the secretary to decide'}</span>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
 
       <section className="g-card g-blur flush" aria-label="Decided">
         <div className="g-listhead">

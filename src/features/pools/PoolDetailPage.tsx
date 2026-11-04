@@ -85,7 +85,7 @@ export function PoolDetailPage() {
                 <THead>
                   <tr>
                     <TH>Member</TH>
-                    <TH>Purpose</TH>
+                    <TH>Loan type</TH>
                     <TH numeric>Amount</TH>
                     <TH numeric>Tenure</TH>
                     <TH numeric>EMI</TH>
