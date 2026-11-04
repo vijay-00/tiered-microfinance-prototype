@@ -11,13 +11,11 @@ import { formatBps, formatPaise, parseRupees } from '@/domain/money';
 import { quoteLoan } from '@/domain/origination';
 import { can } from '@/domain/permissions';
 import { loanTypes, type LoanPurpose } from '@/domain/types';
-import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
+import { formatTenure, maxTenureMonths, tenureChoices } from '@/domain/machines';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
 import { selectCurrentUser } from '@/store/selectors';
-
-const TENURES = [6, 9, 12, 15, 18, 24, 30, 36, 48, 60].filter((m) => m >= MIN_TENURE_MONTHS && m <= MAX_TENURE_MONTHS);
 
 /**
  * A member applies for themselves, or the society applies for them here. The EMI the
@@ -47,6 +45,12 @@ export function NewApplicationPage() {
     return <PageHeader title="New application" description="Only the secretary can apply for a member." />;
   }
   if (!members) return <LoadingTiles count={2} className="md:grid-cols-2" />;
+
+  const longest = maxTenureMonths(purpose);
+  function chooseLoanType(next: LoanPurpose) {
+    setPurpose(next);
+    setTenure((current) => Math.min(current, maxTenureMonths(next)));
+  }
 
   const eligible = members.filter((m) => m.member.status === 'ACTIVE' && !m.inProgress);
   const chosen = eligible.find((m) => m.member.id === memberId);
@@ -137,12 +141,12 @@ export function NewApplicationPage() {
                     />
                   )}
                 </Field>
-                <Field label="Tenure">
+                <Field label="Tenure" hint={`Up to ${formatTenure(longest)}.`}>
                   {({ id }) => (
                     <NativeSelect id={id} value={tenure} onChange={(e) => setTenure(Number(e.target.value))}>
-                      {TENURES.map((m) => (
+                      {tenureChoices(longest).map((m) => (
                         <option key={m} value={m}>
-                          {m} months
+                          {formatTenure(m)}
                         </option>
                       ))}
                     </NativeSelect>
@@ -150,7 +154,7 @@ export function NewApplicationPage() {
                 </Field>
                 <Field label="Loan type">
                   {({ id }) => (
-                    <NativeSelect id={id} value={purpose} onChange={(e) => setPurpose(e.target.value as LoanPurpose)}>
+                    <NativeSelect id={id} value={purpose} onChange={(e) => chooseLoanType(e.target.value as LoanPurpose)}>
                       {loanTypes.map((p) => (
                         <option key={p} value={p}>
                           {PURPOSE_LABEL[p]} · {formatBps(policy.retailRateBps)} a year
@@ -192,7 +196,7 @@ export function NewApplicationPage() {
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-muted-foreground">Interest over {tenure} months</dt>
+                    <dt className="text-muted-foreground">Interest over {formatTenure(tenure)}</dt>
                     <dd>
                       <MoneyText paise={quote.totalInterest} />
                     </dd>

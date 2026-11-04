@@ -7,6 +7,7 @@ import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { formatPaise, sum } from '@/domain/money';
 import { proRataRescope, quoteLoan, type ApplicationRow } from '@/domain/origination';
 import type { ID, Paise } from '@/domain/types';
+import { formatTenure } from '@/domain/machines';
 import { cn } from '@/lib/cn';
 import { useAppStore, useRepositories } from '@/store/context';
 
@@ -144,7 +145,7 @@ export function RescopeDialog(props: { poolId: ID; reference: string; rows: read
                     <TD>
                       <span className="font-medium">{row.memberName}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {id} · {row.tenureMonths} months
+                        {id} · {formatTenure(row.tenureMonths)}
                       </span>
                     </TD>
                     <TD numeric><MoneyText paise={row.amount} /></TD>

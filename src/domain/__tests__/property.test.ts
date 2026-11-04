@@ -13,7 +13,7 @@ import { DEFAULT_POLICY } from '../types';
 
 /**
  * Property tests over generated loans: principals from Rs 1,000 to Rs 5,00,000,
- * rates from 1% to 36% a year, tenures from 3 to 60 months. These find the
+ * rates from 1% to 36% a year, tenures from 3 to 180 months. These find the
  * arithmetic corners example tests miss: a plug larger than the EMI, a receipt
  * that exactly clears penal interest and nothing more.
  */
@@ -22,7 +22,7 @@ const RUNS = { numRuns: 300 };
 
 const principalArb = fc.integer({ min: 100_000, max: 50_000_000 });
 const rateArb = fc.integer({ min: 100, max: 3_600 });
-const tenureArb = fc.integer({ min: 3, max: 60 });
+const tenureArb = fc.integer({ min: 3, max: 180 });
 const dateArb = fc
   .tuple(
     fc.integer({ min: 2020, max: 2035 }),
@@ -34,12 +34,16 @@ const dateArb = fc
     return `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   });
 
-const loanArb = fc.record({
-  principal: principalArb,
-  annualBps: rateArb,
-  tenureMonths: tenureArb,
-  firstDueOn: dateArb,
-});
+// Below the minimum ticket, a long tenure leaves early rows too small to retire
+// a paisa. No such loan can be taken, so only the short ones are generated.
+const loanArb = fc
+  .record({
+    principal: principalArb,
+    annualBps: rateArb,
+    tenureMonths: tenureArb,
+    firstDueOn: dateArb,
+  })
+  .filter((input) => input.principal >= DEFAULT_POLICY.minTicket || input.tenureMonths <= 60);
 
 describe('every generated schedule', () => {
   it('closes at exactly zero, and every row retires some principal', () => {
@@ -93,10 +97,10 @@ describe('every generated schedule', () => {
     );
   });
 
-  it('uses the rupee-rounded EMI for everything at or above the Rs 5,000 minimum ticket', () => {
+  it('uses the rupee-rounded EMI at or above the Rs 5,000 minimum ticket, up to five years', () => {
     fc.assert(
       fc.property(
-        loanArb.filter((input) => input.principal >= DEFAULT_POLICY.minTicket),
+        loanArb.filter((input) => input.principal >= DEFAULT_POLICY.minTicket && input.tenureMonths <= 60),
         (input) => {
           const schedule = generateSchedule({ loanId: 'p', ...input });
           expect(schedule[0]!.instalment % 100).toBe(0);

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { formatBps, formatPaise } from '@/domain/money';
 import { noticesFor, type ApplicationNotice, type Notice, type PaymentNotice, type PoolNotice } from '@/domain/views';
+import { formatTenure } from '@/domain/machines';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useAppStore } from '@/store/context';
 
@@ -71,7 +72,7 @@ function poolCopy(n: PoolNotice): Copy {
 
   const inFull = t.sanctioned === n.requested;
   const share = inFull ? 'in full' : `${Math.round((t.sanctioned / n.requested) * 100)}% of the ${formatPaise(n.requested)} asked for`;
-  const terms = `${formatPaise(t.sanctioned)}, ${share}, at ${formatBps(t.rateBps)} a year for ${t.tenureMonths} months`;
+  const terms = `${formatPaise(t.sanctioned)}, ${share}, at ${formatBps(t.rateBps)} a year for ${formatTenure(t.tenureMonths)}`;
   if (n.audience === 'MEMBER') {
     return {
       title: 'Funding for your loan is approved',
@@ -100,7 +101,7 @@ function poolCopy(n: PoolNotice): Copy {
 }
 
 function applicationCopy(n: ApplicationNotice): Copy {
-  const loan = `a ${formatPaise(n.amount)} ${PURPOSE_LABEL[n.purpose]} over ${n.tenureMonths} months`;
+  const loan = `a ${formatPaise(n.amount)} ${PURPOSE_LABEL[n.purpose]} over ${formatTenure(n.tenureMonths)}`;
   const toFederation = n.route === 'FEDERATION';
   const decider = toFederation ? 'federation' : 'society';
   switch (n.kind) {

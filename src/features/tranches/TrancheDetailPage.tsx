@@ -12,6 +12,7 @@ import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { formatBps } from '@/domain/money';
 import { can } from '@/domain/permissions';
 import type { RemittancePreview } from '@/domain/servicing';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
@@ -62,7 +63,7 @@ export function TrancheDetailPage() {
           { label: 'Undrawn', value: <MoneyText paise={data.undrawn} /> },
           { label: 'Outstanding', value: <MoneyText paise={data.outstanding} /> },
           { label: 'Wholesale rate', value: `${formatBps(tranche.wholesaleRateBps)} a year` },
-          { label: 'Tenure', value: `${tranche.tenureMonths} months` },
+          { label: 'Tenure', value: `${formatTenure(tranche.tenureMonths)}` },
         ]}
       />
 

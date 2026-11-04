@@ -106,8 +106,9 @@ export function rowInterestAt(row: Pick<ScheduleRow, 'opening' | 'brokenPeriodDa
  * rupee overpays enough to retire the loan early, leaving trailing instalments
  * of zero. A Rs 1,000 loan over 53 months at 10.17% has an exact EMI of
  * Rs 23.50; at Rs 24 it is paid off before month 53. Those loans fall back to
- * the EMI rounded only to the paise. Nothing above the Rs 5,000 minimum ticket
- * comes close, and the reference fixture is unaffected.
+ * the EMI rounded only to the paise. Up to five years nothing above the Rs 5,000
+ * minimum ticket comes close; the smallest loans over the longest tenures can,
+ * and the reference fixture is unaffected.
  */
 export function generateSchedule(input: ScheduleInput): readonly ScheduleRow[] {
   const rounded = buildRows(input, emi(input.principal, input.annualBps, input.tenureMonths));

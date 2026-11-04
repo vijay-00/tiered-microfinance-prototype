@@ -8,7 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import type { ScenarioId } from '@/data/scenarios';
 import { formatBps, formatPaise } from '@/domain/money';
 import { REPAYMENT_CAP_SHARE } from '@/domain/origination';
-import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
+import { formatTenure, maxTenureMonths } from '@/domain/machines';
 import { cn } from '@/lib/cn';
 import { plural } from '@/lib/format';
 import { percent } from '@/lib/labels';
@@ -45,7 +45,7 @@ export function SettingsPage() {
               <Row label="Society's spread" value={formatBps(policy.retailRateBps - policy.wholesaleRateBps)} />
               <Row label="Penal interest" value={`${formatBps(policy.penalRateBps)} a year on overdue amounts, after ${plural(policy.graceDays, 'day')} of grace`} />
               <Row label="Loan size" value={`${formatPaise(policy.minTicket)} to ${formatPaise(policy.maxTicket)}, and no more than ${formatPaise(policy.maxTicket)} owed by any one member`} />
-              <Row label="Tenure" value={`${MIN_TENURE_MONTHS} to ${MAX_TENURE_MONTHS} months`} />
+              <Row label="Tenure" value={`Up to ${formatTenure(maxTenureMonths('CONSTRUCTION'))} for a Construction Loan, ${formatTenure(maxTenureMonths('MORTGAGE'))} for a Mortgage Loan`} />
               <Row label="Batch size" value={`${policy.poolMinMembers} to ${policy.poolMaxMembers} members`} />
               <Row label="Repayment burden" value={`Shown against ${percent(REPAYMENT_CAP_SHARE)} of monthly income at appraisal; it informs, not blocks`} />
               <Row label="Prepayment" value="Allowed at any time, without a fee" />

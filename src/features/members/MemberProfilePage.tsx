@@ -11,6 +11,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { stageOf, workingAmount } from '@/domain/origination';
 import { can } from '@/domain/permissions';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
@@ -152,7 +153,7 @@ export function MemberProfilePage() {
                     <TD className="whitespace-nowrap">{formatDate(application.appliedOn)}</TD>
                     <TD>{PURPOSE_LABEL[application.purpose]}</TD>
                     <TD numeric><MoneyText paise={amount} /></TD>
-                    <TD numeric>{tenureMonths} mo</TD>
+                    <TD numeric>{formatTenure(tenureMonths)}</TD>
                     <TD><ApplicationStageBadge stage={stageOf(application)} /></TD>
                   </tr>
                 );

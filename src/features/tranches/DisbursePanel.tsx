@@ -10,6 +10,7 @@ import { compareISO, daysBetween, isValidISODate } from '@/domain/dates';
 import { sum } from '@/domain/money';
 import { MIN_DAYS_TO_FIRST_DUE, type DisbursementPlan } from '@/domain/origination';
 import type { ID } from '@/domain/types';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { RescopeDialog } from '@/features/pools/RescopeDialog';
@@ -216,7 +217,7 @@ function DisburseDialog(props: {
                     <TD numeric>
                       <MoneyText paise={row.amount} />
                     </TD>
-                    <TD numeric>{row.tenureMonths} mo</TD>
+                    <TD numeric>{formatTenure(row.tenureMonths)}</TD>
                     <TD numeric>{row.emi !== undefined ? <MoneyText paise={row.emi} /> : '–'}</TD>
                   </tr>
                 );

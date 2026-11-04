@@ -3,12 +3,12 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
-import { Field, Textarea } from '@/components/ui/form';
+import { Field, NativeSelect, Textarea } from '@/components/ui/form';
 import { sanctionEconomics, type FederationSocietyDetail } from '@/domain/federation';
 import { formatBps, formatPaise, formatPaisePlain, parseRupees } from '@/domain/money';
 import type { PoolReview } from '@/domain/origination';
 import { can } from '@/domain/permissions';
-import { MAX_TENURE_MONTHS } from '@/domain/world';
+import { formatTenure, MAX_TENURE_MONTHS, tenureChoices } from '@/domain/machines';
 import { cn } from '@/lib/cn';
 import { formatDate, plural } from '@/lib/format';
 import { PURPOSE_LABEL } from '@/lib/labels';
@@ -74,8 +74,8 @@ function Review({ review, society }: { review: PoolReview; society: FederationSo
   const facts: [string, ReactNode][] = [
     ['Requested', <Money key="r" paise={pool.requestedAmount} />],
     ['Members', pool.applicationIds.length],
-    ['Longest loan', `${pool.requestedTenureMonths} months`],
-    ['Average tenure', `${detail.economics.weightedTenureMonths.toFixed(1)} months`],
+    ['Longest loan', `${formatTenure(pool.requestedTenureMonths)}`],
+    ['Average tenure', `${(detail.economics.weightedTenureMonths / 12).toFixed(1)} years`],
     ['Smallest loan', <Money key="s" paise={composition.smallest} />],
     ['Largest loan', <Money key="l" paise={composition.largest} />],
   ];
@@ -146,7 +146,7 @@ function Review({ review, society }: { review: PoolReview; society: FederationSo
                       <b className="g-strong">
                         <Money paise={tranche.sanctionedAmount} />
                       </b>{' '}
-                      at {formatBps(tranche.wholesaleRateBps)} a year for {tranche.tenureMonths} months.
+                      at {formatBps(tranche.wholesaleRateBps)} a year for {formatTenure(tranche.tenureMonths)}.
                     </p>
                   ) : null}
                   {decided?.remarks ? <p className="g-sub m-0">“{decided.remarks}”</p> : null}
@@ -371,7 +371,7 @@ function Composition({ review }: { review: PoolReview }) {
                   <td className="r">
                     <Money paise={row.amount} />
                   </td>
-                  <td className="r">{row.tenureMonths} mo</td>
+                  <td className="r">{formatTenure(row.tenureMonths)}</td>
                   <td className="r">{row.emi !== undefined ? <Money paise={row.emi} /> : '–'}</td>
                 </tr>
               ))}
@@ -425,7 +425,7 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
   const { pool } = review.detail;
   const [amountText, setAmountText] = useState(formatPaisePlain(review.maxSanction));
   const [rateText, setRateText] = useState(String(policy.wholesaleRateBps / 100));
-  const [tenure, setTenure] = useState(String(pool.requestedTenureMonths));
+  const [months, setMonths] = useState(pool.requestedTenureMonths);
   const [remarks, setRemarks] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -434,7 +434,6 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
 
   const amount = parseRupees(amountText);
   const rate = parseRate(rateText);
-  const months = Number(tenure);
   const eighty = Math.floor((pool.requestedAmount * 0.8) / 100) * 100;
   const setAmount = (text: string) => {
     setAmountText(text);
@@ -455,11 +454,7 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
       : rate >= policy.retailRateBps
         ? `Must be below the ${formatBps(policy.retailRateBps)} members pay, or the society loses on every loan.`
         : undefined;
-  const tenureError =
-    !Number.isInteger(months) || months < pool.requestedTenureMonths || months > MAX_TENURE_MONTHS
-      ? `Between ${pool.requestedTenureMonths} months, the longest loan, and ${MAX_TENURE_MONTHS}.`
-      : undefined;
-  const valid = !amountError && !rateError && !tenureError;
+  const valid = !amountError && !rateError;
   const shortBy = amount !== undefined && !amountError ? pool.requestedAmount - amount : 0;
 
   // Worked out as the terms change, the way the society's own previews are.
@@ -572,15 +567,16 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
             />
           </div>
           <div className="g-field">
-            <label htmlFor="sanction-tenure">Tenure (months)</label>
-            <input
-              id="sanction-tenure"
-              className="g-input"
-              inputMode="numeric"
-              value={tenure}
-              onChange={(e) => setTenure(e.target.value)}
-              aria-invalid={Boolean(tenureError)}
-            />
+            <label htmlFor="sanction-tenure">Tenure</label>
+            <NativeSelect id="sanction-tenure" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+              {tenureChoices(MAX_TENURE_MONTHS, pool.requestedTenureMonths)
+                .filter((m) => m >= pool.requestedTenureMonths)
+                .map((m) => (
+                  <option key={m} value={m}>
+                    {formatTenure(m)}
+                  </option>
+                ))}
+            </NativeSelect>
           </div>
         </div>
         {rateError ? (
@@ -588,15 +584,9 @@ function Terms(props: { review: PoolReview; name: string; onAmount: (paise: numb
             {rateError}
           </p>
         ) : null}
-        {tenureError ? (
-          <p role="alert" className="g-error m-0">
-            {tenureError}
-          </p>
-        ) : (
-          <p className="g-ok m-0">
-            <Check aria-hidden /> Covers the longest loan, {pool.requestedTenureMonths} months
-          </p>
-        )}
+        <p className="g-ok m-0">
+          <Check aria-hidden /> Covers the longest loan, {formatTenure(pool.requestedTenureMonths)}
+        </p>
 
         <div className="g-field">
           <label htmlFor="sanction-remarks">Remarks for the society</label>

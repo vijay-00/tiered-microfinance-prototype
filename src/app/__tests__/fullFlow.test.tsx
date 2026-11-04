@@ -44,7 +44,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     // A pop-up tells the secretary of the new proposal, and opens it.
     await viewAs(user, 'Society Secretary');
     const proposal = await screen.findByRole('dialog', { name: 'New loan proposal' });
-    expect(proposal).toHaveTextContent('Veerappan Pandian has applied for a ₹40,000 Construction Loan over 12 months.');
+    expect(proposal).toHaveTextContent('Veerappan Pandian has applied for a ₹40,000 Construction Loan over 1 year.');
     await user.click(within(proposal).getByRole('button', { name: 'Open the proposal' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/applications/app_070'));
     await user.type(await screen.findByLabelText('Monthly income (₹)'), '40000');
@@ -57,7 +57,7 @@ describe('from a member’s application to the federation’s remittance', () =>
     // A pop-up tells the member it is approved; it is waiting to go for funding.
     await viewAs(user, 'Member');
     const approved = await screen.findByRole('dialog', { name: 'Your loan is approved' });
-    expect(approved).toHaveTextContent('The society approved a ₹40,000 Construction Loan over 12 months.');
+    expect(approved).toHaveTextContent('The society approved a ₹40,000 Construction Loan over 1 year.');
     await user.click(within(approved).getByRole('button', { name: 'See where it stands' }));
     expect(await tracker()).toHaveTextContent('Approved for ₹40,000.');
     expect(await tracker()).toHaveTextContent('Next: the society sends it, with others, for funding.');

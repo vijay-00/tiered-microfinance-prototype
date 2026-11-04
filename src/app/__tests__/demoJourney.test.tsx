@@ -347,6 +347,38 @@ describe('the ladder’s rules, in the reducer', () => {
     expect(selectInvariantHealth(state()).ok).toBe(true);
   });
 
+  it('carries the largest, longest loan from application to the first remittance', () => {
+    const { store, on } = start();
+    const state = () => store.getState().world;
+    const amount = 500_000_000;
+    const events: WorldEvent[] = [
+      { type: 'APPLICATION_SUBMITTED', on, applicationId: 'app_900', memberId: 'mem_001', requestedAmount: amount, requestedTenureMonths: 180, purpose: 'CONSTRUCTION', recordedBy: 'usr_member' },
+      visit(on, 'usr_officer'),
+      appraise(on, 'usr_secretary'),
+      { type: 'APPLICATION_DECIDED', on, applicationId: 'app_900', outcome: 'APPROVED', sanctionedAmount: amount, tenureMonths: 180, recordedBy: 'usr_secretary' },
+      { type: 'POOL_CREATED', on, poolId: 'pool_90', reference: 'ANN/BATCH/TEST/01', applicationIds: ['app_900'], recordedBy: 'usr_secretary' },
+      { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'SUBMITTED', recordedBy: 'usr_secretary' },
+      { type: 'POOL_STATUS_CHANGED', on, poolId: 'pool_90', to: 'UNDER_APEX_REVIEW', recordedBy: 'usr_apex' },
+      { type: 'TRANCHE_SANCTIONED', on, trancheId: 'trn_90', poolId: 'pool_90', sanctionRef: 'PACF/SAN/TEST/01', sanctionedAmount: amount, wholesaleRateBps: 950, tenureMonths: 180, remarks: '', recordedBy: 'usr_apex' },
+      { type: 'TRANCHE_DRAWN', on, trancheId: 'trn_90', amount, recordedBy: 'usr_secretary' },
+      { type: 'LOAN_DISBURSED', on, loanId: 'loan_900', applicationId: 'app_900', trancheId: 'trn_90', firstDueOn: remittancePreviewDate(on), recordedBy: 'usr_secretary' },
+    ];
+    expect(store.getState().dispatchMany(events)).toEqual({ ok: true });
+
+    const schedule = state().loans.loan_900!.schedule;
+    expect(schedule).toHaveLength(180);
+    expect(schedule.at(-1)!.closing).toBe(0);
+    expect(schedule[1]!.instalment % 100).toBe(0);
+
+    const first = schedule[0]!.instalment;
+    store.getState().dispatch(paymentEvent(state(), { loanId: 'loan_900', amount: first, mode: 'UPI', source: 'CASH', electPrepayment: false }, 'usr_member'));
+    const dueOn = remittancePreview(state(), 'trn_90')!.dueOn;
+    expect(store.getState().advanceClock(dueOn)).toEqual({ ok: true });
+    const due = remittancePreview(state(), 'trn_90')!.due;
+    expect(store.getState().dispatch(remittanceEvent(state(), { trancheId: 'trn_90', dueOn, interestPaid: due.interestDue, principalPaid: due.principalDue }, 'usr_secretary'))).toEqual({ ok: true });
+    expect(selectInvariantHealth(state()).ok).toBe(true);
+  });
+
   it('never lets the same advance go to the federation twice', () => {
     const { store, on } = start();
     const state = () => store.getState().world;

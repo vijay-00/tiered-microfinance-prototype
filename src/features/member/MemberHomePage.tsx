@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { formatBps } from '@/domain/money';
 import type { ApplicationStepKey, MemberApplicationView } from '@/domain/views';
+import { formatTenure } from '@/domain/machines';
 import { BigMoney, Money, PageHead, Pill } from '@/features/apex/glass';
 import { cn } from '@/lib/cn';
 import { formatDate, plural } from '@/lib/format';
@@ -183,7 +184,7 @@ function Tracker({ application: a, fresh }: { application: MemberApplicationView
     <section className="g-card g-blur" aria-label="Your application">
       <div className="g-cardhead flex-wrap">
         <span className="g-lbl">
-          Your application · <Money paise={a.requestedAmount} /> {PURPOSE_LABEL[a.purpose]} over {a.requestedTenureMonths} months
+          Your application · <Money paise={a.requestedAmount} /> {PURPOSE_LABEL[a.purpose]} over {formatTenure(a.requestedTenureMonths)}
         </span>
         {a.route === 'FEDERATION' ? (
           <Pill tone="accent" icon={<Landmark aria-hidden />}>To the federation</Pill>

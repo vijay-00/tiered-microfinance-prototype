@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { FundingDesk } from '@/domain/federation';
 import { downloadCsv, rupeesCell, toCsv } from '@/lib/csv';
 import { can } from '@/domain/permissions';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
@@ -117,7 +118,7 @@ function Desk({ data }: { data: FundingDesk }) {
                     </td>
                     <td className="r">{members}</td>
                     <td className="r"><b className="num"><Money paise={pool.requestedAmount} /></b></td>
-                    <td>{pool.requestedTenureMonths} months</td>
+                    <td>{formatTenure(pool.requestedTenureMonths)}</td>
                     <td>{pool.submittedOn ? formatDate(pool.submittedOn) : '–'}</td>
                     <td>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

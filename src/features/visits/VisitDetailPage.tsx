@@ -6,6 +6,7 @@ import { DocumentAdder, DocumentList } from '@/components/Documents';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import type { AttachedDocument } from '@/domain/types';
 import type { VisitRow } from '@/domain/views';
+import { formatTenure } from '@/domain/machines';
 import { Money, PageHead } from '@/features/apex/glass';
 import { formatDate } from '@/lib/format';
 import { captureLocation, type VisitLocation } from '@/lib/geo';
@@ -27,7 +28,7 @@ export function VisitDetailPage() {
   const officerName = users.find((u) => u.id === data.visit?.officerId)?.name ?? 'Field officer';
   const facts: [string, ReactNode][] = [
     ['Asked for', <Money key="a" paise={data.amount} />],
-    ['Over', `${data.tenureMonths} months`],
+    ['Tenure', `${formatTenure(data.tenureMonths)}`],
     ['Loan type', PURPOSE_LABEL[data.purpose]],
     ['Occupation', data.occupation],
     ['Phone', data.phone],

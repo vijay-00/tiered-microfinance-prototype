@@ -15,6 +15,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBps } from '@/domain/money';
 import { can } from '@/domain/permissions';
 import type { ReceiptLine } from '@/domain/servicing';
+import { formatTenure } from '@/domain/machines';
 import { RecordPaymentSheet } from '@/features/collections/RecordPaymentSheet';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
@@ -84,8 +85,8 @@ export function LoanDetailPage() {
           {
             label: 'Tenure',
             value: data.rescheduled
-              ? `${data.schedule.length} months, from ${loan.tenureMonths}`
-              : `${loan.tenureMonths} months`,
+              ? `${formatTenure(data.schedule.length)}, from ${formatTenure(loan.tenureMonths)}`
+              : `${formatTenure(loan.tenureMonths)}`,
           },
           { label: 'Disbursed', value: formatDate(loan.disbursedOn) },
           { label: 'Occupation', value: member.occupation },

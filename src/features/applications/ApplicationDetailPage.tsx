@@ -10,7 +10,7 @@ import { ApplicationStageBadge, PoolStatusBadge } from '@/components/finance/Sta
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, Input, NativeSelect, Textarea } from '@/components/ui/form';
-import { approvalAuthority } from '@/domain/machines';
+import { approvalAuthority, formatTenure, maxTenureMonths, tenureChoices } from '@/domain/machines';
 import { formatBps, formatPaise, formatPaisePlain, parseRupees } from '@/domain/money';
 import {
   quoteLoan,
@@ -25,7 +25,6 @@ import { DocumentList } from '@/components/Documents';
 import { Pill } from '@/features/apex/glass';
 import { VisitSummary } from '@/features/visits/VisitSummary';
 import type { User } from '@/domain/types';
-import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
 import { cn } from '@/lib/cn';
 import { formatDate } from '@/lib/format';
 import { percent, PURPOSE_LABEL } from '@/lib/labels';
@@ -91,7 +90,7 @@ export function ApplicationDetailPage() {
         className="mb-5 rounded-lg border bg-card p-4"
         items={[
           { label: 'Asked for', value: <MoneyText paise={application.requestedAmount} /> },
-          { label: 'Over', value: `${application.requestedTenureMonths} months` },
+          { label: 'Tenure', value: `${formatTenure(application.requestedTenureMonths)}` },
           { label: 'Instalment at that', value: data.requested ? <MoneyText paise={data.requested.emi} /> : '–' },
           { label: 'Borrowing now', value: <MoneyText paise={data.exposure} /> },
           { label: 'Internal score', value: member.internalScore },
@@ -283,7 +282,7 @@ function AppraisalForm({ detail }: { detail: ApplicationDetail }) {
             <Field
               label="Recommended amount (₹)"
               error={recommendedError}
-              hint={quote ? <>Instalment <MoneyText paise={quote.emi} /> over {application.requestedTenureMonths} months</> : undefined}
+              hint={quote ? <>Instalment <MoneyText paise={quote.emi} /> over {formatTenure(application.requestedTenureMonths)}</> : undefined}
             >
               {({ id, describedBy, invalid }) => (
                 <Input
@@ -357,11 +356,6 @@ function AppraisalSummary({ detail }: { detail: ApplicationDetail }) {
     </Card>
   );
 }
-
-const TENURE_CHOICES = Array.from(
-  { length: MAX_TENURE_MONTHS - MIN_TENURE_MONTHS + 1 },
-  (_, i) => MIN_TENURE_MONTHS + i,
-);
 
 function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User }) {
   const repositories = useRepositories();
@@ -475,9 +469,9 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
                 <Field label="Tenure">
                   {({ id }) => (
                     <NativeSelect id={id} value={tenure} onChange={(e) => setTenure(Number(e.target.value))}>
-                      {TENURE_CHOICES.map((m) => (
+                      {tenureChoices(maxTenureMonths(application.purpose), application.requestedTenureMonths).map((m) => (
                         <option key={m} value={m}>
-                          {m} months
+                          {formatTenure(m)}
                         </option>
                       ))}
                     </NativeSelect>
@@ -486,7 +480,7 @@ function DecisionForm({ detail, user }: { detail: ApplicationDetail; user: User 
               </div>
               {quote ? (
                 <p className="text-sm">
-                  The member would pay <strong><MoneyText paise={quote.emi} /></strong> a month for {tenure} months,{' '}
+                  The member would pay <strong><MoneyText paise={quote.emi} /></strong> a month for {formatTenure(tenure)},{' '}
                   <MoneyText paise={quote.totalInterest} /> in interest at {formatBps(policy.retailRateBps)}.
                 </p>
               ) : null}
@@ -547,7 +541,7 @@ function DecisionSummary({ detail, apex }: { detail: ApplicationDetail; apex: bo
             className="lg:grid-cols-4"
             items={[
               { label: 'Sanctioned', value: <MoneyText paise={decision.sanctionedAmount} /> },
-              { label: 'Tenure', value: `${decision.tenureMonths} months` },
+              { label: 'Tenure', value: `${formatTenure(decision.tenureMonths)}` },
               { label: 'Rate', value: `${formatBps(decision.rateBps)} a year` },
               { label: 'Instalment', value: detail.row.emi !== undefined ? <MoneyText paise={detail.row.emi} /> : '–' },
             ]}

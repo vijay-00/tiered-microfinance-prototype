@@ -13,6 +13,7 @@ import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { poolEconomics, type PoolBuilder } from '@/domain/origination';
 import { can } from '@/domain/permissions';
 import type { ID } from '@/domain/types';
+import { formatTenure } from '@/domain/machines';
 import { cn } from '@/lib/cn';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
@@ -188,7 +189,7 @@ function Builder({ builder, societyId }: { builder: PoolBuilder; societyId: ID }
                       <TD numeric>
                         <MoneyText paise={row.amount} />
                       </TD>
-                      <TD numeric>{row.tenureMonths} mo</TD>
+                      <TD numeric>{formatTenure(row.tenureMonths)}</TD>
                       <TD numeric>{row.emi !== undefined ? <MoneyText paise={row.emi} /> : '–'}</TD>
                     </tr>
                   );

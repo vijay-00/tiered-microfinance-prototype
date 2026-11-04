@@ -11,6 +11,7 @@ import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { formatBps } from '@/domain/money';
 import type { PoolDetail, TrailStep } from '@/domain/origination';
 import { can } from '@/domain/permissions';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { RescopeDialog } from './RescopeDialog';
@@ -105,7 +106,7 @@ export function PoolDetailPage() {
                       <TD numeric>
                         <MoneyText paise={row.amount} />
                       </TD>
-                      <TD numeric>{row.tenureMonths} mo</TD>
+                      <TD numeric>{formatTenure(row.tenureMonths)}</TD>
                       <TD numeric>{row.emi !== undefined ? <MoneyText paise={row.emi} /> : '–'}</TD>
                       <TD>
                         {row.loanId ? (
@@ -190,7 +191,7 @@ function FederationDecision({ detail }: { detail: PoolDetail }) {
       <CardContent className="space-y-2 text-sm">
         <p>
           <MoneyText paise={tranche.sanctionedAmount} /> at {formatBps(tranche.wholesaleRateBps)} a year for{' '}
-          {tranche.tenureMonths} months.
+          {formatTenure(tranche.tenureMonths)}.
           {pool.apexReview?.remarks ? <span className="text-muted-foreground"> “{pool.apexReview.remarks}”</span> : null}
         </p>
         {detail.shortfall > 0 ? (

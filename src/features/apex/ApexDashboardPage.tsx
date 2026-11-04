@@ -1,6 +1,7 @@
 import { ArrowUpRight, Check, ChevronRight, CircleAlert, Clock, Download, Eye, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { FederationHome, FederationTrends } from '@/domain/federation';
+import { formatTenure } from '@/domain/machines';
 import { downloadCsv, rupeesCell, toCsv } from '@/lib/csv';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
@@ -99,7 +100,7 @@ function Exposure({ data, trends }: { data: FederationHome; trends: FederationTr
             </div>
             <div className="g-sub">
               <b>{oldest.society.name.replace(/ Credit Society$/, '')}</b> · {plural(oldest.members, 'member')} · longest loan{' '}
-              {oldest.pool.requestedTenureMonths} months
+              {formatTenure(oldest.pool.requestedTenureMonths)}
             </div>
             {data.requests.length > 1 ? <div className="g-sub">and {plural(data.requests.length - 1, 'more request')} behind it</div> : null}
             <div className="g-foot">

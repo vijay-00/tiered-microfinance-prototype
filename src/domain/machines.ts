@@ -147,6 +147,38 @@ export function needsFieldVisit(purpose: LoanPurpose, policy: Pick<Policy, 'fiel
   return Boolean(policy.fieldVisitRequired) && (purpose === 'CONSTRUCTION' || purpose === 'MORTGAGE');
 }
 
+/** Shorter terms stay valid so saved work still replays; the forms start at one year. */
+export const MIN_TENURE_MONTHS = 3;
+/** The longest any loan or tranche runs. */
+export const MAX_TENURE_MONTHS = 180;
+
+/**
+ * Loans secured on a building run for years. Construction goes to 15 years;
+ * mortgage to 10, as at Tamil Nadu's own co-operative banks.
+ */
+const LONGEST_LOAN_MONTHS: Partial<Record<LoanPurpose, number>> = { CONSTRUCTION: MAX_TENURE_MONTHS, MORTGAGE: 120 };
+
+export function maxTenureMonths(purpose: LoanPurpose): number {
+  return LONGEST_LOAN_MONTHS[purpose] ?? 60;
+}
+
+/** Whole years up to `longest`, in months, plus `keep` if an older record falls between them. */
+export function tenureChoices(longest: number, keep?: number): number[] {
+  const years = Array.from({ length: Math.floor(longest / 12) }, (_, i) => (i + 1) * 12);
+  return keep === undefined || years.includes(keep) ? years : [...years, keep].sort((a, b) => a - b);
+}
+
+/** 60 reads "5 years", 12 "1 year", and a term between years "1 year 6 months". */
+export function formatTenure(months: number): string {
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  const parts = [
+    ...(years > 0 ? [`${years} ${years === 1 ? 'year' : 'years'}`] : []),
+    ...(rest > 0 ? [`${rest} ${rest === 1 ? 'month' : 'months'}`] : []),
+  ];
+  return parts.join(' ') || '0 months';
+}
+
 /** At or under the officer's limit the Loan Officer may decide; above it, the Secretary. */
 export function approvalAuthority(
   amount: Paise,

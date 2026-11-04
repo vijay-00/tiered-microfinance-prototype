@@ -5,10 +5,9 @@ import { DocumentSlots } from '@/components/Documents';
 import { LoadingTiles } from '@/components/LoadingTiles';
 import { Field, Input, NativeSelect } from '@/components/ui/form';
 import { formatBps, formatPaise, parseRupees } from '@/domain/money';
-import { needsFieldVisit } from '@/domain/machines';
+import { formatTenure, maxTenureMonths, needsFieldVisit, tenureChoices } from '@/domain/machines';
 import { quoteLoan } from '@/domain/origination';
 import { loanTypes, type ApplicationRoute, type AttachedDocument, type LoanPurpose } from '@/domain/types';
-import { MAX_TENURE_MONTHS, MIN_TENURE_MONTHS } from '@/domain/world';
 import { Money, PageHead } from '@/features/apex/glass';
 import { PURPOSE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
@@ -17,8 +16,6 @@ import { selectCurrentUser } from '@/store/selectors';
 
 /** What a member attaches when applying. Mock files: only the name and size are kept. */
 const REQUIRED_DOCUMENTS = ['Aadhaar card', 'PAN card', 'Bank passbook', 'Income proof', 'Passport photo'];
-
-const TENURES = [6, 9, 12, 15, 18, 24, 30, 36].filter((m) => m >= MIN_TENURE_MONTHS && m <= MAX_TENURE_MONTHS);
 
 /**
  * A member applies for themselves. The instalment is worked out as they type,
@@ -61,6 +58,12 @@ export function MemberApplyPage() {
   const quote = amount !== undefined && !amountError ? quoteLoan(amount, tenure, policy.retailRateBps, clock) : undefined;
   const documentsMissing = documents.length < REQUIRED_DOCUMENTS.length;
   const visitNeeded = needsFieldVisit(purpose, policy);
+  const longest = maxTenureMonths(purpose);
+
+  function chooseLoanType(next: LoanPurpose) {
+    setPurpose(next);
+    setTenure((current) => Math.min(current, maxTenureMonths(next)));
+  }
 
   async function submit() {
     setTouched(true);
@@ -134,12 +137,12 @@ export function MemberApplyPage() {
                 )}
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Repay over">
+                <Field label="Tenure" hint={`Up to ${formatTenure(longest)} for a ${PURPOSE_LABEL[purpose]}.`}>
                   {({ id }) => (
                     <NativeSelect id={id} value={tenure} onChange={(e) => setTenure(Number(e.target.value))}>
-                      {TENURES.map((m) => (
+                      {tenureChoices(longest).map((m) => (
                         <option key={m} value={m}>
-                          {m} months
+                          {formatTenure(m)}
                         </option>
                       ))}
                     </NativeSelect>
@@ -147,7 +150,7 @@ export function MemberApplyPage() {
                 </Field>
                 <Field label="Loan type" hint={visitNeeded ? 'A field officer visits you for this loan.' : 'No field visit needed for this loan.'}>
                   {({ id }) => (
-                    <NativeSelect id={id} value={purpose} onChange={(e) => setPurpose(e.target.value as LoanPurpose)}>
+                    <NativeSelect id={id} value={purpose} onChange={(e) => chooseLoanType(e.target.value as LoanPurpose)}>
                       {loanTypes.map((p) => (
                         <option key={p} value={p}>
                           {PURPOSE_LABEL[p]} · {formatBps(policy.retailRateBps)} a year
@@ -193,7 +196,7 @@ export function MemberApplyPage() {
                 </div>
                 <dl className="g-facts mt-3 text-[13px]">
                   <div>
-                    <dt>Interest over {tenure} months</dt>
+                    <dt>Interest over {formatTenure(tenure)}</dt>
                     <dd className="m-0">
                       <b className="num">
                         <Money paise={quote.totalInterest} />

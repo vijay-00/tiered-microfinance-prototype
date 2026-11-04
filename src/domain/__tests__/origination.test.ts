@@ -3,6 +3,7 @@ import { loadScenarioA } from '@/data/seed';
 import { financialYear } from '../dates';
 import { generateSchedule } from '../interest';
 import { ACCOUNTS } from '../ledger';
+import { formatTenure, maxTenureMonths, tenureChoices } from '../machines';
 import { sum } from '../money';
 import {
   applicationQueue,
@@ -211,10 +212,31 @@ describe('applications', () => {
     expectError(() => applyEvent(world, submit({ memberId: 'mem_024' })), /already has application app_064 in progress/);
     expectError(() => applyEvent(world, submit({ memberId: 'mem_029' })), /dormant and cannot apply/);
     expectError(() => applyEvent(world, submit({ requestedAmount: 100_000 })), /between ₹5,000 and ₹5,00,000/);
-    expectError(() => applyEvent(world, submit({ requestedTenureMonths: 2 })), /between 3 and 60 whole months/);
+    expectError(() => applyEvent(world, submit({ requestedTenureMonths: 2 })), /between 3 months and 5 years/);
     expectError(() => applyEvent(world, submit({ recordedBy: 'usr_officer_2' })), /for another society/);
     expectError(() => applyEvent(world, submit({ recordedBy: 'usr_auditor' })), /cannot submit an application/);
     expectError(() => applyEvent(world, submit({ applicationId: 'app_001' })), /already exists/);
+  });
+
+  it('holds each loan type to its longest tenure', () => {
+    const world = seedWorld();
+    expect(maxTenureMonths('CONSTRUCTION')).toBe(180);
+    expect(maxTenureMonths('MORTGAGE')).toBe(120);
+
+    expect(() => applyEvent(world, submit({ purpose: 'CONSTRUCTION', requestedTenureMonths: 180 }))).not.toThrow();
+    expect(() => applyEvent(world, submit({ purpose: 'MORTGAGE', requestedTenureMonths: 120 }))).not.toThrow();
+    expectError(() => applyEvent(world, submit({ purpose: 'CONSTRUCTION', requestedTenureMonths: 192 })), /between 3 months and 15 years/);
+    expectError(() => applyEvent(world, submit({ purpose: 'MORTGAGE', requestedTenureMonths: 132 })), /between 3 months and 10 years/);
+  });
+
+  it('reads tenures in years and offers them a year at a time', () => {
+    expect(formatTenure(12)).toBe('1 year');
+    expect(formatTenure(180)).toBe('15 years');
+    expect(formatTenure(18)).toBe('1 year 6 months');
+    expect(formatTenure(6)).toBe('6 months');
+    expect(tenureChoices(36)).toEqual([12, 24, 36]);
+    expect(tenureChoices(36, 18)).toEqual([12, 18, 24, 36]);
+    expect(tenureChoices(36, 24)).toEqual([12, 24, 36]);
   });
 
   it('cannot recommend more than was asked for', () => {
@@ -344,7 +366,7 @@ describe('sanction and disbursement', () => {
 
   it('runs at least as long as the longest loan in the batch, and never above what was asked', () => {
     const world = seedWorld();
-    expectError(() => applyEvent(world, sanction(75_000_000, 18)), /at least as long as the batch's longest loan, 24 months/);
+    expectError(() => applyEvent(world, sanction(75_000_000, 18)), /at least as long as the batch's longest loan, 2 years/);
     expectError(() => applyEvent(world, sanction(75_000_100)), /cannot exceed what the batch requested/);
   });
 

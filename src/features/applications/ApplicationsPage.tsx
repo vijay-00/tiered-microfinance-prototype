@@ -9,6 +9,7 @@ import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STAGE_ORDER, type ApplicationRow, type ApplicationStage } from '@/domain/origination';
 import { can } from '@/domain/permissions';
+import { formatTenure } from '@/domain/machines';
 import { formatDate } from '@/lib/format';
 import { PURPOSE_LABEL, STAGE_LABEL } from '@/lib/labels';
 import { useQuery } from '@/lib/useQuery';
@@ -101,7 +102,7 @@ function StageTable({ stage, rows }: { stage: ApplicationStage; rows: readonly A
             <TD className="whitespace-nowrap">{formatDate(row.application.appliedOn)}</TD>
             <TD>{PURPOSE_LABEL[row.application.purpose]}</TD>
             <TD numeric><MoneyText paise={row.amount} /></TD>
-            <TD numeric>{row.tenureMonths} mo</TD>
+            <TD numeric>{formatTenure(row.tenureMonths)}</TD>
             <TD numeric>{row.emi !== undefined ? <MoneyText paise={row.emi} /> : '–'}</TD>
             <TD>
               {stage === 'IN_POOL' || stage === 'READY_TO_POOL' ? (

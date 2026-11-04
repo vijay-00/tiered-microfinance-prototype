@@ -29,6 +29,9 @@ import {
   poolMachine,
   poolReadiness,
   trancheMachine,
+  formatTenure,
+  maxTenureMonths,
+  MIN_TENURE_MONTHS,
   needsFieldVisit,
 } from './machines';
 import { formatPaise, sum } from './money';
@@ -61,6 +64,7 @@ import {
   applicationRouteSchema,
   attachedDocumentSchema,
   type LoanApplication,
+  type LoanPurpose,
   type Member,
   type Paise,
   type PaymentMode,
@@ -456,9 +460,6 @@ function requireVisited(state: WorldState, application: LoanApplication, actor: 
 /** An application still on its way to becoming a loan. */
 const IN_PROGRESS: ReadonlySet<LoanApplication['status']> = new Set(['SUBMITTED', 'UNDER_APPRAISAL', 'APPROVED', 'POOLED']);
 
-export const MIN_TENURE_MONTHS = 3;
-export const MAX_TENURE_MONTHS = 60;
-
 function requireTicket(state: WorldState, amount: Paise): void {
   const { minTicket, maxTicket } = state.policy;
   if (amount < minTicket || amount > maxTicket) {
@@ -469,11 +470,12 @@ function requireTicket(state: WorldState, amount: Paise): void {
   }
 }
 
-function requireTenure(months: number): void {
-  if (!Number.isInteger(months) || months < MIN_TENURE_MONTHS || months > MAX_TENURE_MONTHS) {
+function requireTenure(months: number, purpose: LoanPurpose): void {
+  const longest = maxTenureMonths(purpose);
+  if (!Number.isInteger(months) || months < MIN_TENURE_MONTHS || months > longest) {
     throw new WorldError(
       'INVALID_STATE',
-      `a tenure must be between ${MIN_TENURE_MONTHS} and ${MAX_TENURE_MONTHS} whole months`,
+      `a tenure must be between ${formatTenure(MIN_TENURE_MONTHS)} and ${formatTenure(longest)} for this loan`,
     );
   }
 }
@@ -680,7 +682,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('INVALID_STATE', `${member.name} already has application ${open.id} in progress`);
       }
       requireTicket(state, event.requestedAmount);
-      requireTenure(event.requestedTenureMonths);
+      requireTenure(event.requestedTenureMonths, event.purpose);
       return {
         ...state,
         applications: [
@@ -785,7 +787,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
         throw new WorldError('OVER_LIMIT', 'a loan cannot be sanctioned for more than was requested');
       }
       requireTicket(state, event.sanctionedAmount);
-      requireTenure(event.tenureMonths);
+      requireTenure(event.tenureMonths, application.purpose);
       const member = memberOf(state, application.memberId);
       const exposure = memberExposure(state, member.id) + event.sanctionedAmount;
       if (exposure > state.policy.maxTicket) {
@@ -900,7 +902,7 @@ function reduce(state: WorldState, event: WorldEvent): WorldState {
       if (event.tenureMonths < pool.requestedTenureMonths) {
         throw new WorldError(
           'INVALID_STATE',
-          `the tranche must run at least as long as the batch's longest loan, ${pool.requestedTenureMonths} months`,
+          `the tranche must run at least as long as the batch's longest loan, ${formatTenure(pool.requestedTenureMonths)}`,
         );
       }
       const society = societyOf(state, pool.societyId);

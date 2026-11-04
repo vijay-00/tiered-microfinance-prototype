@@ -2,6 +2,7 @@ import { CalendarDays, Check, CircleAlert, Clock, Download } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom';
 import type { FederationSocietyDetail } from '@/domain/federation';
 import { formatBps, formatPaise } from '@/domain/money';
+import { formatTenure } from '@/domain/machines';
 import { downloadCsv, rupeesCell, toCsv } from '@/lib/csv';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
@@ -262,7 +263,7 @@ function Detail({ data }: { data: FederationSocietyDetail }) {
                           ) : (
                             <Money paise={t.tranche.sanctionedAmount} />
                           )}{' '}
-                          · {formatBps(t.tranche.wholesaleRateBps)} a year · {t.tranche.tenureMonths} months · for {t.poolReference}
+                          · {formatBps(t.tranche.wholesaleRateBps)} a year · {formatTenure(t.tranche.tenureMonths)} · for {t.poolReference}
                         </span>
                       </div>
                       <div className="v">

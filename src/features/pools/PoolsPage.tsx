@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TBody, TD, TH, THead } from '@/components/ui/table';
 import { can } from '@/domain/permissions';
+import { formatTenure } from '@/domain/machines';
 import { formatDate, plural } from '@/lib/format';
 import { useQuery } from '@/lib/useQuery';
 import { useAppStore, useRepositories } from '@/store/context';
@@ -94,7 +95,7 @@ export function PoolsPage() {
                     <TD numeric>
                       <MoneyText paise={pool.requestedAmount} />
                     </TD>
-                    <TD numeric>{pool.requestedTenureMonths ? `${pool.requestedTenureMonths} mo` : '–'}</TD>
+                    <TD numeric>{pool.requestedTenureMonths ? `${formatTenure(pool.requestedTenureMonths)}` : '–'}</TD>
                     <TD className="text-xs">
                       {tranche ? (
                         <>
